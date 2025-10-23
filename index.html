@@ -543,30 +543,15 @@
     function searchAirports(query) {
       const q = query.toLowerCase();
 
-      // Special values (legend codes + NULL/BLACK)
-      const specialValues = [
-        { code: "LIFR", name: "Low IFR (Legend)", city: "Flight Category" },
-        { code: "IFR", name: "IFR (Legend)", city: "Flight Category" },
-        { code: "MVFR", name: "Marginal VFR (Legend)", city: "Flight Category" },
-        { code: "WVFR", name: "Windy VFR (Legend)", city: "Flight Category" },
-        { code: "VFR", name: "VFR (Legend)", city: "Flight Category" },
-        { code: "NULL", name: "Off (No Assignment)", city: "Special" },
-        { code: "BLACK", name: "Off (Black)", city: "Special" }
-      ];
-
-      const matchingSpecial = specialValues.filter(a =>
-        a.code.toLowerCase().includes(q) ||
-        a.name.toLowerCase().includes(q)
-      );
-
-      const matchingAirports = airportsDatabase.filter(a =>
+      // Filter from airportsDatabase (already includes special values + airports)
+      const matches = airportsDatabase.filter(a =>
         a && a.code && a.name && a.city &&
         (a.code.toLowerCase().includes(q) ||
          a.name.toLowerCase().includes(q) ||
          a.city.toLowerCase().includes(q))
       );
 
-      return [...matchingSpecial, ...matchingAirports].slice(0, 10);
+      return matches.slice(0, 10);
     }
 
     // Show autocomplete dropdown
