@@ -400,8 +400,10 @@
           console.warn('Failed to load airport database, manual entry only');
           return;
         }
-        airportsDatabase = await response.json();
-        console.log(`Loaded ${airportsDatabase.length} airports`);
+        const githubAirports = await response.json();
+        // APPEND to existing fallback values, don't replace
+        airportsDatabase = [...airportsDatabase, ...githubAirports];
+        console.log(`Loaded ${airportsDatabase.length} airports total`);
       } catch (error) {
         console.warn('Airport database unavailable:', error);
       }
