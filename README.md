@@ -7,4 +7,4 @@ Contains HTML/CSS/JS assets that are downloaded at startup to provide a  configu
 
 Personal and non-commercial use only. See [LICENSE](LICENSE) for details.
 
-For commercial use, please contact [your info].
+For commercial use, please contact the author at https://github.com/mgerety via GitHub.
