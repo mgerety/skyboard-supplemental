@@ -363,10 +363,10 @@
       setupEventListeners();
     });
 
-    // Load airport database from GitHub
+    // Load airport database from GitHub (live from CDN, not from ESP8266)
     async function loadAirportDatabase() {
       try {
-        const response = await fetch('/data/airports.json');
+        const response = await fetch('https://raw.githubusercontent.com/mgerety/skyboard-supplemental/main/data/airports.json');
         if (!response.ok) {
           console.warn('Failed to load airport database, manual entry only');
           return;
