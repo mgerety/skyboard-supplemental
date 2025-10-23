@@ -362,7 +362,16 @@
       useMDNS: true,
       airports: []
     };
-    let airportsDatabase = [];
+    // Fallback inline airport database (used if GitHub fetch fails)
+    let airportsDatabase = [
+      { code: "LIFR", name: "Low IFR (Legend)", city: "Flight Category" },
+      { code: "IFR", name: "IFR (Legend)", city: "Flight Category" },
+      { code: "MVFR", name: "Marginal VFR (Legend)", city: "Flight Category" },
+      { code: "WVFR", name: "Windy VFR (Legend)", city: "Flight Category" },
+      { code: "VFR", name: "VFR (Legend)", city: "Flight Category" },
+      { code: "NULL", name: "Off (No Assignment)", city: "Special" },
+      { code: "BLACK", name: "Off (Black)", city: "Special" }
+    ];
     let statusData = [];
 
     // Initialize on page load
@@ -440,7 +449,8 @@
           return;
         }
 
-        statusData = await response.json();
+        const data = await response.json();
+        statusData = data.leds || [];  // Extract the "leds" array
         updateStatusIndicators();
 
       } catch (error) {
@@ -455,7 +465,7 @@
 
       for (let i = 0; i < currentConfig.numLeds; i++) {
         const assignment = currentConfig.airports[i] || 'NULL';
-        const status = statusData.find(s => s.led === i) || { fltCat: null, color: '#000000' };
+        const status = statusData.find(s => s.index === i) || { wxValue: null, color: '#000000' };
 
         const tr = document.createElement('tr');
 
@@ -497,7 +507,7 @@
     // Update status indicators
     function updateStatusIndicators() {
       statusData.forEach(item => {
-        const dot = document.querySelector(`.status-dot[data-led="${item.led}"]`);
+        const dot = document.querySelector(`.status-dot[data-led="${item.index}"]`);
         if (dot) {
           dot.style.backgroundColor = item.color || '#000000';
         }
