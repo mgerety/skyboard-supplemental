@@ -527,10 +527,19 @@
   color: var(--color-accent);
   text-decoration: none;
   font-weight: var(--font-weight-medium);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius);
+  transition: background-color var(--transition-fast);
 }
 
 .page-header nav a:hover {
-  text-decoration: underline;
+  background: var(--color-border);
+}
+
+.page-header nav a.active {
+  background: var(--color-accent);
+  color: white;
+  font-weight: var(--font-weight-bold);
 }
 
 /* Dashboard Grid - Responsive 3-column layout */
