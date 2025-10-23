@@ -3,231 +3,824 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skyboard - Diagnostics</title>
+    <title>Skyboard Diagnostics Dashboard</title>
     <style>
-        :root {
-            --bg: #ffffff;
-            --text: #000000;
-            --input-bg: #f5f5f5;
-            --border: #ddd;
-            --accent: #0066cc;
+        /* ===== CSS RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
+
+        :root {
+            /* Light mode colors */
+            --bg-primary: #f5f5f7;
+            --bg-card: #ffffff;
+            --text-primary: #1d1d1f;
+            --text-secondary: #6e6e73;
+            --border-color: #d2d2d7;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --accent: #007aff;
+            --accent-hover: #0051d5;
+
+            /* Flight category colors (match LED colors) */
+            --vfr: #00ff00;
+            --wvfr: #ffff00;
+            --mvfr: #0000ff;
+            --ifr: #ff0000;
+            --lifr: #ff00ff;
+            --error: #ff3b30;
+            --offline: #000000;
+
+            /* Status colors */
+            --success: #34c759;
+            --warning: #ff9500;
+            --danger: #ff3b30;
+        }
+
+        /* Dark mode */
         @media (prefers-color-scheme: dark) {
             :root {
-                --bg: #1a1a1a;
-                --text: #e0e0e0;
-                --input-bg: #2a2a2a;
-                --border: #444;
-                --accent: #4da6ff;
+                --bg-primary: #000000;
+                --bg-card: #1c1c1e;
+                --text-primary: #f5f5f7;
+                --text-secondary: #98989d;
+                --border-color: #38383a;
+                --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
             }
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             line-height: 1.6;
+            padding: 16px;
+            min-height: 100vh;
         }
-        .container { max-width: 1200px; margin: 0 auto; }
-        h1 { font-size: 24px; margin-bottom: 20px; }
-        h2 { font-size: 18px; margin: 20px 0 10px; }
-        .btn {
+
+        /* ===== LAYOUT ===== */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* ===== CARDS ===== */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ===== DASHBOARD GRID ===== */
+        .dashboard-grid {
+            display: grid;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        @media (min-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* ===== METRICS ===== */
+        .metric {
+            margin-bottom: 16px;
+        }
+
+        .metric:last-child {
+            margin-bottom: 0;
+        }
+
+        .metric-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .metric-value {
+            font-size: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ===== PROGRESS BARS ===== */
+        .progress-bar {
+            height: 8px;
+            background: var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-fill.good {
+            background: var(--success);
+        }
+
+        .progress-fill.warning {
+            background: var(--warning);
+        }
+
+        .progress-fill.danger {
+            background: var(--danger);
+        }
+
+        /* ===== WIFI SIGNAL ===== */
+        .wifi-signal {
+            display: inline-flex;
+            gap: 2px;
+            align-items: flex-end;
+            height: 20px;
+        }
+
+        .wifi-bar {
+            width: 3px;
+            background: var(--text-secondary);
+            border-radius: 2px;
+            transition: background 0.3s ease;
+        }
+
+        .wifi-bar:nth-child(1) { height: 25%; }
+        .wifi-bar:nth-child(2) { height: 50%; }
+        .wifi-bar:nth-child(3) { height: 75%; }
+        .wifi-bar:nth-child(4) { height: 100%; }
+
+        .wifi-bar.active {
+            background: var(--success);
+        }
+
+        /* ===== BUTTONS ===== */
+        .button-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        button {
             background: var(--accent);
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: 600;
             cursor: pointer;
-            margin: 10px 5px 10px 0;
+            transition: background 0.2s ease;
+            min-height: 44px;
         }
-        .btn:hover { opacity: 0.9; }
+
+        button:hover {
+            background: var(--accent-hover);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button.secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        button.secondary:hover {
+            background: var(--border-color);
+        }
+
+        button.danger {
+            background: var(--danger);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        button.loading::after {
+            content: " ⏳";
+        }
+
+        /* ===== TABLE ===== */
+        .table-container {
+            overflow-x: auto;
+            margin-top: 16px;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin: 10px 0;
             font-size: 14px;
         }
-        th, td {
-            padding: 8px;
-            border: 1px solid var(--border);
+
+        thead {
+            background: var(--border-color);
+            position: sticky;
+            top: 0;
+        }
+
+        th {
+            padding: 12px 8px;
             text-align: left;
-        }
-        th { background: var(--input-bg); font-weight: 600; }
-        .color-box {
-            width: 30px;
-            height: 20px;
-            display: inline-block;
-            border: 1px solid var(--border);
-            border-radius: 3px;
-        }
-        textarea, pre {
-            width: 100%;
-            background: var(--input-bg);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            padding: 10px;
-            color: var(--text);
-            font-family: monospace;
-            font-size: 12px;
-            overflow: auto;
-        }
-        textarea { min-height: 200px; }
-        pre { max-height: 300px; }
-        .tabs { display: flex; gap: 10px; margin: 10px 0; }
-        .tab {
-            padding: 8px 16px;
-            background: var(--input-bg);
-            border: 1px solid var(--border);
-            border-radius: 4px;
+            font-weight: 600;
             cursor: pointer;
+            user-select: none;
         }
-        .tab.active { background: var(--accent); color: white; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .nav-link { color: var(--accent); text-decoration: none; margin-right: 20px; }
-        .nav-link:hover { text-decoration: underline; }
-        .table-container { max-height: 400px; overflow-y: auto; }
+
+        th:hover {
+            background: var(--bg-card);
+        }
+
+        th.sortable::after {
+            content: " ↕";
+            opacity: 0.3;
+        }
+
+        th.sort-asc::after {
+            content: " ↑";
+            opacity: 1;
+        }
+
+        th.sort-desc::after {
+            content: " ↓";
+            opacity: 1;
+        }
+
+        td {
+            padding: 12px 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        tr:hover {
+            background: var(--border-color);
+        }
+
+        tr.error {
+            background: rgba(255, 59, 48, 0.1);
+        }
+
+        /* ===== COLOR INDICATORS ===== */
+        .color-indicator {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        /* ===== SEARCH/FILTER ===== */
+        .search-filter {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        input[type="text"],
+        select {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            font-size: 14px;
+            min-height: 44px;
+        }
+
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        /* ===== TOAST NOTIFICATIONS ===== */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            max-width: 400px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .toast-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .toast-message {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* ===== STATUS BADGES ===== */
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge.success { background: rgba(52, 199, 89, 0.2); color: var(--success); }
+        .badge.warning { background: rgba(255, 149, 0, 0.2); color: var(--warning); }
+        .badge.danger { background: rgba(255, 59, 48, 0.2); color: var(--danger); }
+
+        /* ===== RESPONSIVE ADJUSTMENTS ===== */
+        @media (max-width: 767px) {
+            body {
+                padding: 12px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .card {
+                padding: 16px;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 8px 4px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Skyboard - Diagnostics</h1>
-        <div style="margin-bottom: 20px;">
-            <a href="/" class="nav-link">← Back to Config</a>
+        <!-- HEADER -->
+        <header>
+            <h1>🛩️ Skyboard Diagnostics</h1>
+            <p class="subtitle">System Health & LED Status Monitor</p>
+        </header>
+
+        <!-- CONTROL BUTTONS -->
+        <div class="card">
+            <div class="button-group">
+                <button id="refreshBtn" onclick="forceRefresh()">🔄 Force Refresh</button>
+                <button class="secondary" onclick="clearLogs()">🗑️ Clear Logs</button>
+                <a href="/api/downloadWeather" style="text-decoration: none;">
+                    <button class="secondary">📥 Download Weather Data</button>
+                </a>
+            </div>
         </div>
 
-        <h2>LED Status</h2>
-        <button class="btn" onclick="refreshStatus()">🔄 Force Refresh Weather Data</button>
-        <button class="btn" onclick="loadStatus()">↻ Reload Status Table</button>
-        <div class="table-container">
-            <table id="statusTable">
-                <thead>
-                    <tr><th>LED#</th><th>Assignment</th><th>WxValue</th><th>Color</th></tr>
-                </thead>
-                <tbody id="statusBody"></tbody>
-            </table>
+        <!-- DASHBOARD GRID -->
+        <div class="dashboard-grid">
+            <!-- SYSTEM HEALTH CARD -->
+            <div class="card">
+                <div class="card-title">💚 System Health</div>
+                <div class="metric">
+                    <div class="metric-label">Free Heap Memory</div>
+                    <div class="metric-value">
+                        <span id="heapValue">--</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="heapBar"></div>
+                    </div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Uptime</div>
+                    <div class="metric-value" id="uptimeValue">--</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Firmware Version</div>
+                    <div class="metric-value" id="firmwareValue">--</div>
+                </div>
+            </div>
+
+            <!-- NETWORK CARD -->
+            <div class="card">
+                <div class="card-title">📡 Network</div>
+                <div class="metric">
+                    <div class="metric-label">WiFi Signal</div>
+                    <div class="metric-value">
+                        <div class="wifi-signal" id="wifiSignal">
+                            <div class="wifi-bar"></div>
+                            <div class="wifi-bar"></div>
+                            <div class="wifi-bar"></div>
+                            <div class="wifi-bar"></div>
+                        </div>
+                        <span id="rssiValue">--</span>
+                    </div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">IP Address</div>
+                    <div class="metric-value" id="ipValue">--</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Hostname</div>
+                    <div class="metric-value" id="hostnameValue">--</div>
+                </div>
+            </div>
+
+            <!-- STORAGE & WEATHER CARD -->
+            <div class="card">
+                <div class="card-title">💾 Storage & Weather</div>
+                <div class="metric">
+                    <div class="metric-label">LittleFS Usage</div>
+                    <div class="metric-value">
+                        <span id="fsValue">--</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="fsBar"></div>
+                    </div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Last Weather Update</div>
+                    <div class="metric-value" id="lastUpdateValue">--</div>
+                </div>
+            </div>
         </div>
 
-        <h2>Last API Response</h2>
-        <div style="margin-bottom: 10px;">
-            <strong>Timestamp:</strong> <span id="apiTimestamp">N/A</span>
-        </div>
-        <div id="apiResponse" style="margin-top: 10px;">Loading...</div>
+        <!-- LED STATUS TABLE -->
+        <div class="card">
+            <div class="card-title">💡 LED Status (<span id="ledCount">0</span> configured)</div>
 
-        <h2>Logs</h2>
-        <div class="tabs">
-            <div class="tab active" onclick="switchTab('error')">Error Log</div>
-            <div class="tab" onclick="switchTab('info')">Info Log</div>
-        </div>
-        <div id="error-tab" class="tab-content active">
-            <button class="btn" onclick="clearLog('error')">🗑️ Clear Error Log</button>
-            <textarea id="errorLog" readonly>Loading...</textarea>
-        </div>
-        <div id="info-tab" class="tab-content">
-            <button class="btn" onclick="clearLog('info')">🗑️ Clear Info Log</button>
-            <textarea id="infoLog" readonly>Loading...</textarea>
+            <div class="search-filter">
+                <input type="text" id="searchInput" placeholder="Search LED# or Airport Code..." onkeyup="filterTable()">
+                <select id="categoryFilter" onchange="filterTable()">
+                    <option value="">All Categories</option>
+                    <option value="VFR">VFR</option>
+                    <option value="WVFR">WVFR (Windy)</option>
+                    <option value="MVFR">MVFR</option>
+                    <option value="IFR">IFR</option>
+                    <option value="LIFR">LIFR</option>
+                    <option value="ERROR">Errors Only</option>
+                </select>
+            </div>
+
+            <div class="table-container">
+                <table id="ledTable">
+                    <thead>
+                        <tr>
+                            <th class="sortable" onclick="sortTable(0)">LED #</th>
+                            <th class="sortable" onclick="sortTable(1)">Assignment</th>
+                            <th class="sortable" onclick="sortTable(2)">Flight Category</th>
+                            <th>Color</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ledTableBody">
+                        <!-- Populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="toast">
+        <div class="toast-title" id="toastTitle"></div>
+        <div class="toast-message" id="toastMessage"></div>
+    </div>
+
     <script>
-        let currentTab = 'error';
+        // Global state
+        let ledStatus = [];
+        let sortColumn = 0;
+        let sortAscending = true;
+        const TOTAL_HEAP = 35000; // Approximate total heap for ESP8266
 
-        async function loadStatus() {
+        // ===== API FUNCTIONS =====
+
+        async function fetchSystemInfo() {
             try {
-                const response = await fetch('/api/status');
-                const data = await response.json();
-                const tbody = document.getElementById('statusBody');
-                tbody.innerHTML = '';
-
-                data.leds.forEach(led => {
-                    const row = tbody.insertRow();
-                    row.insertCell(0).textContent = led.index;
-                    row.insertCell(1).textContent = led.assignment;
-                    row.insertCell(2).textContent = led.wxValue || '-';
-                    const colorCell = row.insertCell(3);
-                    const colorBox = document.createElement('div');
-                    colorBox.className = 'color-box';
-                    colorBox.style.background = led.color;
-                    colorCell.appendChild(colorBox);
-                });
+                const res = await fetch('/api/system/info');
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return await res.json();
             } catch (error) {
-                console.error('Error loading status:', error);
+                console.error('Failed to fetch system info:', error);
+                return null;
             }
         }
 
-        async function refreshStatus() {
+        async function fetchLEDStatus() {
             try {
-                await fetch('/api/forceRefresh', { method: 'POST' });
-                setTimeout(loadStatus, 5000);  // Reload after 5 seconds
-                alert('Weather refresh triggered! Table will reload in 5 seconds.');
+                const res = await fetch('/api/status');
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                return data.leds || [];
             } catch (error) {
-                console.error('Error refreshing:', error);
+                console.error('Failed to fetch LED status:', error);
+                return [];
             }
         }
 
-        async function loadLastResponse() {
+        async function callForceRefresh() {
             try {
-                const response = await fetch('/api/lastResponse');
-                const data = await response.json();
+                const res = await fetch('/api/forceRefresh', { method: 'POST' });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return await res.json();
+            } catch (error) {
+                console.error('Failed to force refresh:', error);
+                return { success: false, error: error.message };
+            }
+        }
 
-                // Display timestamp (already formatted by ESP8266)
-                document.getElementById('apiTimestamp').textContent = data.timestamp;
+        async function callClearLogs(type) {
+            try {
+                const res = await fetch(`/api/clearLogs?type=${type}`, { method: 'POST' });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return { success: true };
+            } catch (error) {
+                console.error(`Failed to clear ${type} logs:`, error);
+                return { success: false, error: error.message };
+            }
+        }
 
-                // Display download link instead of embedded viewer
-                const responseDiv = document.getElementById('apiResponse');
-                if (data.fileExists) {
-                    responseDiv.innerHTML = `
-                        <a href="${data.downloadUrl}" target="_blank" class="btn" style="text-decoration: none;">
-                            📥 Download/View Weather Data (JSON)
-                        </a>
-                        <p style="margin-top: 10px; font-size: 14px; color: var(--text); opacity: 0.7;">
-                            Opens in new tab or downloads raw JSON file
-                        </p>
-                    `;
-                } else {
-                    responseDiv.innerHTML = '<p style="color: var(--text); opacity: 0.7;">No weather data available yet. Wait for first weather update.</p>';
+        // ===== INITIALIZATION =====
+
+        async function init() {
+            await refreshDashboard();
+            await refreshLEDTable();
+
+            // Auto-refresh system health every 5 seconds
+            setInterval(refreshDashboard, 5000);
+        }
+
+        // ===== DASHBOARD RENDERING =====
+
+        async function refreshDashboard() {
+            const systemInfo = await fetchSystemInfo();
+            if (!systemInfo) return;
+
+            // Heap memory
+            const heapPercent = (systemInfo.freeHeap / TOTAL_HEAP) * 100;
+            const heapKB = Math.round(systemInfo.freeHeap / 1024);
+            const totalKB = Math.round(TOTAL_HEAP / 1024);
+            document.getElementById('heapValue').textContent = `${heapKB}KB / ${totalKB}KB (${Math.round(heapPercent)}%)`;
+
+            const heapBar = document.getElementById('heapBar');
+            heapBar.style.width = heapPercent + '%';
+            heapBar.className = 'progress-fill ' + (heapPercent > 60 ? 'good' : heapPercent > 30 ? 'warning' : 'danger');
+
+            // Uptime
+            const uptimeMs = systemInfo.uptime;
+            const days = Math.floor(uptimeMs / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((uptimeMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((uptimeMs % (1000 * 60 * 60)) / (1000 * 60));
+            document.getElementById('uptimeValue').textContent = `${days}d ${hours}h ${minutes}m`;
+
+            // Firmware
+            document.getElementById('firmwareValue').textContent = `v${systemInfo.firmwareVersion}`;
+
+            // WiFi signal
+            const rssi = systemInfo.wifiRSSI;
+            let quality, bars;
+            if (rssi >= -50) { quality = "Excellent"; bars = 4; }
+            else if (rssi >= -60) { quality = "Good"; bars = 3; }
+            else if (rssi >= -70) { quality = "Fair"; bars = 2; }
+            else { quality = "Poor"; bars = 1; }
+
+            document.getElementById('rssiValue').textContent = `${rssi} dBm (${quality})`;
+
+            const wifiBars = document.querySelectorAll('.wifi-bar');
+            wifiBars.forEach((bar, index) => {
+                bar.classList.toggle('active', index < bars);
+            });
+
+            // Network info
+            document.getElementById('ipValue').textContent = systemInfo.localIP;
+            document.getElementById('hostnameValue').textContent = systemInfo.hostname;
+
+            // File system
+            const fsPercent = (systemInfo.fsUsed / systemInfo.fsTotal) * 100;
+            const fsUsedKB = Math.round(systemInfo.fsUsed / 1024);
+            const fsTotalMB = (systemInfo.fsTotal / (1024 * 1024)).toFixed(1);
+            document.getElementById('fsValue').textContent = `${fsUsedKB}KB / ${fsTotalMB}MB (${fsPercent.toFixed(1)}%)`;
+
+            const fsBar = document.getElementById('fsBar');
+            fsBar.style.width = fsPercent + '%';
+            fsBar.className = 'progress-fill ' + (fsPercent < 50 ? 'good' : fsPercent < 80 ? 'warning' : 'danger');
+
+            // Last update
+            const minutesAgo = Math.floor((Date.now() - systemInfo.lastUpdate) / 60000);
+            const lastUpdateDate = new Date(systemInfo.lastUpdate);
+            const formattedDate = lastUpdateDate.toLocaleString();
+            document.getElementById('lastUpdateValue').textContent = `${formattedDate} (${minutesAgo} min ago)`;
+        }
+
+        // ===== LED TABLE RENDERING =====
+
+        async function refreshLEDTable() {
+            const data = await fetchLEDStatus();
+
+            // Transform API data to match prototype format
+            ledStatus = data.map(led => ({
+                led: led.index,
+                assignment: led.assignment,
+                fltCat: led.wxValue,
+                color: led.color,
+                error: led.wxValue === 'Pending' || led.wxValue === '-'
+            }));
+
+            renderLEDTable();
+        }
+
+        function renderLEDTable() {
+            const tbody = document.getElementById('ledTableBody');
+            tbody.innerHTML = '';
+
+            ledStatus.forEach(led => {
+                const row = document.createElement('tr');
+                if (led.error) row.classList.add('error');
+
+                row.innerHTML = `
+                    <td>${led.led}</td>
+                    <td><strong>${led.assignment}</strong></td>
+                    <td>${led.error ? '<span class="badge danger">PENDING</span>' : led.fltCat}</td>
+                    <td><span class="color-indicator" style="background-color: ${led.color}"></span></td>
+                    <td>${led.error ? '⏳ Pending' : '✅ OK'}</td>
+                `;
+
+                tbody.appendChild(row);
+            });
+
+            document.getElementById('ledCount').textContent = ledStatus.length;
+        }
+
+        // ===== TABLE SORTING =====
+
+        function sortTable(columnIndex) {
+            if (sortColumn === columnIndex) {
+                sortAscending = !sortAscending;
+            } else {
+                sortColumn = columnIndex;
+                sortAscending = true;
+            }
+
+            ledStatus.sort((a, b) => {
+                let valA, valB;
+
+                switch(columnIndex) {
+                    case 0: valA = a.led; valB = b.led; break;
+                    case 1: valA = a.assignment; valB = b.assignment; break;
+                    case 2: valA = a.fltCat || 'ZZZ'; valB = b.fltCat || 'ZZZ'; break;
+                    default: return 0;
                 }
-            } catch (error) {
-                console.error('Error loading response:', error);
-                document.getElementById('apiResponse').textContent = 'Error loading response info';
+
+                if (typeof valA === 'number') {
+                    return sortAscending ? valA - valB : valB - valA;
+                } else {
+                    return sortAscending ? valA.localeCompare(valB) : valB.localeCompare(valA);
+                }
+            });
+
+            // Update sort indicators
+            document.querySelectorAll('th').forEach((th, index) => {
+                th.classList.remove('sort-asc', 'sort-desc');
+                if (index === columnIndex) {
+                    th.classList.add(sortAscending ? 'sort-asc' : 'sort-desc');
+                }
+            });
+
+            renderLEDTable();
+        }
+
+        // ===== TABLE FILTERING =====
+
+        function filterTable() {
+            const searchTerm = document.getElementById('searchInput').value.toUpperCase();
+            const categoryFilter = document.getElementById('categoryFilter').value;
+
+            const tbody = document.getElementById('ledTableBody');
+            const rows = tbody.getElementsByTagName('tr');
+
+            for (let row of rows) {
+                const ledNum = row.cells[0].textContent;
+                const assignment = row.cells[1].textContent;
+                const category = ledStatus.find(l => l.led == ledNum);
+
+                let matchesSearch = ledNum.includes(searchTerm) || assignment.includes(searchTerm);
+                let matchesCategory = true;
+
+                if (categoryFilter) {
+                    if (categoryFilter === 'ERROR') {
+                        matchesCategory = category && category.error;
+                    } else {
+                        matchesCategory = category && category.fltCat === categoryFilter;
+                    }
+                }
+
+                row.style.display = (matchesSearch && matchesCategory) ? '' : 'none';
             }
         }
 
-        async function loadLogs() {
-            try {
-                const errorResp = await fetch('/api/logs?type=error');
-                document.getElementById('errorLog').value = await errorResp.text();
+        // ===== INTERACTIVE CONTROLS =====
 
-                const infoResp = await fetch('/api/logs?type=info');
-                document.getElementById('infoLog').value = await infoResp.text();
-            } catch (error) {
-                console.error('Error loading logs:', error);
+        async function forceRefresh() {
+            const btn = document.getElementById('refreshBtn');
+            btn.classList.add('loading');
+            btn.disabled = true;
+
+            const result = await callForceRefresh();
+
+            btn.classList.remove('loading');
+            btn.disabled = false;
+
+            if (result.success) {
+                showToast('Refresh complete', 'Weather data updated successfully', 'success');
+                await refreshLEDTable();
+            } else {
+                showToast('Refresh failed', result.error || 'Unknown error', 'error');
             }
         }
 
-        async function clearLog(type) {
-            if (!confirm('Clear ' + type + ' log?')) return;
-            try {
-                await fetch('/api/clearLogs?type=' + type, { method: 'POST' });
-                loadLogs();
-            } catch (error) {
-                console.error('Error clearing log:', error);
-            }
+        async function clearLogs() {
+            await callClearLogs('error');
+            await callClearLogs('info');
+            showToast('Logs cleared', 'All logs have been cleared', 'success');
         }
 
-        function switchTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            event.target.classList.add('active');
-            document.getElementById(tab + '-tab').classList.add('active');
-            currentTab = tab;
+        // ===== TOAST NOTIFICATIONS =====
+
+        function showToast(title, message, type = 'success') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastTitle').textContent = title;
+            document.getElementById('toastMessage').textContent = message;
+
+            toast.className = `toast ${type}`;
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
         }
 
-        loadStatus();
-        loadLastResponse();
-        loadLogs();
-        setInterval(loadStatus, 60000);  // Auto-refresh every minute
+        // ===== START APPLICATION =====
+
+        window.onload = init;
     </script>
 </body>
 </html>
