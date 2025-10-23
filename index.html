@@ -72,16 +72,10 @@
     }
 
     .led-number {
-      font-weight: 600;
-      color: var(--color-accent);
+      font-weight: 400;
+      color: var(--color-text);
       min-width: 60px;
       font-family: var(--font-mono);
-    }
-
-    .flight-category {
-      font-family: var(--font-mono);
-      font-size: var(--font-size-sm);
-      color: var(--color-text-muted);
     }
 
     /* Airport Input with Autocomplete */
@@ -298,11 +292,14 @@
       <div class="settings-grid">
         <div class="setting-row">
           <label for="numLeds">Number of LEDs:</label>
-          <input type="number" id="numLeds" class="input" min="5" max="150" value="80">
+          <input type="number" id="numLeds" class="input" min="5" max="150" value="80" style="max-width: 120px;">
         </div>
         <div class="setting-row">
           <label for="brightness">Brightness (0-255):</label>
-          <input type="number" id="brightness" class="input" min="0" max="255" value="20">
+          <div style="display: flex; gap: var(--spacing-md); align-items: center; flex: 1;">
+            <input type="range" id="brightness" min="0" max="255" value="20" style="flex: 1; max-width: 300px;">
+            <input type="number" id="brightnessValue" class="input" min="0" max="255" value="20" style="width: 80px;">
+          </div>
         </div>
         <div class="setting-row">
           <label for="updateInterval">Update Interval:</label>
@@ -321,22 +318,26 @@
           </div>
         </div>
         <div class="setting-row">
-          <label for="useMDNS">Enable mDNS:</label>
-          <input type="checkbox" id="useMDNS" checked>
+          <label>Enable mDNS:</label>
+          <div style="display: flex; align-items: center;">
+            <input type="checkbox" id="useMDNS" checked>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- LED Assignments -->
     <div class="card">
-      <h2>LED Assignments</h2>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-md);">
+        <h2 style="margin: 0;">LED Assignments</h2>
+        <input type="text" id="searchBox" class="input" placeholder="Search by LED or airport code..." style="max-width: 300px;">
+      </div>
       <table class="led-table">
         <thead>
           <tr>
             <th>LED</th>
             <th>Airport</th>
             <th>Status</th>
-            <th>Flight Cat</th>
           </tr>
         </thead>
         <tbody id="ledTableBody">
@@ -416,6 +417,7 @@
         // Populate form fields
         document.getElementById('numLeds').value = currentConfig.numLeds;
         document.getElementById('brightness').value = currentConfig.brightness;
+        document.getElementById('brightnessValue').value = currentConfig.brightness;
         document.getElementById('updateInterval').value = currentConfig.updateIntervalMinutes;
         document.getElementById('hostname').value = currentConfig.hostname;
         document.getElementById('hostnamePreview').textContent = currentConfig.hostname;
@@ -479,13 +481,6 @@
         tdStatus.innerHTML = `<span class="status-dot" data-led="${i}" style="background-color: ${status.color}"></span>`;
         tr.appendChild(tdStatus);
 
-        // Flight category
-        const tdCat = document.createElement('td');
-        tdCat.dataset.led = i;
-        tdCat.className = 'flight-category';
-        tdCat.textContent = status.fltCat || 'N/A';
-        tr.appendChild(tdCat);
-
         tbody.appendChild(tr);
       }
 
@@ -505,10 +500,6 @@
         const dot = document.querySelector(`.status-dot[data-led="${item.led}"]`);
         if (dot) {
           dot.style.backgroundColor = item.color || '#000000';
-        }
-        const cat = document.querySelector(`.flight-category[data-led="${item.led}"]`);
-        if (cat) {
-          cat.textContent = item.fltCat || 'N/A';
         }
       });
     }
@@ -604,6 +595,23 @@
         document.getElementById('hostnamePreview').textContent = e.target.value || 'led-sectional';
       });
 
+      // Brightness slider sync
+      const brightnessSlider = document.getElementById('brightness');
+      const brightnessValue = document.getElementById('brightnessValue');
+
+      brightnessSlider.addEventListener('input', (e) => {
+        brightnessValue.value = e.target.value;
+      });
+
+      brightnessValue.addEventListener('input', (e) => {
+        let val = parseInt(e.target.value);
+        if (isNaN(val)) val = 0;
+        if (val < 0) val = 0;
+        if (val > 255) val = 255;
+        brightnessSlider.value = val;
+        brightnessValue.value = val;
+      });
+
       // Number of LEDs change
       document.getElementById('numLeds').addEventListener('change', (e) => {
         const newNum = parseInt(e.target.value);
@@ -611,6 +619,24 @@
           currentConfig.numLeds = newNum;
           renderLEDTable();
         }
+      });
+
+      // Search box filtering
+      document.getElementById('searchBox').addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('#ledTableBody tr');
+
+        rows.forEach(row => {
+          const ledNum = row.querySelector('.led-number').textContent;
+          const airportInput = row.querySelector('.airport-input');
+          const airportCode = airportInput ? airportInput.value.toLowerCase() : '';
+
+          if (ledNum.includes(query) || airportCode.includes(query)) {
+            row.style.display = '';
+          } else {
+            row.style.display = 'none';
+          }
+        });
       });
 
       // Save button
