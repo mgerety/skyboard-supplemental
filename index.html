@@ -311,7 +311,7 @@
         <div class="setting-row">
           <label for="hostname">Hostname:</label>
           <div style="display: flex; flex-direction: column; gap: var(--spacing-xs);">
-            <input type="text" id="hostname" class="input" maxlength="32" placeholder="led-sectional" pattern="[a-zA-Z0-9-]+" style="max-width: 250px;">
+            <input type="text" id="hostname" class="input" maxlength="32" placeholder="led-sectional" pattern="[a-zA-Z0-9\-]+" style="max-width: 250px;">
             <small style="color: var(--color-text-muted); font-size: var(--font-size-sm);">
               Access via: http://<span id="hostnamePreview" style="font-weight: bold;">led-sectional</span>.local
             </small>
@@ -401,8 +401,14 @@
           return;
         }
         const githubAirports = await response.json();
+        // Transform array format [code, name, city] to object format {code, name, city}
+        const transformedAirports = githubAirports.map(a => ({
+          code: a[0],
+          name: a[1],
+          city: a[2]
+        }));
         // APPEND to existing fallback values, don't replace
-        airportsDatabase = [...airportsDatabase, ...githubAirports];
+        airportsDatabase = [...airportsDatabase, ...transformedAirports];
         console.log(`Loaded ${airportsDatabase.length} airports total`);
       } catch (error) {
         console.warn('Airport database unavailable:', error);
@@ -554,9 +560,10 @@
       );
 
       const matchingAirports = airportsDatabase.filter(a =>
-        a.code.toLowerCase().includes(q) ||
-        a.name.toLowerCase().includes(q) ||
-        a.city.toLowerCase().includes(q)
+        a && a.code && a.name && a.city &&
+        (a.code.toLowerCase().includes(q) ||
+         a.name.toLowerCase().includes(q) ||
+         a.city.toLowerCase().includes(q))
       );
 
       return [...matchingSpecial, ...matchingAirports].slice(0, 10);
