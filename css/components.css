@@ -505,6 +505,34 @@
 
 /* ===== DIAGNOSTICS-SPECIFIC COMPONENTS ===== */
 
+/* Page Header with Navigation */
+.page-header {
+  background: var(--color-input-bg);
+  padding: var(--spacing-md);
+  border-bottom: var(--border-width) solid var(--color-border);
+  margin-bottom: var(--spacing-lg);
+}
+
+.page-header h1 {
+  margin: 0 0 var(--spacing-sm) 0;
+  font-size: var(--font-size-xl);
+}
+
+.page-header nav {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.page-header nav a {
+  color: var(--color-accent);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+}
+
+.page-header nav a:hover {
+  text-decoration: underline;
+}
+
 /* Dashboard Grid - Responsive 3-column layout */
 .dashboard-grid {
   display: grid;
