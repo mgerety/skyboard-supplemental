@@ -45,7 +45,7 @@
 
     .led-table th,
     .led-table td {
-      padding: var(--spacing-sm);
+      padding: var(--spacing-md) var(--spacing-sm);
       text-align: left;
       border-bottom: 1px solid var(--color-border);
     }
@@ -53,19 +53,35 @@
     .led-table th {
       background: var(--color-input-bg);
       font-weight: 600;
+      font-size: var(--font-size-sm);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--color-text-muted);
       position: sticky;
       top: 0;
       z-index: 10;
+      padding: var(--spacing-sm);
+    }
+
+    .led-table tbody tr {
+      transition: background-color var(--transition-fast);
     }
 
     .led-table tbody tr:hover {
-      background: var(--color-input-bg);
+      background: rgba(77, 166, 255, 0.1);
     }
 
     .led-number {
       font-weight: 600;
       color: var(--color-accent);
-      min-width: 50px;
+      min-width: 60px;
+      font-family: var(--font-mono);
+    }
+
+    .flight-category {
+      font-family: var(--font-mono);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-muted);
     }
 
     /* Airport Input with Autocomplete */
@@ -147,15 +163,15 @@
     /* Settings Section */
     .settings-grid {
       display: grid;
-      gap: var(--spacing-md);
+      gap: var(--spacing-lg);
       margin: var(--spacing-md) 0;
     }
 
     .setting-row {
       display: grid;
-      grid-template-columns: 150px 1fr;
+      grid-template-columns: 180px 1fr;
       align-items: center;
-      gap: var(--spacing-md);
+      gap: var(--spacing-lg);
     }
 
     @media (max-width: 768px) {
@@ -166,30 +182,33 @@
     }
 
     .setting-row label {
-      font-weight: 500;
+      font-weight: 600;
+      font-size: var(--font-size-base);
     }
 
     /* Legend */
     .legend {
       display: flex;
-      gap: var(--spacing-md);
+      gap: var(--spacing-lg);
       flex-wrap: wrap;
       padding: var(--spacing-md);
-      background: var(--color-input-bg);
+      background: var(--color-surface);
       border-radius: var(--border-radius);
       margin: var(--spacing-md) 0;
+      border: var(--border-width) solid var(--color-border);
     }
 
     .legend-item {
       display: flex;
       align-items: center;
       gap: var(--spacing-sm);
+      font-weight: 500;
     }
 
     .legend-color {
-      width: 30px;
-      height: 20px;
-      border-radius: 3px;
+      width: 32px;
+      height: 24px;
+      border-radius: var(--border-radius-sm);
       border: 1px solid var(--color-border);
     }
 

@@ -184,11 +184,31 @@
 /* CARDS */
 
 .card {
-  padding: var(--spacing-md);
+  padding: var(--spacing-lg);
   background-color: var(--color-surface);
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--border-radius);
   box-shadow: var(--box-shadow);
+  margin-bottom: var(--spacing-lg);
+}
+
+.card h2 {
+  margin-bottom: var(--spacing-md);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+}
+
+.card ul {
+  margin-left: var(--spacing-lg);
+  line-height: var(--line-height-relaxed);
+}
+
+.card ul li {
+  margin-bottom: var(--spacing-sm);
+}
+
+.card ul li strong {
+  font-weight: var(--font-weight-bold);
 }
 
 .card-header {
