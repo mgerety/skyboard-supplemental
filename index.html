@@ -8,238 +8,6 @@
   <title>Skyboard Configuration</title>
   <link rel="stylesheet" href="/css/base.css">
   <link rel="stylesheet" href="/css/components.css">
-  <style>
-    /* Additional page-specific styles */
-    .page-header {
-      background: var(--color-input-bg);
-      padding: var(--spacing-md);
-      border-bottom: 1px solid var(--color-border);
-      margin-bottom: var(--spacing-lg);
-    }
-
-    .page-header h1 {
-      margin: 0 0 var(--spacing-sm) 0;
-      font-size: var(--font-size-xl);
-    }
-
-    .page-header nav {
-      display: flex;
-      gap: var(--spacing-md);
-    }
-
-    .page-header nav a {
-      color: var(--color-accent);
-      text-decoration: none;
-    }
-
-    .page-header nav a:hover {
-      text-decoration: underline;
-    }
-
-    /* LED Table */
-    .led-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: var(--spacing-md) 0;
-    }
-
-    .led-table th,
-    .led-table td {
-      padding: var(--spacing-md) var(--spacing-sm);
-      text-align: left;
-      border-bottom: 1px solid var(--color-border);
-    }
-
-    .led-table th {
-      background: var(--color-input-bg);
-      font-weight: 600;
-      font-size: var(--font-size-sm);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--color-text-muted);
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      padding: var(--spacing-sm);
-    }
-
-    .led-table tbody tr {
-      transition: background-color var(--transition-fast);
-    }
-
-    .led-table tbody tr:hover {
-      background: rgba(77, 166, 255, 0.1);
-    }
-
-    .led-number {
-      font-weight: 400;
-      color: var(--color-text);
-      min-width: 60px;
-      font-family: var(--font-mono);
-    }
-
-    /* Airport Input with Autocomplete */
-    .airport-input-wrapper {
-      position: relative;
-    }
-
-    .airport-input {
-      width: 100%;
-      min-width: 120px;
-      padding: var(--spacing-sm);
-      border: 1px solid var(--color-border);
-      border-radius: var(--border-radius);
-      background: var(--color-input-bg);
-      color: var(--color-text);
-      font-family: var(--font-mono);
-      font-size: var(--font-size-base);
-      text-transform: uppercase;
-    }
-
-    .airport-input:focus {
-      outline: 2px solid var(--color-accent);
-      outline-offset: 1px;
-    }
-
-    .autocomplete-dropdown {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      background: var(--color-bg);
-      border: 1px solid var(--color-border);
-      border-radius: var(--border-radius);
-      box-shadow: var(--box-shadow);
-      max-height: 300px;
-      overflow-y: auto;
-      z-index: 100;
-      display: none;
-    }
-
-    .autocomplete-dropdown.show {
-      display: block;
-    }
-
-    .autocomplete-item {
-      padding: var(--spacing-sm);
-      cursor: pointer;
-      display: flex;
-      gap: var(--spacing-sm);
-      align-items: center;
-      border-bottom: 1px solid var(--color-border);
-      min-height: 44px; /* Touch-friendly */
-    }
-
-    .autocomplete-item:last-child {
-      border-bottom: none;
-    }
-
-    .autocomplete-item:hover {
-      background: var(--color-input-bg);
-    }
-
-    .autocomplete-no-results {
-      padding: var(--spacing-md);
-      text-align: center;
-      color: var(--color-text-muted);
-      font-size: var(--font-size-sm);
-    }
-
-    /* Status Indicator */
-    .status-dot {
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      border: 1px solid var(--color-border);
-    }
-
-    /* Settings Section */
-    .settings-grid {
-      display: grid;
-      gap: var(--spacing-lg);
-      margin: var(--spacing-md) 0;
-    }
-
-    .setting-row {
-      display: grid;
-      grid-template-columns: 180px 1fr;
-      align-items: center;
-      gap: var(--spacing-lg);
-    }
-
-    @media (max-width: 768px) {
-      .setting-row {
-        grid-template-columns: 1fr;
-        gap: var(--spacing-sm);
-      }
-    }
-
-    .setting-row label {
-      font-weight: 600;
-      font-size: var(--font-size-base);
-    }
-
-    /* Legend */
-    .legend {
-      display: flex;
-      gap: var(--spacing-lg);
-      flex-wrap: wrap;
-      padding: var(--spacing-md);
-      background: var(--color-surface);
-      border-radius: var(--border-radius);
-      margin: var(--spacing-md) 0;
-      border: var(--border-width) solid var(--color-border);
-    }
-
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-sm);
-      font-weight: 500;
-    }
-
-    .legend-color {
-      width: 32px;
-      height: 24px;
-      border-radius: var(--border-radius-sm);
-      border: 1px solid var(--color-border);
-    }
-
-    /* Loading state */
-    .loading-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-    }
-
-    .loading-overlay .loading {
-      font-size: 48px;
-    }
-
-    /* Mobile optimizations */
-    @media (max-width: 768px) {
-      .led-table {
-        font-size: var(--font-size-sm);
-      }
-
-      .led-table th,
-      .led-table td {
-        padding: var(--spacing-xs);
-      }
-
-      .airport-input {
-        font-size: var(--font-size-sm);
-      }
-    }
-  </style>
 </head>
 <body>
   <header class="page-header">
@@ -292,34 +60,34 @@
       <div class="settings-grid">
         <div class="setting-row">
           <label for="numLeds">Number of LEDs:</label>
-          <input type="number" id="numLeds" class="input" min="5" max="150" value="80" style="max-width: 120px;">
+          <input type="number" id="numLeds" class="input max-w-120" min="5" max="150" value="80">
         </div>
         <div class="setting-row">
           <label for="brightness">Brightness (0-255):</label>
-          <div style="display: flex; gap: var(--spacing-md); align-items: center; flex: 1;">
-            <input type="range" id="brightness" min="0" max="255" value="20" style="flex: 1; max-width: 300px;">
-            <input type="number" id="brightnessValue" class="input" min="0" max="255" value="20" style="width: 80px;">
+          <div class="flex gap-md items-center flex-1">
+            <input type="range" id="brightness" class="flex-1 max-w-300" min="0" max="255" value="20">
+            <input type="number" id="brightnessValue" class="input w-80" min="0" max="255" value="20">
           </div>
         </div>
         <div class="setting-row">
           <label for="updateInterval">Update Interval:</label>
-          <div style="display: flex; gap: var(--spacing-sm); align-items: center;">
-            <input type="number" id="updateInterval" class="input" min="5" max="60" value="15" style="width: 80px;">
+          <div class="flex gap-sm items-center">
+            <input type="number" id="updateInterval" class="input w-80" min="5" max="60" value="15">
             <span>minutes</span>
           </div>
         </div>
         <div class="setting-row">
           <label for="hostname">Hostname:</label>
-          <div style="display: flex; flex-direction: column; gap: var(--spacing-xs);">
-            <input type="text" id="hostname" class="input" maxlength="32" placeholder="led-sectional" pattern="[a-zA-Z0-9\-]+" style="max-width: 250px;">
-            <small style="color: var(--color-text-muted); font-size: var(--font-size-sm);">
-              Access via: http://<span id="hostnamePreview" style="font-weight: bold;">led-sectional</span>.local
+          <div class="flex flex-col gap-xs">
+            <input type="text" id="hostname" class="input max-w-250" maxlength="32" placeholder="led-sectional" pattern="[a-zA-Z0-9\-]+">
+            <small class="text-muted">
+              Access via: http://<span id="hostnamePreview" class="font-bold">led-sectional</span>.local
             </small>
           </div>
         </div>
         <div class="setting-row">
           <label>Enable mDNS:</label>
-          <div style="display: flex; align-items: center;">
+          <div class="flex items-center">
             <input type="checkbox" id="useMDNS" checked>
           </div>
         </div>
@@ -328,9 +96,9 @@
 
     <!-- LED Assignments -->
     <div class="card">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-md);">
-        <h2 style="margin: 0;">LED Assignments</h2>
-        <input type="text" id="searchBox" class="input" placeholder="Search by LED or airport code..." style="max-width: 300px;">
+      <div class="flex justify-between items-center mb-md">
+        <h2 class="m-0">LED Assignments</h2>
+        <input type="text" id="searchBox" class="input max-w-300" placeholder="Search by LED or airport code...">
       </div>
       <table class="led-table">
         <thead>
@@ -347,7 +115,7 @@
     </div>
 
     <!-- Save Button -->
-    <button id="saveBtn" class="btn btn-primary" style="width: 100%;">
+    <button id="saveBtn" class="btn btn-primary btn-block">
       💾 Save Configuration
     </button>
   </div>
@@ -496,7 +264,11 @@
 
         // Status dot
         const tdStatus = document.createElement('td');
-        tdStatus.innerHTML = `<span class="status-dot" data-led="${i}" style="background-color: ${status.color}"></span>`;
+        const statusDot = document.createElement('span');
+        statusDot.className = 'status-dot';
+        statusDot.dataset.led = i;
+        statusDot.style.backgroundColor = status.color;
+        tdStatus.appendChild(statusDot);
         tr.appendChild(tdStatus);
 
         tbody.appendChild(tr);
@@ -568,8 +340,8 @@
       dropdown.innerHTML = matches.map(a => {
         const displayName = a.name.length > 35 ? a.name.substring(0, 32) + '...' : a.name;
         return `<div class="autocomplete-item" onclick="selectAirport(${ledIndex}, '${a.code}')">
-          <span style="min-width: 60px; font-weight: 600; font-family: var(--font-mono);">${a.code}</span>
-          <span style="color: var(--color-text-muted); font-size: var(--font-size-sm);">${displayName}</span>
+          <span class="autocomplete-code">${a.code}</span>
+          <span class="autocomplete-name">${displayName}</span>
         </div>`;
       }).join('');
 

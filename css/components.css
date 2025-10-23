@@ -771,3 +771,252 @@ button.loading::after {
     padding: var(--spacing-xs) var(--spacing-xs);
   }
 }
+
+/* ===== CONFIG PAGE SPECIFIC COMPONENTS ===== */
+
+/* LED Table (Config Page) */
+.led-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: var(--spacing-md) 0;
+}
+
+.led-table th,
+.led-table td {
+  padding: var(--spacing-md) var(--spacing-sm);
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.led-table th {
+  background: var(--color-input-bg);
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text-muted);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: var(--spacing-sm);
+}
+
+.led-table tbody tr {
+  transition: background-color var(--transition-fast);
+}
+
+.led-table tbody tr:hover {
+  background: rgba(77, 166, 255, 0.1);
+}
+
+.led-number {
+  font-weight: 400;
+  color: var(--color-text);
+  min-width: 60px;
+  font-family: var(--font-mono);
+}
+
+/* Airport Input with Autocomplete */
+.airport-input-wrapper {
+  position: relative;
+}
+
+.airport-input {
+  width: 100%;
+  min-width: 120px;
+  padding: var(--spacing-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  background: var(--color-input-bg);
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-base);
+  text-transform: uppercase;
+}
+
+.airport-input:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+.autocomplete-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 100;
+  display: none;
+}
+
+.autocomplete-dropdown.show {
+  display: block;
+}
+
+.autocomplete-item {
+  padding: var(--spacing-sm);
+  cursor: pointer;
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+  border-bottom: 1px solid var(--color-border);
+  min-height: 44px; /* Touch-friendly */
+}
+
+.autocomplete-item:last-child {
+  border-bottom: none;
+}
+
+.autocomplete-item:hover {
+  background: var(--color-input-bg);
+}
+
+.autocomplete-no-results {
+  padding: var(--spacing-md);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* Status Indicator */
+.status-dot {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+}
+
+/* Settings Section */
+.settings-grid {
+  display: grid;
+  gap: var(--spacing-lg);
+  margin: var(--spacing-md) 0;
+}
+
+.setting-row {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  align-items: center;
+  gap: var(--spacing-lg);
+}
+
+@media (max-width: 768px) {
+  .setting-row {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+  }
+}
+
+.setting-row label {
+  font-weight: 600;
+  font-size: var(--font-size-base);
+}
+
+/* Legend */
+.legend {
+  display: flex;
+  gap: var(--spacing-lg);
+  flex-wrap: wrap;
+  padding: var(--spacing-md);
+  background: var(--color-surface);
+  border-radius: var(--border-radius);
+  margin: var(--spacing-md) 0;
+  border: var(--border-width) solid var(--color-border);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-weight: 500;
+}
+
+.legend-color {
+  width: 32px;
+  height: 24px;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--color-border);
+}
+
+/* Loading Overlay */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loading-overlay .loading {
+  font-size: 48px;
+}
+
+/* Mobile Optimizations (Config Page) */
+@media (max-width: 768px) {
+  .led-table {
+    font-size: var(--font-size-sm);
+  }
+
+  .led-table th,
+  .led-table td {
+    padding: var(--spacing-xs);
+  }
+
+  .airport-input {
+    font-size: var(--font-size-sm);
+  }
+}
+
+/* Autocomplete Item Content Styles */
+.autocomplete-code {
+  min-width: 60px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+}
+
+.autocomplete-name {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* ===== UTILITY CLASSES ===== */
+
+/* Width utilities */
+.w-full { width: 100%; }
+.w-80 { width: 80px; }
+.w-120 { width: 120px; }
+.w-250 { width: 250px; }
+.w-300 { width: 300px; }
+.max-w-120 { max-width: 120px; }
+.max-w-250 { max-width: 250px; }
+.max-w-300 { max-width: 300px; }
+
+/* Flex utilities */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.flex-1 { flex: 1; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-xs { gap: var(--spacing-xs); }
+.gap-sm { gap: var(--spacing-sm); }
+.gap-md { gap: var(--spacing-md); }
+
+/* Margin utilities */
+.m-0 { margin: 0; }
+.mb-0 { margin-bottom: 0; }
+.mb-md { margin-bottom: var(--spacing-md); }
+
+/* Text decoration */
+.no-underline { text-decoration: none; }
+.font-bold { font-weight: bold; }
