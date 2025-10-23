@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LED Sectional Chart Config</title>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #000000;
+            --input-bg: #f5f5f5;
+            --border: #ddd;
+            --accent: #0066cc;
+            --legend-lifr: #ff00ff;
+            --legend-ifr: #ff0000;
+            --legend-mvfr: #0000ff;
+            --legend-wvfr: #ffff00;
+            --legend-vfr: #00ff00;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #1a1a1a;
+                --text: #e0e0e0;
+                --input-bg: #2a2a2a;
+                --border: #444;
+                --accent: #4da6ff;
+            }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .info {
+            background: var(--input-bg);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid var(--border);
+        }
+
+        .info h2 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .info ul {
+            margin-left: 20px;
+        }
+
+        .legend {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 30px;
+            height: 20px;
+            border-radius: 3px;
+            border: 1px solid var(--border);
+        }
+
+        .settings {
+            display: grid;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .setting-row {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            align-items: center;
+            gap: 10px;
+        }
+
+        label {
+            font-weight: 500;
+        }
+
+        input[type="number"] {
+            width: 100px;
+            padding: 8px;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text);
+            font-size: 14px;
+        }
+
+        .led-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .led-input {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .led-input label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .led-input input {
+            width: 100%;
+            padding: 8px;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text);
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        .btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 20px 0;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .status {
+            padding: 12px;
+            border-radius: 6px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .status.success {
+                background: #1e4620;
+                color: #9fdf9f;
+                border-color: #2d5f30;
+            }
+            .status.error {
+                background: #4a1c1c;
+                color: #ff9999;
+                border-color: #6b2929;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✈️ Skyboard Configuration</h1>
+
+        <div style="margin-bottom: 20px;">
+            <a href="/diagnostics" style="color: var(--accent); text-decoration: none;">📊 View Diagnostics →</a>
+        </div>
+
+        <div class="info">
+            <h2>Instructions</h2>
+            <ul>
+                <li><strong>Airport Codes:</strong> Enter 4-letter ICAO codes (e.g., KSFO, KMRY)</li>
+                <li><strong>Legend Values:</strong> Use LIFR, IFR, MVFR, WVFR, or VFR at ANY position for static color display</li>
+                <li><strong>Skip LEDs:</strong> Enter "NULL" or "BLACK" to turn off</li>
+                <li><strong>Number of LEDs:</strong> Total LEDs in your strip (max 150)</li>
+                <li><strong>Changes save immediately</strong> and take effect on next weather update</li>
+            </ul>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: var(--legend-lifr)"></div>
+                <span>LIFR</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: var(--legend-ifr)"></div>
+                <span>IFR</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: var(--legend-mvfr)"></div>
+                <span>MVFR</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: var(--legend-wvfr)"></div>
+                <span>WVFR (Windy)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: var(--legend-vfr)"></div>
+                <span>VFR</span>
+            </div>
+        </div>
+
+        <h2 style="margin: 20px 0 10px 0;">Network Configuration</h2>
+        <div class="settings">
+            <div class="setting-row">
+                <label for="hostname">Hostname:</label>
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                    <input type="text" id="hostname" maxlength="32" placeholder="led-sectional"
+                           pattern="[a-zA-Z0-9-]+" title="Only letters, numbers, and hyphens allowed"
+                           style="width: 250px;">
+                    <small style="color: var(--accent); font-size: 12px;">
+                        Access via: http://<span id="hostnamePreview" style="font-weight: bold;">led-sectional</span>.local
+                    </small>
+                </div>
+            </div>
+            <div class="setting-row">
+                <label for="useMDNS">Enable mDNS:</label>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" id="useMDNS" checked>
+                    <small style="font-size: 12px;">Recommended (disable if experiencing network issues)</small>
+                </div>
+            </div>
+        </div>
+
+        <h2 style="margin: 20px 0 10px 0;">LED Configuration</h2>
+        <div class="settings">
+            <div class="setting-row">
+                <label for="numLeds">Number of LEDs:</label>
+                <input type="number" id="numLeds" min="5" max="150" value="80">
+            </div>
+            <div class="setting-row">
+                <label for="brightness">Brightness (0-255):</label>
+                <input type="number" id="brightness" min="0" max="255" value="20">
+            </div>
+            <div class="setting-row">
+                <label for="updateInterval">Update Interval:</label>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <input type="number" id="updateInterval" min="5" max="60" value="15" style="width: 80px;">
+                    <span>minutes</span>
+                </div>
+            </div>
+        </div>
+
+        <h2 style="margin: 20px 0 10px 0;">LED Assignments</h2>
+        <div class="led-grid" id="ledGrid"></div>
+
+        <button class="btn" onclick="saveConfig()">💾 Save Configuration</button>
+
+        <div class="status" id="status"></div>
+    </div>
+
+    <script>
+        let currentNumLeds = 80;
+
+        // Live hostname preview
+        document.addEventListener('DOMContentLoaded', function() {
+            const hostnameInput = document.getElementById('hostname');
+            hostnameInput.addEventListener('input', function(e) {
+                const preview = document.getElementById('hostnamePreview');
+                preview.textContent = e.target.value || 'led-sectional';
+            });
+        });
+
+        async function loadConfig() {
+            try {
+                const response = await fetch('/config');
+                const data = await response.json();
+
+                document.getElementById('numLeds').value = data.numLeds;
+                document.getElementById('brightness').value = data.brightness;
+                document.getElementById('updateInterval').value = data.updateIntervalMinutes || 15;
+                currentNumLeds = data.numLeds;
+
+                // Load hostname and mDNS settings
+                const hostname = data.hostname || 'led-sectional';
+                document.getElementById('hostname').value = hostname;
+                document.getElementById('hostnamePreview').textContent = hostname;
+                document.getElementById('useMDNS').checked = data.useMDNS !== false;
+
+                renderLEDGrid(data.airports);
+            } catch (error) {
+                showStatus('Error loading config: ' + error.message, 'error');
+            }
+        }
+
+        function renderLEDGrid(airports) {
+            const grid = document.getElementById('ledGrid');
+            grid.innerHTML = '';
+
+            for (let i = 0; i < currentNumLeds; i++) {
+                const div = document.createElement('div');
+                div.className = 'led-input';
+
+                const label = document.createElement('label');
+                label.textContent = `LED ${i}`;
+
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.id = `led${i}`;
+                input.maxLength = 7;
+                input.value = airports[i] || 'NULL';
+
+                div.appendChild(label);
+                div.appendChild(input);
+                grid.appendChild(div);
+            }
+        }
+
+        async function saveConfig() {
+            const numLeds = parseInt(document.getElementById('numLeds').value);
+            const brightness = parseInt(document.getElementById('brightness').value);
+            const updateIntervalMinutes = parseInt(document.getElementById('updateInterval').value);
+            const hostname = document.getElementById('hostname').value.trim() || 'led-sectional';
+            const useMDNS = document.getElementById('useMDNS').checked;
+
+            if (numLeds < 5 || numLeds > 150) {
+                showStatus('Number of LEDs must be between 5 and 150', 'error');
+                return;
+            }
+
+            if (updateIntervalMinutes < 5 || updateIntervalMinutes > 60) {
+                showStatus('Update interval must be between 5 and 60 minutes', 'error');
+                return;
+            }
+
+            // Client-side hostname validation (backup - server validates too)
+            if (!/^[a-zA-Z0-9-]+$/.test(hostname)) {
+                showStatus('Hostname can only contain letters, numbers, and hyphens', 'error');
+                return;
+            }
+
+            if (hostname.length > 32) {
+                showStatus('Hostname must be 32 characters or less', 'error');
+                return;
+            }
+
+            if (hostname.startsWith('-') || hostname.endsWith('-')) {
+                showStatus('Hostname cannot start or end with a hyphen', 'error');
+                return;
+            }
+
+            const airports = [];
+            for (let i = 0; i < numLeds; i++) {
+                const input = document.getElementById(`led${i}`);
+                airports.push(input ? input.value.toUpperCase() : 'NULL');
+            }
+
+            const config = { numLeds, brightness, airports, hostname, useMDNS, updateIntervalMinutes };
+
+            try {
+                const response = await fetch('/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(config)
+                });
+
+                if (response.ok) {
+                    const contentType = response.headers.get('content-type');
+
+                    if (contentType && contentType.includes('application/json')) {
+                        const data = await response.json();
+                        if (data.hostnameChanged) {
+                            showStatus('⚠️ ' + data.message + ' New URL will be: http://' + hostname + '.local', 'success');
+                        } else {
+                            showStatus('Configuration saved successfully! Changes will apply on next weather update.', 'success');
+                        }
+                    } else {
+                        showStatus('Configuration saved successfully! Changes will apply on next weather update.', 'success');
+                    }
+
+                    if (numLeds !== currentNumLeds) {
+                        currentNumLeds = numLeds;
+                        renderLEDGrid(airports);
+                    }
+                } else {
+                    const contentType = response.headers.get('content-type');
+
+                    if (contentType && contentType.includes('application/json')) {
+                        const errorData = await response.json();
+                        showStatus('ERROR: ' + errorData.error, 'error');
+                    } else {
+                        const errorText = await response.text();
+                        showStatus('Error: ' + errorText, 'error');
+                    }
+                }
+            } catch (error) {
+                showStatus('Error: ' + error.message, 'error');
+            }
+        }
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = 'status ' + type;
+            status.style.display = 'block';
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 5000);
+        }
+
+        document.getElementById('numLeds').addEventListener('change', function() {
+            const newNum = parseInt(this.value);
+            if (newNum >= 5 && newNum <= 150 && newNum !== currentNumLeds) {
+                const airports = [];
+                for (let i = 0; i < Math.max(newNum, currentNumLeds); i++) {
+                    const input = document.getElementById(`led${i}`);
+                    airports.push(input ? input.value : 'NULL');
+                }
+                currentNumLeds = newNum;
+                renderLEDGrid(airports);
+            }
+        });
+
+        loadConfig();
+    </script>
+</body>
+</html>

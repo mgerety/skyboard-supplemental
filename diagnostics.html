@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LED Sectional - Diagnostics</title>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #000000;
+            --input-bg: #f5f5f5;
+            --border: #ddd;
+            --accent: #0066cc;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #1a1a1a;
+                --text: #e0e0e0;
+                --input-bg: #2a2a2a;
+                --border: #444;
+                --accent: #4da6ff;
+            }
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { font-size: 24px; margin-bottom: 20px; }
+        h2 { font-size: 18px; margin: 20px 0 10px; }
+        .btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 5px 10px 0;
+        }
+        .btn:hover { opacity: 0.9; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        th, td {
+            padding: 8px;
+            border: 1px solid var(--border);
+            text-align: left;
+        }
+        th { background: var(--input-bg); font-weight: 600; }
+        .color-box {
+            width: 30px;
+            height: 20px;
+            display: inline-block;
+            border: 1px solid var(--border);
+            border-radius: 3px;
+        }
+        textarea, pre {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 10px;
+            color: var(--text);
+            font-family: monospace;
+            font-size: 12px;
+            overflow: auto;
+        }
+        textarea { min-height: 200px; }
+        pre { max-height: 300px; }
+        .tabs { display: flex; gap: 10px; margin: 10px 0; }
+        .tab {
+            padding: 8px 16px;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .tab.active { background: var(--accent); color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .nav-link { color: var(--accent); text-decoration: none; margin-right: 20px; }
+        .nav-link:hover { text-decoration: underline; }
+        .table-container { max-height: 400px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Skyboard - Diagnostics</h1>
+        <div style="margin-bottom: 20px;">
+            <a href="/" class="nav-link">← Back to Config</a>
+        </div>
+
+        <h2>LED Status</h2>
+        <button class="btn" onclick="refreshStatus()">🔄 Force Refresh Weather Data</button>
+        <button class="btn" onclick="loadStatus()">↻ Reload Status Table</button>
+        <div class="table-container">
+            <table id="statusTable">
+                <thead>
+                    <tr><th>LED#</th><th>Assignment</th><th>WxValue</th><th>Color</th></tr>
+                </thead>
+                <tbody id="statusBody"></tbody>
+            </table>
+        </div>
+
+        <h2>Last API Response</h2>
+        <div style="margin-bottom: 10px;">
+            <strong>Timestamp:</strong> <span id="apiTimestamp">N/A</span>
+        </div>
+        <pre id="apiResponse">Loading...</pre>
+
+        <h2>Logs</h2>
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('error')">Error Log</div>
+            <div class="tab" onclick="switchTab('info')">Info Log</div>
+        </div>
+        <div id="error-tab" class="tab-content active">
+            <button class="btn" onclick="clearLog('error')">🗑️ Clear Error Log</button>
+            <textarea id="errorLog" readonly>Loading...</textarea>
+        </div>
+        <div id="info-tab" class="tab-content">
+            <button class="btn" onclick="clearLog('info')">🗑️ Clear Info Log</button>
+            <textarea id="infoLog" readonly>Loading...</textarea>
+        </div>
+    </div>
+
+    <script>
+        let currentTab = 'error';
+
+        async function loadStatus() {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+                const tbody = document.getElementById('statusBody');
+                tbody.innerHTML = '';
+
+                data.leds.forEach(led => {
+                    const row = tbody.insertRow();
+                    row.insertCell(0).textContent = led.index;
+                    row.insertCell(1).textContent = led.assignment;
+                    row.insertCell(2).textContent = led.wxValue || '-';
+                    const colorCell = row.insertCell(3);
+                    const colorBox = document.createElement('div');
+                    colorBox.className = 'color-box';
+                    colorBox.style.background = led.color;
+                    colorCell.appendChild(colorBox);
+                });
+            } catch (error) {
+                console.error('Error loading status:', error);
+            }
+        }
+
+        async function refreshStatus() {
+            try {
+                await fetch('/api/forceRefresh', { method: 'POST' });
+                setTimeout(loadStatus, 5000);  // Reload after 5 seconds
+                alert('Weather refresh triggered! Table will reload in 5 seconds.');
+            } catch (error) {
+                console.error('Error refreshing:', error);
+            }
+        }
+
+        async function loadLastResponse() {
+            try {
+                const response = await fetch('/api/lastResponse');
+                const data = await response.json();
+                document.getElementById('apiTimestamp').textContent = new Date(data.timestamp).toLocaleString();
+                document.getElementById('apiResponse').textContent = JSON.stringify(JSON.parse(data.response), null, 2);
+            } catch (error) {
+                document.getElementById('apiResponse').textContent = 'Error loading response';
+            }
+        }
+
+        async function loadLogs() {
+            try {
+                const errorResp = await fetch('/api/logs?type=error');
+                document.getElementById('errorLog').value = await errorResp.text();
+
+                const infoResp = await fetch('/api/logs?type=info');
+                document.getElementById('infoLog').value = await infoResp.text();
+            } catch (error) {
+                console.error('Error loading logs:', error);
+            }
+        }
+
+        async function clearLog(type) {
+            if (!confirm('Clear ' + type + ' log?')) return;
+            try {
+                await fetch('/api/clearLogs?type=' + type, { method: 'POST' });
+                loadLogs();
+            } catch (error) {
+                console.error('Error clearing log:', error);
+            }
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tab + '-tab').classList.add('active');
+            currentTab = tab;
+        }
+
+        loadStatus();
+        loadLastResponse();
+        loadLogs();
+        setInterval(loadStatus, 60000);  // Auto-refresh every minute
+    </script>
+</body>
+</html>
