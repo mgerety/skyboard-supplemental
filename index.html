@@ -520,12 +520,14 @@
       const ledIndex = input.dataset.led;
       const query = input.value.trim().toUpperCase();
 
+      // If empty, show all options (special values + some airports)
+      let matches;
       if (query.length === 0) {
-        hideAutocomplete(ledIndex);
-        return;
+        matches = airportsDatabase.slice(0, 20);  // Show first 20 options
+      } else {
+        matches = searchAirports(query);
       }
 
-      const matches = searchAirports(query);
       showAutocomplete(ledIndex, matches, input);
     }
 
