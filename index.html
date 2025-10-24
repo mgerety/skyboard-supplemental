@@ -323,7 +323,9 @@
       statusData.forEach(item => {
         const dot = document.querySelector(`.status-dot[data-led="${item.index}"]`);
         if (dot) {
-          dot.style.backgroundColor = item.color || '#000000';
+          // Derive color from flight category, NOT LED color
+          const assignment = currentConfig.airports[item.index] || 'NULL';
+          dot.style.backgroundColor = getColorFromFlightCategory(assignment, item.wxValue);
         }
       });
     }
