@@ -282,6 +282,39 @@
             renderLEDTable();
         }
 
+        // ===== COLOR DERIVATION =====
+
+        function getColorFromFlightCategory(assignment, fltCat) {
+            // Derive display color from flight category string (wxValue)
+            // This ensures table shows correct color regardless of actual LED color
+            // (which may be blinking orange for invalid airports, etc.)
+
+            // LEGEND LEDs: Assignment IS the flight category (LIFR, IFR, etc.)
+            // These can be at ANY LED index, not just 0-4
+            const legendValues = ['LIFR', 'IFR', 'MVFR', 'WVFR', 'VFR'];
+            if (legendValues.includes(assignment)) {
+                switch(assignment) {
+                    case 'LIFR': return '#FF00FF';  // Magenta
+                    case 'IFR':  return '#FF0000';  // Red
+                    case 'MVFR': return '#0000FF';  // Blue
+                    case 'WVFR': return '#FFFF00';  // Yellow (windy VFR)
+                    case 'VFR':  return '#00FF00';  // Green
+                }
+            }
+
+            // AIRPORT LEDs: Color based on wxValue from weather cache
+            switch(fltCat) {
+                case 'LIFR': return '#FF00FF';  // Magenta
+                case 'IFR':  return '#FF0000';  // Red
+                case 'MVFR': return '#0000FF';  // Blue
+                case 'WVFR': return '#FFFF00';  // Yellow (windy VFR)
+                case 'VFR':  return '#00FF00';  // Green
+                case 'Pending': return '#FFA500';  // Orange (no data yet)
+                case '-':    return '#000000';  // Black (NULL/BLACK assignment)
+                default:     return '#888888';  // Gray (unknown)
+            }
+        }
+
         function renderLEDTable() {
             const tbody = document.getElementById('ledTableBody');
             tbody.innerHTML = '';
@@ -290,11 +323,14 @@
                 const row = document.createElement('tr');
                 if (led.error) row.classList.add('error');
 
+                // Derive color from assignment and flight category, not from LED color
+                const displayColor = getColorFromFlightCategory(led.assignment, led.fltCat);
+
                 row.innerHTML = `
                     <td>${led.led}</td>
                     <td><strong>${led.assignment}</strong></td>
                     <td>${led.error ? '<span class="badge danger">PENDING</span>' : led.fltCat}</td>
-                    <td><span class="color-indicator" style="background-color: ${led.color}"></span></td>
+                    <td><span class="color-indicator" style="background-color: ${displayColor}"></span></td>
                     <td>${led.error ? '⏳ Pending' : '✅ OK'}</td>
                 `;
 
