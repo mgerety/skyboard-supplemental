@@ -11,6 +11,7 @@
   --color-ifr: #ff0000;      /* Red - Instrument Flight Rules */
   --color-lifr: #ff00ff;     /* Magenta - Low IFR */
   --color-wvfr: #ffff00;     /* Yellow - Windy VFR */
+  --color-pending: #ffa500;  /* Orange - No Weather Data */
 
   /* UI Colors - Light Mode */
   --color-bg: #ffffff;
