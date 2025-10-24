@@ -513,6 +513,22 @@
         // Update current config
         currentConfig = config;
 
+        // CRITICAL: Force weather update after saving config
+        // Otherwise new airport assignments show as "Pending" until next 15-minute cycle
+        saveBtn.textContent = '🔄 Updating weather...';
+        try {
+          const refreshResponse = await fetch('/api/forceRefresh', { method: 'POST' });
+          if (refreshResponse.ok) {
+            showToast('Weather data updated successfully!', 'success');
+            // Reload status to show updated colors
+            await loadStatus();
+          } else {
+            console.warn('Force refresh failed, weather will update on next cycle');
+          }
+        } catch (refreshError) {
+          console.warn('Force refresh error:', refreshError);
+        }
+
       } catch (error) {
         showToast('Error saving configuration: ' + error.message, 'error');
       } finally {
