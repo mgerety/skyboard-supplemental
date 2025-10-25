@@ -611,7 +611,7 @@
     }
 
     // Show toast notification (simple implementation without component library)
-    function showToast(message, type = 'info', duration = 5000) {
+    function showToast(message, type = 'info', duration = 8000) {
       const toast = document.createElement('div');
       toast.className = `toast toast-${type}`;
       toast.textContent = message;
@@ -800,9 +800,9 @@
         return;
       }
 
-      // Validate ICAO format (4 letters) or special values
-      if (!/^([A-Z]{4}|NULL|BLACK)$/.test(value)) {
-        showToast('Invalid airport code. Use 4-letter ICAO code or "NULL".', 'error');
+      // Validate ICAO format (4 alphanumeric characters) or special values
+      if (!/^([A-Z0-9]{4}|NULL|BLACK)$/.test(value)) {
+        showToast('Invalid airport code. Use 4-character ICAO code (e.g., K1B9) or "NULL".', 'error', 8000);
         input.focus();
         return;
       }
@@ -862,8 +862,8 @@
       }
 
       // Validate ICAO format
-      if (!/^([A-Z]{4}|NULL|BLACK)$/.test(lastValue)) {
-        showToast('Invalid airport code on last LED. Use 4-letter ICAO code or "NULL".', 'error');
+      if (!/^([A-Z0-9]{4}|NULL|BLACK)$/.test(lastValue)) {
+        showToast('Invalid airport code on last LED. Use 4-character ICAO code (e.g., K1B9) or "NULL".', 'error', 8000);
         lastInput.focus();
         return;
       }
