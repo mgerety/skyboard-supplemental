@@ -621,10 +621,19 @@
         background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : type === 'warning' ? '#ffc107' : '#0066cc'};
         color: white;
         font-size: 14px;
+        cursor: pointer;
       `;
+
+      // Click to dismiss
+      toast.addEventListener('click', () => {
+        if (toast.parentNode) {
+          toast.parentNode.removeChild(toast);
+        }
+      });
 
       document.body.appendChild(toast);
 
+      // Auto-dismiss after duration
       setTimeout(() => {
         if (toast.parentNode) {
           toast.parentNode.removeChild(toast);
@@ -676,6 +685,7 @@
         document.getElementById('manualLedConfig').style.display = 'none';
         document.getElementById('wizardContainer').style.display = 'block';
         document.getElementById('startWizardBtn').style.display = 'none';
+        document.getElementById('saveBtn').style.display = 'none'; // Hide manual save button
 
         // Render first LED row
         renderWizardRows();
@@ -798,7 +808,7 @@
           newInput.focus();
         }
 
-        showToast(`LED ${ledIndex} configured. LED ${wizardState.currentIndex} is now blinking.`, 'success', 2000);
+        showToast(`LED ${ledIndex} configured. LED ${wizardState.currentIndex} is now blinking.`, 'success');
       } catch (error) {
         console.error('Failed to add next LED:', error);
         showToast('Failed to update. Check ESP8266 connection.', 'error');
@@ -919,6 +929,7 @@
       document.getElementById('wizardContainer').style.display = 'none';
       document.getElementById('manualLedConfig').style.display = 'block';
       document.getElementById('startWizardBtn').style.display = 'inline-block';
+      document.getElementById('saveBtn').style.display = 'block'; // Show manual save button
 
       // Clear wizard rows
       document.getElementById('wizardRows').innerHTML = '';
