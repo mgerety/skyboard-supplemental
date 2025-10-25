@@ -653,7 +653,8 @@
         // Call backend to enter setup mode
         const response = await fetch('/setup/start', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
         });
 
         if (!response.ok) {
