@@ -8,6 +8,7 @@
   <title>Skyboard Configuration</title>
   <link rel="stylesheet" href="/css/base.css">
   <link rel="stylesheet" href="/css/components.css">
+  <script src="/js/components.js"></script>
 </head>
 <body>
   <header class="page-header">
@@ -102,9 +103,35 @@
     <div class="card">
       <div class="flex justify-between items-center mb-md">
         <h2 class="m-0">LED Assignments</h2>
-        <input type="text" id="searchBox" class="input max-w-300" placeholder="Search by LED or airport code...">
+        <button id="startWizardBtn" class="btn btn-primary">
+          🔧 Start LED Setup Wizard
+        </button>
       </div>
-      <table class="led-table">
+
+      <!-- Setup Wizard Container (hidden by default) -->
+      <div id="wizardContainer" class="wizard-container" style="display: none;">
+        <div class="wizard-instructions">
+          <p><strong>LED Setup Wizard</strong></p>
+          <p>This wizard will help you identify each LED. The current LED will blink ORANGE. Previous LEDs will be GREEN. You can edit ANY textbox at ANY time. Click 'Next' to add the next LED.</p>
+        </div>
+
+        <div id="wizardRows" class="wizard-rows">
+          <!-- Progressive LED rows will be added here by JavaScript -->
+        </div>
+
+        <div class="wizard-buttons">
+          <button id="wizardSaveBtn" class="btn btn-success">
+            💾 Save Configuration
+          </button>
+        </div>
+      </div>
+
+      <!-- Manual LED Table (shown when wizard is not active) -->
+      <div id="manualLedConfig">
+        <div class="mb-md">
+          <input type="text" id="searchBox" class="input max-w-300" placeholder="Search by LED or airport code...">
+        </div>
+        <table class="led-table">
         <thead>
           <tr>
             <th>LED</th>
@@ -116,6 +143,7 @@
           <!-- Populated by JavaScript -->
         </tbody>
       </table>
+      </div> <!-- /manualLedConfig -->
     </div>
 
     <!-- Save Button -->
@@ -603,6 +631,322 @@
         }
       }, duration);
     }
+
+    // ====================================================================
+    // LED SETUP WIZARD FUNCTIONALITY
+    // ====================================================================
+
+    // Wizard state
+    let wizardActive = false;
+    let wizardState = {
+      numLeds: 0,
+      currentIndex: 0,
+      airports: [],
+      brightness: 20
+    };
+
+    /**
+     * Start the LED setup wizard
+     */
+    async function startWizard() {
+      try {
+        // Call backend to enter setup mode
+        const response = await fetch('/setup/start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to start setup mode');
+        }
+
+        const result = await response.json();
+
+        // Initialize wizard state
+        wizardActive = true;
+        wizardState = {
+          numLeds: 1,
+          currentIndex: 0,
+          airports: [''],
+          brightness: parseInt(document.getElementById('brightness').value) || 20
+        };
+
+        // Hide manual config, show wizard
+        document.getElementById('manualLedConfig').style.display = 'none';
+        document.getElementById('wizardContainer').style.display = 'block';
+        document.getElementById('startWizardBtn').style.display = 'none';
+
+        // Render first LED row
+        renderWizardRows();
+
+        showToast('Wizard started! LED 0 is blinking orange.', 'success');
+      } catch (error) {
+        console.error('Failed to start wizard:', error);
+        showToast('Failed to start wizard. Check ESP8266 connection.', 'error');
+      }
+    }
+
+    /**
+     * Render all wizard rows based on current state
+     */
+    function renderWizardRows() {
+      const container = document.getElementById('wizardRows');
+      container.innerHTML = '';
+
+      // Render all existing LED rows
+      for (let i = 0; i < wizardState.numLeds; i++) {
+        const row = createWizardRow(i);
+        container.appendChild(row);
+      }
+    }
+
+    /**
+     * Create a single wizard row for an LED
+     */
+    function createWizardRow(ledIndex) {
+      const row = document.createElement('div');
+      row.className = 'wizard-row';
+      row.id = `wizard-row-${ledIndex}`;
+
+      // LED label
+      const label = document.createElement('span');
+      label.className = 'wizard-led-label';
+      label.textContent = `LED ${ledIndex}`;
+
+      // Airport input
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.id = `wizard-input-${ledIndex}`;
+      input.className = 'wizard-input';
+      input.placeholder = 'ICAO code or NULL';
+      input.value = wizardState.airports[ledIndex] || '';
+      input.autocomplete = 'off';
+
+      // Update state on input change
+      input.addEventListener('input', (e) => {
+        wizardState.airports[ledIndex] = e.target.value.trim().toUpperCase();
+      });
+
+      // Next button (only on the last LED)
+      const nextBtn = document.createElement('button');
+      nextBtn.className = 'wizard-next-btn';
+      nextBtn.textContent = 'Next';
+      nextBtn.dataset.led = ledIndex;
+
+      // Only enable Next button on the last LED
+      if (ledIndex !== wizardState.numLeds - 1) {
+        nextBtn.disabled = true;
+        nextBtn.style.opacity = '0.3';
+        nextBtn.textContent = '✓';
+      } else {
+        nextBtn.addEventListener('click', () => handleWizardNext(ledIndex));
+      }
+
+      row.appendChild(label);
+      row.appendChild(input);
+      row.appendChild(nextBtn);
+
+      return row;
+    }
+
+    /**
+     * Handle clicking "Next" to add another LED
+     */
+    async function handleWizardNext(ledIndex) {
+      const input = document.getElementById(`wizard-input-${ledIndex}`);
+      const value = input.value.trim().toUpperCase();
+
+      // Validate input
+      if (!value) {
+        showToast('Please enter an airport code or "NULL"', 'error');
+        input.focus();
+        return;
+      }
+
+      // Validate ICAO format (4 letters) or special values
+      if (!/^([A-Z]{4}|NULL|BLACK)$/.test(value)) {
+        showToast('Invalid airport code. Use 4-letter ICAO code or "NULL".', 'error');
+        input.focus();
+        return;
+      }
+
+      try {
+        // Update state
+        wizardState.airports[ledIndex] = value;
+        wizardState.numLeds += 1;
+        wizardState.currentIndex = wizardState.numLeds - 1;
+        wizardState.airports[wizardState.currentIndex] = ''; // New empty slot
+
+        // Send update to backend
+        const response = await fetch('/setup/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(wizardState)
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to update setup state');
+        }
+
+        // Re-render rows to add new one
+        renderWizardRows();
+
+        // Focus new input
+        const newInput = document.getElementById(`wizard-input-${wizardState.currentIndex}`);
+        if (newInput) {
+          newInput.focus();
+        }
+
+        showToast(`LED ${ledIndex} configured. LED ${wizardState.currentIndex} is now blinking.`, 'success', 2000);
+      } catch (error) {
+        console.error('Failed to add next LED:', error);
+        showToast('Failed to update. Check ESP8266 connection.', 'error');
+
+        // Revert state
+        wizardState.numLeds -= 1;
+        wizardState.currentIndex = wizardState.numLeds - 1;
+        wizardState.airports.pop();
+      }
+    }
+
+    /**
+     * Handle clicking "Save Configuration"
+     */
+    async function handleWizardSave() {
+      // Validate last LED has a value
+      const lastIndex = wizardState.numLeds - 1;
+      const lastInput = document.getElementById(`wizard-input-${lastIndex}`);
+      const lastValue = lastInput ? lastInput.value.trim().toUpperCase() : '';
+
+      if (!lastValue) {
+        showToast(`Please fill in LED ${lastIndex} or remove it before saving.`, 'error');
+        lastInput.focus();
+        return;
+      }
+
+      // Validate ICAO format
+      if (!/^([A-Z]{4}|NULL|BLACK)$/.test(lastValue)) {
+        showToast('Invalid airport code on last LED. Use 4-letter ICAO code or "NULL".', 'error');
+        lastInput.focus();
+        return;
+      }
+
+      // Update last value in state
+      wizardState.airports[lastIndex] = lastValue;
+
+      // Show confirmation modal
+      const modal = new Modal();
+      const modalContent = document.createElement('div');
+      modalContent.innerHTML = `
+        <p>Are you sure you want to save this configuration?</p>
+        <p style="margin-top: 16px;"><strong>You have configured ${wizardState.numLeds} LED${wizardState.numLeds > 1 ? 's' : ''}.</strong></p>
+        <div style="display: flex; gap: 12px; margin-top: 24px;">
+          <button id="modalCancelBtn" class="btn btn-secondary" style="flex: 1;">No, Continue</button>
+          <button id="modalConfirmBtn" class="btn btn-success" style="flex: 1;">Yes, Save</button>
+        </div>
+      `;
+
+      modal.show('Confirm Save', modalContent);
+
+      // Attach button handlers
+      document.getElementById('modalCancelBtn').onclick = () => modal.hide();
+      document.getElementById('modalConfirmBtn').onclick = async () => {
+        modal.hide();
+        await saveWizardConfig();
+      };
+    }
+
+    /**
+     * Save wizard configuration and exit wizard mode
+     */
+    async function saveWizardConfig() {
+      try {
+        // Build full config object (150 airports, filled with NULL)
+        const fullAirports = new Array(150).fill('NULL');
+        for (let i = 0; i < wizardState.numLeds; i++) {
+          fullAirports[i] = wizardState.airports[i] || 'NULL';
+        }
+
+        const finalConfig = {
+          numLeds: wizardState.numLeds,
+          airports: fullAirports,
+          brightness: wizardState.brightness,
+          hostname: document.getElementById('hostname').value.trim(),
+          useMDNS: document.getElementById('useMDNS').checked,
+          updateIntervalMinutes: parseInt(document.getElementById('updateInterval').value)
+        };
+
+        // Send to backend
+        const response = await fetch('/setup/finish', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(finalConfig)
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to save configuration');
+        }
+
+        showToast(`Configuration saved! ${wizardState.numLeds} LEDs configured.`, 'success', 5000);
+
+        // Exit wizard mode
+        exitWizard();
+
+        // Reload config to update UI
+        setTimeout(() => {
+          loadConfig();
+        }, 1000);
+      } catch (error) {
+        console.error('Failed to save wizard config:', error);
+        showToast('Failed to save configuration. Check ESP8266 connection.', 'error');
+      }
+    }
+
+    /**
+     * Exit wizard mode and restore manual config UI
+     */
+    function exitWizard() {
+      wizardActive = false;
+      wizardState = {
+        numLeds: 0,
+        currentIndex: 0,
+        airports: [],
+        brightness: 20
+      };
+
+      // Hide wizard, show manual config
+      document.getElementById('wizardContainer').style.display = 'none';
+      document.getElementById('manualLedConfig').style.display = 'block';
+      document.getElementById('startWizardBtn').style.display = 'inline-block';
+
+      // Clear wizard rows
+      document.getElementById('wizardRows').innerHTML = '';
+    }
+
+    /**
+     * Warn user if navigating away during wizard
+     */
+    window.addEventListener('beforeunload', (e) => {
+      if (wizardActive) {
+        e.preventDefault();
+        e.returnValue = 'You have an active wizard session. Progress will be lost if you leave.';
+        return e.returnValue;
+      }
+    });
+
+    // Attach wizard button event listeners after DOM loads
+    document.addEventListener('DOMContentLoaded', () => {
+      const startBtn = document.getElementById('startWizardBtn');
+      if (startBtn) {
+        startBtn.addEventListener('click', startWizard);
+      }
+
+      const saveBtn = document.getElementById('wizardSaveBtn');
+      if (saveBtn) {
+        saveBtn.addEventListener('click', handleWizardSave);
+      }
+    });
+
   </script>
 </body>
 </html>
