@@ -65,7 +65,7 @@
       <div class="settings-grid">
         <div class="setting-row">
           <label for="numLeds">Number of LEDs:</label>
-          <input type="number" id="numLeds" class="input max-w-120" min="5" max="150" value="80">
+          <input type="number" id="numLeds" class="input max-w-120" min="1" max="150" value="80">
         </div>
         <div class="setting-row">
           <label for="brightness">Brightness (0-255):</label>
@@ -501,8 +501,8 @@
       const useMDNS = document.getElementById('useMDNS').checked;
 
       // Validation
-      if (numLeds < 5 || numLeds > 150) {
-        showToast('Number of LEDs must be between 5 and 150', 'error');
+      if (numLeds < 1 || numLeds > 150) {
+        showToast('Number of LEDs must be between 1 and 150', 'error');
         return;
       }
 
