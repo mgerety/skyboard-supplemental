@@ -431,6 +431,12 @@
       if (input) {
         input.value = code;
       }
+
+      // Also update wizard state if wizard is active
+      if (wizardActive && wizardState.airports) {
+        wizardState.airports[ledIndex] = code;
+      }
+
       hideAutocomplete(ledIndex);
     }
 
@@ -724,18 +730,38 @@
       label.className = 'wizard-led-label';
       label.textContent = `LED ${ledIndex}`;
 
-      // Airport input
+      // Airport input with autocomplete wrapper
+      const inputWrapper = document.createElement('div');
+      inputWrapper.className = 'airport-input-wrapper';
+
       const input = document.createElement('input');
       input.type = 'text';
       input.id = `wizard-input-${ledIndex}`;
-      input.className = 'wizard-input';
-      input.placeholder = 'ICAO code or NULL';
+      input.className = 'wizard-input airport-input';
+      input.dataset.led = ledIndex;
+      input.placeholder = 'Type to search...';
       input.value = wizardState.airports[ledIndex] || '';
       input.autocomplete = 'off';
+      input.autocapitalize = 'characters';
+
+      // Autocomplete dropdown
+      const dropdown = document.createElement('div');
+      dropdown.className = 'autocomplete-dropdown';
+      dropdown.dataset.led = ledIndex;
+
+      inputWrapper.appendChild(input);
+      inputWrapper.appendChild(dropdown);
 
       // Update state on input change
       input.addEventListener('input', (e) => {
         wizardState.airports[ledIndex] = e.target.value.trim().toUpperCase();
+        handleAutocompleteInput(e);
+      });
+
+      // Autocomplete focus/blur handlers
+      input.addEventListener('focus', handleAutocompleteInput);
+      input.addEventListener('blur', (e) => {
+        setTimeout(() => hideAutocomplete(ledIndex), 200);
       });
 
       // Next button (only on the last LED)
@@ -754,7 +780,7 @@
       }
 
       row.appendChild(label);
-      row.appendChild(input);
+      row.appendChild(inputWrapper);
       row.appendChild(nextBtn);
 
       return row;
