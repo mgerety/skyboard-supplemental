@@ -27,6 +27,7 @@
         <li><strong>Airport Codes:</strong> Type to search by ICAO code, airport name, or city</li>
         <li><strong>Legend Values:</strong> Use LIFR, IFR, MVFR, WVFR, or VFR for static color display</li>
         <li><strong>Skip LEDs:</strong> Enter "NULL" or "BLACK" to turn off</li>
+        <li><strong>CSV Import:</strong> Upload a CSV file with format: index,code (e.g., "0,KSFO")</li>
         <li><strong>Changes save:</strong> Click "Save Configuration" when done</li>
       </ul>
     </div>
@@ -128,8 +129,16 @@
 
       <!-- Manual LED Table (shown when wizard is not active) -->
       <div id="manualLedConfig">
-        <div class="mb-md">
+        <div class="flex justify-between items-center mb-md gap-md">
           <input type="text" id="searchBox" class="input max-w-300" placeholder="Search by LED or airport code...">
+
+          <!-- CSV Import Button -->
+          <div class="flex gap-sm items-center">
+            <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
+            <button id="importCsvBtn" class="btn btn-secondary">
+              📄 Import CSV
+            </button>
+          </div>
         </div>
         <table class="led-table">
         <thead>
@@ -496,6 +505,113 @@
 
       // Save button
       document.getElementById('saveBtn').addEventListener('click', saveConfiguration);
+
+      // CSV import button
+      document.getElementById('importCsvBtn').addEventListener('click', () => {
+        document.getElementById('csvFileInput').click();
+      });
+
+      document.getElementById('csvFileInput').addEventListener('change', handleCSVImport);
+    }
+
+    // CSV Import Handler
+    async function handleCSVImport(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      // Reset file input for next import
+      e.target.value = '';
+
+      if (!file.name.endsWith('.csv')) {
+        showToast('Please select a CSV file', 'error');
+        return;
+      }
+
+      try {
+        const text = await file.text();
+        const lines = text.split(/\r?\n/).filter(line => line.trim());
+
+        if (lines.length === 0) {
+          showToast('CSV file is empty', 'error');
+          return;
+        }
+
+        let imported = 0;
+        let errors = [];
+        const newAirports = [...currentConfig.airports]; // Clone existing array
+
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (!line) continue;
+
+          // Parse CSV line (simple comma split - handles most cases)
+          const parts = line.split(',').map(p => p.trim());
+
+          if (parts.length < 2) {
+            errors.push(`Line ${i+1}: Invalid format (need index,code)`);
+            continue;
+          }
+
+          const index = parseInt(parts[0]);
+          const code = parts[1].toUpperCase();
+
+          // Validation
+          if (isNaN(index)) {
+            errors.push(`Line ${i+1}: Invalid index "${parts[0]}"`);
+            continue;
+          }
+
+          if (index < 0 || index >= 150) {
+            errors.push(`Line ${i+1}: Index ${index} out of range (0-149)`);
+            continue;
+          }
+
+          // Validate airport code format
+          if (!/^([A-Z0-9]{4}|NULL|BLACK|LIFR|IFR|MVFR|WVFR|VFR)$/.test(code)) {
+            errors.push(`Line ${i+1}: Invalid code "${code}"`);
+            continue;
+          }
+
+          newAirports[index] = code;
+          imported++;
+        }
+
+        // Only apply if at least one import succeeded
+        if (imported === 0) {
+          showToast('No valid entries found in CSV', 'error');
+          if (errors.length > 0) {
+            console.error('CSV Import Errors:', errors);
+            showToast(`Errors: ${errors.slice(0, 3).join(', ')}`, 'error', 8000);
+          }
+          return;
+        }
+
+        // Update LED count to highest index + 1
+        const highestIndex = Math.max(...newAirports.map((code, idx) =>
+          (code && code !== 'NULL') ? idx : -1
+        ));
+        const newNumLeds = Math.max(highestIndex + 1, currentConfig.numLeds);
+
+        // Update config
+        currentConfig.airports = newAirports;
+        currentConfig.numLeds = newNumLeds;
+        document.getElementById('numLeds').value = newNumLeds;
+
+        // Re-render table
+        renderLEDTable();
+
+        // Show success/warning message
+        if (errors.length > 0) {
+          showToast(`Imported ${imported} LEDs with ${errors.length} errors (check console)`, 'warning', 8000);
+          console.error('CSV Import Errors:', errors);
+        } else {
+          showToast(`Successfully imported ${imported} LED assignments`, 'success');
+        }
+
+      } catch (error) {
+        console.error('CSV import error:', error);
+        showToast(`Failed to import CSV: ${error.message}`, 'error');
+      }
     }
 
     // Save configuration
