@@ -660,16 +660,62 @@
       brightness: 20
     };
 
+    // Cache for config when modal opens
+    let cachedConfigForWizard = null;
+
+    /**
+     * Show wizard start modal
+     */
+    function showWizardStartModal(numLeds) {
+      const modal = document.getElementById('wizardStartModal');
+      const ledCountText = document.getElementById('wizardModalLedCount');
+      const continueLedCount = document.getElementById('wizardContinueLedCount');
+
+      // Update LED count displays
+      ledCountText.innerHTML = `You currently have <strong>${numLeds} LED${numLeds !== 1 ? 's' : ''}</strong> configured.`;
+      continueLedCount.textContent = numLeds;
+
+      modal.style.display = 'flex';
+    }
+
+    /**
+     * Hide wizard start modal
+     */
+    function hideWizardStartModal() {
+      const modal = document.getElementById('wizardStartModal');
+      modal.style.display = 'none';
+    }
+
     /**
      * Start the LED setup wizard
      */
-    async function startWizard() {
+    async function startWizard(continueFromExisting = false) {
       try {
+        // Build request body
+        const brightness = parseInt(document.getElementById('brightness').value) || 20;
+        let requestBody = {
+          brightness: brightness
+        };
+
+        // If continuing from existing, add airports array
+        if (continueFromExisting && cachedConfigForWizard) {
+          // Extract existing airports (only up to numLeds)
+          const existingAirports = cachedConfigForWizard.airports.slice(0, cachedConfigForWizard.numLeds);
+
+          // Validate airports array length (max 150 LEDs)
+          if (existingAirports.length > 150) {
+            showToast('Cannot start wizard: too many LEDs (max 150)', 'error');
+            return;
+          }
+
+          requestBody.airports = existingAirports;
+        }
+
         // Call backend to enter setup mode
         const response = await fetch('/setup/start', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({})
+          body: JSON.stringify(requestBody)
         });
 
         if (!response.ok) {
@@ -678,14 +724,25 @@
 
         const result = await response.json();
 
-        // Initialize wizard state
+        // Initialize wizard state based on mode
         wizardActive = true;
-        wizardState = {
-          numLeds: 1,
-          currentIndex: 0,
-          airports: [''],
-          brightness: parseInt(document.getElementById('brightness').value) || 20
-        };
+        if (continueFromExisting && cachedConfigForWizard) {
+          // Continue mode: Pre-fill with existing airports + empty slot for next LED
+          wizardState = {
+            numLeds: cachedConfigForWizard.numLeds + 1,
+            currentIndex: cachedConfigForWizard.numLeds,
+            airports: [...cachedConfigForWizard.airports.slice(0, cachedConfigForWizard.numLeds), ''],
+            brightness: brightness
+          };
+        } else {
+          // Start from scratch: Empty config
+          wizardState = {
+            numLeds: 1,
+            currentIndex: 0,
+            airports: [''],
+            brightness: brightness
+          };
+        }
 
         // Hide manual config, show wizard
         document.getElementById('manualLedConfig').style.display = 'none';
@@ -693,10 +750,15 @@
         document.getElementById('startWizardBtn').style.display = 'none';
         document.getElementById('saveBtn').style.display = 'none'; // Hide manual save button
 
-        // Render first LED row
+        // Render wizard rows
         renderWizardRows();
 
-        showToast('Wizard started! LED 0 is blinking orange.', 'success');
+        // Show appropriate success message
+        if (continueFromExisting) {
+          showToast(`Wizard started! Continuing from ${cachedConfigForWizard.numLeds} LEDs. LED ${cachedConfigForWizard.numLeds} is blinking orange.`, 'success');
+        } else {
+          showToast('Wizard started! LED 0 is blinking orange.', 'success');
+        }
       } catch (error) {
         console.error('Failed to start wizard:', error);
         showToast('Failed to start wizard. Check ESP8266 connection.', 'error');
@@ -976,8 +1038,67 @@
     document.addEventListener('DOMContentLoaded', () => {
       const startBtn = document.getElementById('startWizardBtn');
       if (startBtn) {
-        startBtn.addEventListener('click', startWizard);
+        startBtn.addEventListener('click', async () => {
+          try {
+            // Fetch current config to populate modal
+            const response = await fetch('/config');
+            if (!response.ok) {
+              throw new Error('Failed to fetch config');
+            }
+            cachedConfigForWizard = await response.json();
+
+            // Show modal with current LED count
+            showWizardStartModal(cachedConfigForWizard.numLeds);
+          } catch (error) {
+            console.error('Failed to load current config:', error);
+            showToast('Failed to load current config. Check ESP8266 connection.', 'error');
+          }
+        });
       }
+
+      // Wire up modal buttons
+      const startScratchBtn = document.getElementById('wizardStartScratchBtn');
+      if (startScratchBtn) {
+        startScratchBtn.addEventListener('click', () => {
+          hideWizardStartModal();
+          startWizard(false); // Start from scratch
+        });
+      }
+
+      const continueBtn = document.getElementById('wizardContinueBtn');
+      if (continueBtn) {
+        continueBtn.addEventListener('click', () => {
+          hideWizardStartModal();
+          startWizard(true); // Continue from existing
+        });
+      }
+
+      const cancelBtn = document.getElementById('wizardCancelBtn');
+      if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => {
+          hideWizardStartModal();
+        });
+      }
+
+      // Close modal on backdrop click
+      const modal = document.getElementById('wizardStartModal');
+      if (modal) {
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            hideWizardStartModal();
+          }
+        });
+      }
+
+      // Close modal on Escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          const modal = document.getElementById('wizardStartModal');
+          if (modal && modal.style.display === 'flex') {
+            hideWizardStartModal();
+          }
+        }
+      });
 
       const saveBtn = document.getElementById('wizardSaveBtn');
       if (saveBtn) {
@@ -986,5 +1107,27 @@
     });
 
   </script>
+
+  <!-- Wizard Start Modal -->
+  <div id="wizardStartModal" class="modal-overlay" style="display: none;">
+    <div class="modal-box">
+      <h2>Start LED Setup Wizard</h2>
+      <p id="wizardModalLedCount" class="wizard-modal-description">
+        You currently have <strong>0 LEDs</strong> configured.
+      </p>
+      <div class="wizard-modal-buttons">
+        <button id="wizardStartScratchBtn" class="btn btn-secondary">
+          Start from Scratch
+        </button>
+        <button id="wizardContinueBtn" class="btn btn-primary">
+          Continue from Existing (<span id="wizardContinueLedCount">0</span> LEDs)
+        </button>
+        <button id="wizardCancelBtn" class="btn btn-ghost">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>

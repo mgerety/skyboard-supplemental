@@ -69,6 +69,17 @@
   width: 100%;
 }
 
+.btn-ghost {
+  background-color: transparent;
+  color: var(--color-text-muted);
+  border: var(--border-width) solid var(--color-border);
+}
+
+.btn-ghost:hover {
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text);
+}
+
 /* FORM CONTROLS */
 
 .input,
@@ -254,7 +265,8 @@
   to { opacity: 1; }
 }
 
-.modal {
+.modal,
+.modal-box {
   position: relative;
   background-color: var(--color-bg);
   padding: var(--spacing-lg);
@@ -1165,6 +1177,37 @@ button.loading::after {
   }
 
   .wizard-buttons .btn {
+    width: 100%;
+  }
+}
+
+/* Wizard Start Modal */
+.wizard-modal-description {
+  margin: var(--spacing-md) 0;
+  color: var(--color-text);
+  font-size: var(--font-size-base);
+}
+
+.wizard-modal-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: var(--spacing-md);
+  justify-content: center;
+  margin-top: var(--spacing-lg);
+}
+
+.wizard-modal-buttons .btn {
+  flex: 1;
+  min-height: 48px; /* Touch target */
+}
+
+/* Responsive: Modal buttons stack on mobile */
+@media (max-width: 600px) {
+  .wizard-modal-buttons {
+    flex-direction: column;
+  }
+
+  .wizard-modal-buttons .btn {
     width: 100%;
   }
 }
