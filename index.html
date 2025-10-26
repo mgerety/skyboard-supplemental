@@ -190,6 +190,9 @@
 
       // Setup event listeners
       setupEventListeners();
+
+      // Check for crashed wizard session (do this AFTER config loads)
+      setTimeout(() => checkForCrashedWizardSession(), 500);
     });
 
     // Load airport database from ESP8266 LittleFS
@@ -663,6 +666,160 @@
     // Cache for config when modal opens
     let cachedConfigForWizard = null;
 
+    // ====================================================================
+    // WIZARD CRASH RECOVERY - localStorage Auto-Save
+    // ====================================================================
+    const WIZARD_STATE_KEY = 'skyboard_wizard_state';
+    const WIZARD_STATE_TIMESTAMP_KEY = 'skyboard_wizard_timestamp';
+
+    /**
+     * Save wizard state to localStorage (called after every change)
+     */
+    function saveWizardStateToLocalStorage() {
+      if (!wizardActive) return;
+
+      try {
+        const stateToSave = {
+          numLeds: wizardState.numLeds,
+          currentIndex: wizardState.currentIndex,
+          airports: wizardState.airports,
+          brightness: wizardState.brightness
+        };
+        localStorage.setItem(WIZARD_STATE_KEY, JSON.stringify(stateToSave));
+        localStorage.setItem(WIZARD_STATE_TIMESTAMP_KEY, Date.now().toString());
+        console.log('[Wizard] State auto-saved to localStorage:', stateToSave);
+      } catch (error) {
+        console.error('[Wizard] Failed to save state to localStorage:', error);
+      }
+    }
+
+    /**
+     * Load wizard state from localStorage (called on page load if crash detected)
+     */
+    function loadWizardStateFromLocalStorage() {
+      try {
+        const savedState = localStorage.getItem(WIZARD_STATE_KEY);
+        const savedTimestamp = localStorage.getItem(WIZARD_STATE_TIMESTAMP_KEY);
+
+        if (!savedState || !savedTimestamp) return null;
+
+        const age = Date.now() - parseInt(savedTimestamp);
+        const MAX_AGE = 24 * 60 * 60 * 1000; // 24 hours
+
+        if (age > MAX_AGE) {
+          console.log('[Wizard] Saved state too old, discarding');
+          clearWizardStateFromLocalStorage();
+          return null;
+        }
+
+        const state = JSON.parse(savedState);
+        console.log('[Wizard] Recovered state from localStorage:', state);
+        return state;
+      } catch (error) {
+        console.error('[Wizard] Failed to load state from localStorage:', error);
+        return null;
+      }
+    }
+
+    /**
+     * Clear wizard state from localStorage
+     */
+    function clearWizardStateFromLocalStorage() {
+      localStorage.removeItem(WIZARD_STATE_KEY);
+      localStorage.removeItem(WIZARD_STATE_TIMESTAMP_KEY);
+      console.log('[Wizard] Cleared saved state from localStorage');
+    }
+
+    /**
+     * Check for crashed wizard session on page load
+     */
+    function checkForCrashedWizardSession() {
+      const savedState = loadWizardStateFromLocalStorage();
+
+      if (savedState && savedState.numLeds > 0) {
+        // Show recovery modal
+        const modal = new Modal();
+        const modalContent = document.createElement('div');
+        modalContent.innerHTML = `
+          <p><strong>🔧 Wizard Session Recovery</strong></p>
+          <p>We detected an incomplete wizard session with <strong>${savedState.numLeds} LED${savedState.numLeds > 1 ? 's' : ''}</strong> configured.</p>
+          <p>Would you like to recover your progress?</p>
+          <div style="display: flex; gap: 12px; margin-top: 24px;">
+            <button id="recoveryDiscardBtn" class="btn btn-secondary" style="flex: 1;">Discard</button>
+            <button id="recoveryRecoverBtn" class="btn btn-primary" style="flex: 1;">✓ Recover</button>
+          </div>
+        `;
+
+        modal.show('Recover Wizard Session', modalContent);
+
+        document.getElementById('recoveryDiscardBtn').onclick = () => {
+          clearWizardStateFromLocalStorage();
+          modal.hide();
+          showToast('Wizard session discarded', 'info');
+        };
+
+        document.getElementById('recoveryRecoverBtn').onclick = async () => {
+          modal.hide();
+          await recoverWizardSession(savedState);
+        };
+      }
+    }
+
+    /**
+     * Recover wizard session from saved state
+     */
+    async function recoverWizardSession(savedState) {
+      try {
+        // First, try to reset ESP8266 setup state
+        showToast('Recovering wizard session...', 'info', 2000);
+
+        // Call /setup/start to reset ESP8266 state (it might be stuck)
+        const brightness = parseInt(document.getElementById('brightness').value) || savedState.brightness || 20;
+        const response = await fetch('/setup/start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            brightness: brightness,
+            airports: savedState.airports.slice(0, savedState.numLeds)
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to restart setup mode');
+        }
+
+        // Restore wizard state
+        wizardActive = true;
+        wizardState = {
+          numLeds: savedState.numLeds,
+          currentIndex: savedState.currentIndex,
+          airports: savedState.airports,
+          brightness: savedState.brightness
+        };
+
+        // Show wizard UI
+        document.getElementById('manualLedConfig').style.display = 'none';
+        document.getElementById('wizardContainer').style.display = 'block';
+        document.getElementById('startWizardBtn').style.display = 'none';
+        document.getElementById('saveBtn').style.display = 'none';
+
+        // Render wizard rows
+        renderWizardRows();
+
+        // Focus last input
+        const lastInput = document.getElementById(`wizard-input-${wizardState.currentIndex}`);
+        if (lastInput) {
+          lastInput.focus();
+        }
+
+        showToast(`✓ Recovered ${savedState.numLeds} LED${savedState.numLeds > 1 ? 's' : ''}! Continue where you left off.`, 'success', 5000);
+      } catch (error) {
+        console.error('[Wizard] Recovery failed:', error);
+        showToast('Recovery failed. Starting fresh wizard session.', 'error');
+        clearWizardStateFromLocalStorage();
+      }
+    }
+
     /**
      * Show wizard start modal
      */
@@ -744,6 +901,9 @@
           };
         }
 
+        // CRITICAL: Save initial state to localStorage
+        saveWizardStateToLocalStorage();
+
         // Hide manual config, show wizard
         document.getElementById('manualLedConfig').style.display = 'none';
         document.getElementById('wizardContainer').style.display = 'block';
@@ -818,6 +978,8 @@
       input.addEventListener('input', (e) => {
         wizardState.airports[ledIndex] = e.target.value.trim().toUpperCase();
         handleAutocompleteInput(e);
+        // Auto-save after every keystroke
+        saveWizardStateToLocalStorage();
       });
 
       // Autocomplete focus/blur handlers
@@ -876,6 +1038,9 @@
         wizardState.currentIndex = wizardState.numLeds - 1;
         wizardState.airports[wizardState.currentIndex] = ''; // New empty slot
 
+        // CRITICAL: Save to localStorage BEFORE network call
+        saveWizardStateToLocalStorage();
+
         // Send update to backend
         const response = await fetch('/setup/update', {
           method: 'POST',
@@ -905,6 +1070,8 @@
         wizardState.numLeds -= 1;
         wizardState.currentIndex = wizardState.numLeds - 1;
         wizardState.airports.pop();
+        // Re-save reverted state
+        saveWizardStateToLocalStorage();
       }
     }
 
@@ -988,6 +1155,9 @@
 
         showToast(`Configuration saved! ${wizardState.numLeds} LEDs configured.`, 'success', 5000);
 
+        // CRITICAL: Clear localStorage since wizard completed successfully
+        clearWizardStateFromLocalStorage();
+
         // Exit wizard mode
         exitWizard();
 
@@ -1012,6 +1182,9 @@
         airports: [],
         brightness: 20
       };
+
+      // Clear localStorage (wizard is over)
+      clearWizardStateFromLocalStorage();
 
       // Hide wizard, show manual config
       document.getElementById('wizardContainer').style.display = 'none';
