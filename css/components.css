@@ -861,16 +861,14 @@ button.loading::after {
   outline-offset: 2px;
 }
 
+/* Story 3.4: Changed to fixed positioning for viewport-based positioning */
 .autocomplete-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
+  position: fixed;
+  /* top, bottom, left, right set dynamically via JavaScript */
   background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--border-radius);
   box-shadow: var(--box-shadow);
-  max-height: 300px;
   overflow-y: auto;
   z-index: 100;
   display: none;
@@ -880,6 +878,28 @@ button.loading::after {
   display: block;
 }
 
+/* Story 3.4: Responsive max heights for different screen sizes */
+/* Desktop */
+@media (min-width: 901px) {
+  .autocomplete-dropdown {
+    max-height: 300px;
+  }
+}
+
+/* Tablet */
+@media (min-width: 600px) and (max-width: 900px) {
+  .autocomplete-dropdown {
+    max-height: 250px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 599px) {
+  .autocomplete-dropdown {
+    max-height: 200px;
+  }
+}
+
 .autocomplete-item {
   padding: var(--spacing-sm);
   cursor: pointer;
@@ -887,7 +907,20 @@ button.loading::after {
   gap: var(--spacing-sm);
   align-items: center;
   border-bottom: 1px solid var(--color-border);
-  min-height: 44px; /* Touch-friendly */
+  min-height: 44px; /* Touch-friendly - base size */
+}
+
+/* Story 3.4: Mobile touch targets - 48px minimum for comfortable tapping */
+@media (max-width: 600px) {
+  .autocomplete-item {
+    min-height: 48px;
+    padding: 12px 16px; /* Larger padding for comfortable tapping */
+  }
+
+  /* Buttons also need 48px minimum on mobile */
+  .btn, button {
+    min-height: 48px;
+  }
 }
 
 .autocomplete-item:last-child {

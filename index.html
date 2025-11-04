@@ -430,6 +430,73 @@
       return matches.slice(0, 10);
     }
 
+    /**
+     * Calculate dropdown positioning based on available viewport space
+     * Story 3.4: Smart dropdown positioning (above/below)
+     * @param {HTMLElement} inputElement - The input element
+     * @returns {Object} - { position: 'below' | 'above', spaceBelow, spaceAbove }
+     */
+    function calculateDropdownPosition(inputElement) {
+      const inputRect = inputElement.getBoundingClientRect();
+      const dropdownHeight = 300; // Estimated max height (matches CSS)
+
+      const spaceBelow = window.innerHeight - inputRect.bottom;
+      const spaceAbove = inputRect.top;
+
+      // Check if mobile and keyboard might be visible
+      const isMobile = window.innerWidth < 600;
+      const keyboardLikelyVisible = isMobile && window.visualViewport
+        ? window.visualViewport.height < window.innerHeight - 100
+        : false;
+
+      // Decide position: prefer above if keyboard visible or insufficient space below
+      let position = 'below'; // default
+      if (keyboardLikelyVisible || (spaceBelow < dropdownHeight && spaceAbove > spaceBelow)) {
+        position = 'above';
+      }
+
+      return { position, spaceBelow, spaceAbove };
+    }
+
+    /**
+     * Apply dropdown positioning styles
+     * Story 3.4: Smart dropdown positioning
+     * @param {HTMLElement} dropdown - The dropdown element
+     * @param {HTMLElement} inputElement - The input element
+     * @param {string} position - 'above' or 'below'
+     */
+    function applyDropdownPosition(dropdown, inputElement, position) {
+      const inputRect = inputElement.getBoundingClientRect();
+      const isMobile = window.innerWidth < 600;
+
+      // Clear previous positioning classes
+      dropdown.classList.remove('position-above', 'position-below');
+      dropdown.classList.add(`position-${position}`);
+
+      if (position === 'above') {
+        // Position above input
+        dropdown.style.bottom = `${window.innerHeight - inputRect.top + 4}px`;
+        dropdown.style.top = 'auto';
+      } else {
+        // Position below input (default)
+        dropdown.style.top = `${inputRect.bottom + 4}px`;
+        dropdown.style.bottom = 'auto';
+      }
+
+      // Horizontal positioning
+      if (isMobile) {
+        // Story 3.4: Mobile - full width with 16px padding
+        dropdown.style.left = '16px';
+        dropdown.style.right = '16px';
+        dropdown.style.width = 'auto';
+      } else {
+        // Desktop - align with input
+        dropdown.style.left = `${inputRect.left}px`;
+        dropdown.style.width = `${inputRect.width}px`;
+        dropdown.style.right = 'auto';
+      }
+    }
+
     // Show autocomplete dropdown
     function showAutocomplete(ledIndex, matches, inputEl) {
       const dropdown = document.querySelector(`.autocomplete-dropdown[data-led="${ledIndex}"]`);
@@ -439,6 +506,9 @@
         dropdown.classList.add('show');
         // Story 3.3: Set ARIA expanded state
         dropdown.setAttribute('aria-expanded', 'true');
+        // Story 3.4: Apply smart positioning (even for no results)
+        const positionInfo = calculateDropdownPosition(inputEl);
+        applyDropdownPosition(dropdown, inputEl, positionInfo.position);
         return;
       }
 
@@ -461,6 +531,10 @@
       dropdown.classList.add('show');
       // Story 3.3: Set ARIA expanded state
       dropdown.setAttribute('aria-expanded', 'true');
+
+      // Story 3.4: Apply smart positioning
+      const positionInfo = calculateDropdownPosition(inputEl);
+      applyDropdownPosition(dropdown, inputEl, positionInfo.position);
     }
 
     // Hide autocomplete dropdown
@@ -519,7 +593,10 @@
         // Determine next input index
         if (currentIndex < allInputs.length - 1) {
           // Not last field - move to next
-          allInputs[currentIndex + 1].focus();
+          const nextInput = allInputs[currentIndex + 1];
+          // Story 3.4: Auto-scroll to next input
+          nextInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setTimeout(() => nextInput.focus(), 100);
         } else {
           // Last field - handle based on mode
           if (wizardActive) {
@@ -562,7 +639,10 @@
 
         // Advance to next field (same logic as Tab)
         if (currentIndex < allInputs.length - 1) {
-          allInputs[currentIndex + 1].focus();
+          const nextInput = allInputs[currentIndex + 1];
+          // Story 3.4: Auto-scroll to next input
+          nextInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setTimeout(() => nextInput.focus(), 100);
         } else {
           // Last field behavior
           if (wizardActive) {
@@ -1408,7 +1488,13 @@
         // Focus new input
         const newInput = document.getElementById(`wizard-input-${wizardState.currentIndex}`);
         if (newInput) {
-          newInput.focus();
+          // Story 3.4: Auto-scroll new input into view (smooth, centered)
+          newInput.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+          });
+          // Focus after scroll animation starts
+          setTimeout(() => newInput.focus(), 300);
         }
 
         showToast(`LED ${ledIndex} configured. LED ${wizardState.currentIndex} is now blinking.`, 'success');
@@ -1639,6 +1725,46 @@
       console.error('Unhandled promise rejection:', event.reason);
       hideLoadingIndicator();
     });
+
+    /**
+     * Story 3.4: Handle window resize events
+     * Reposition any open autocomplete dropdowns when window is resized
+     */
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        // Find any open dropdowns and reposition them
+        document.querySelectorAll('.autocomplete-dropdown.show').forEach(dropdown => {
+          const ledIndex = dropdown.dataset.led;
+          const input = document.querySelector(`.airport-input[data-led="${ledIndex}"]`);
+          if (input) {
+            const positionInfo = calculateDropdownPosition(input);
+            applyDropdownPosition(dropdown, input, positionInfo.position);
+          }
+        });
+      }, 100); // Debounce: wait 100ms after resize stops
+    });
+
+    /**
+     * Story 3.4: Optional - Detect on-screen keyboard on mobile using VisualViewport API
+     */
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', () => {
+        const keyboardVisible = window.visualViewport.height < window.innerHeight - 100;
+
+        if (keyboardVisible) {
+          // Force dropdowns above inputs when keyboard is visible
+          document.querySelectorAll('.autocomplete-dropdown.show').forEach(dropdown => {
+            const ledIndex = dropdown.dataset.led;
+            const input = document.querySelector(`.airport-input[data-led="${ledIndex}"]`);
+            if (input) {
+              applyDropdownPosition(dropdown, input, 'above');
+            }
+          });
+        }
+      });
+    }
 
   </script>
 
