@@ -132,11 +132,14 @@
         <div class="flex justify-between items-center mb-md gap-md">
           <input type="text" id="searchBox" class="input max-w-300" placeholder="Search by LED or airport code...">
 
-          <!-- CSV Import Button -->
+          <!-- CSV Import/Export Buttons -->
           <div class="flex gap-sm items-center">
             <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
             <button id="importCsvBtn" class="btn btn-secondary">
               📄 Import CSV
+            </button>
+            <button id="exportCsvBtn" class="btn btn-secondary">
+              📥 Download CSV
             </button>
           </div>
         </div>
@@ -827,6 +830,9 @@
       });
 
       document.getElementById('csvFileInput').addEventListener('change', handleCSVImport);
+
+      // CSV export button - Story 3.8
+      document.getElementById('exportCsvBtn').addEventListener('click', exportConfigurationAsCSV);
     }
 
     // CSV Import Handler
@@ -927,6 +933,52 @@
         console.error('CSV import error:', error);
         showToast(`Failed to import CSV: ${error.message}`, 'error');
       }
+    }
+
+    // CSV Export Handler - Story 3.8
+    function exportConfigurationAsCSV() {
+      // Check if any LEDs are configured
+      if (!currentConfig || !currentConfig.airports || currentConfig.airports.length === 0) {
+        showToast('No LEDs configured to download', 'warning');
+        return;
+      }
+
+      // Generate CSV lines (only include configured LEDs, filter out empty/undefined)
+      const csvLines = currentConfig.airports
+        .map((code, index) => `${index},${code}`)
+        .filter(line => {
+          const parts = line.split(',');
+          const code = parts[1];
+          return code && code !== '' && code !== 'undefined';
+        });
+
+      if (csvLines.length === 0) {
+        showToast('No LEDs configured to download', 'warning');
+        return;
+      }
+
+      const csvContent = csvLines.join('\n');
+
+      // Create blob and download link
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+
+      // Generate filename with current date (YYYY-MM-DD)
+      const date = new Date().toISOString().split('T')[0];
+      const filename = `skyboard-config-${date}.csv`;
+
+      // Create temporary download link and trigger click
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+
+      // Cleanup
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showToast(`Configuration exported to ${filename}`, 'success');
     }
 
     // Save configuration
