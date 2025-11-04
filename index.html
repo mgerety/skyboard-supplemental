@@ -338,12 +338,26 @@
         tr.appendChild(tdNum);
 
         // Airport code (editable with autocomplete)
+        // Story 3.3: Added ARIA attributes for accessibility
         const tdAirport = document.createElement('td');
         tdAirport.innerHTML = `
           <div class="airport-input-wrapper">
-            <input type="text" class="airport-input" data-led="${i}" value="${assignment}"
-                   placeholder="Type to search..." autocapitalize="characters">
-            <div class="autocomplete-dropdown" data-led="${i}"></div>
+            <input type="text"
+                   class="airport-input"
+                   data-led="${i}"
+                   value="${assignment}"
+                   placeholder="Type to search..."
+                   autocapitalize="characters"
+                   aria-label="LED ${i} airport code"
+                   aria-autocomplete="list"
+                   aria-controls="autocomplete-dropdown-${i}"
+                   role="combobox"
+                   aria-expanded="false">
+            <div class="autocomplete-dropdown"
+                 data-led="${i}"
+                 id="autocomplete-dropdown-${i}"
+                 role="listbox"
+                 aria-expanded="false"></div>
           </div>
         `;
         tr.appendChild(tdAirport);
@@ -367,6 +381,8 @@
         input.addEventListener('blur', (e) => {
           setTimeout(() => hideAutocomplete(e.target.dataset.led), 200);
         });
+        // Story 3.3: Add keyboard navigation event listener
+        input.addEventListener('keydown', handleKeyboardNavigation);
       });
     }
 
@@ -421,19 +437,30 @@
       if (matches.length === 0) {
         dropdown.innerHTML = '<div class="autocomplete-no-results">No airports found</div>';
         dropdown.classList.add('show');
+        // Story 3.3: Set ARIA expanded state
+        dropdown.setAttribute('aria-expanded', 'true');
         return;
       }
 
       const query = inputEl.value.toUpperCase();
-      dropdown.innerHTML = matches.map(a => {
+      // Story 3.3: Add data-code and unique IDs for keyboard navigation and ARIA
+      dropdown.innerHTML = matches.map((a, idx) => {
         const displayName = a.name.length > 35 ? a.name.substring(0, 32) + '...' : a.name;
-        return `<div class="autocomplete-item" onclick="selectAirport(${ledIndex}, '${a.code}')">
+        const itemId = `autocomplete-led${ledIndex}-item${idx}`;
+        return `<div class="autocomplete-item"
+                     id="${itemId}"
+                     data-code="${a.code}"
+                     role="option"
+                     aria-selected="false"
+                     onclick="selectAirport(${ledIndex}, '${a.code}')">
           <span class="autocomplete-code">${a.code}</span>
           <span class="autocomplete-name">${displayName}</span>
         </div>`;
       }).join('');
 
       dropdown.classList.add('show');
+      // Story 3.3: Set ARIA expanded state
+      dropdown.setAttribute('aria-expanded', 'true');
     }
 
     // Hide autocomplete dropdown
@@ -441,6 +468,8 @@
       const dropdown = document.querySelector(`.autocomplete-dropdown[data-led="${ledIndex}"]`);
       if (dropdown) {
         dropdown.classList.remove('show');
+        // Story 3.3: Set ARIA expanded state
+        dropdown.setAttribute('aria-expanded', 'false');
       }
     }
 
@@ -458,6 +487,190 @@
       }
 
       hideAutocomplete(ledIndex);
+    }
+
+    // Story 3.3: Keyboard Navigation for Airport Inputs
+    // Handles Tab, Shift+Tab, Enter, Arrow keys, and Escape for airport inputs
+
+    /**
+     * Handle keyboard navigation in airport inputs
+     * Story 3.3: Keyboard Navigation for Airport Grid
+     * @param {KeyboardEvent} event - Keyboard event
+     */
+    function handleKeyboardNavigation(event) {
+      const input = event.target;
+      const ledIndex = parseInt(input.dataset.led);
+      const dropdown = document.querySelector(`.autocomplete-dropdown[data-led="${ledIndex}"]`);
+      const isDropdownOpen = dropdown && dropdown.classList.contains('show');
+
+      // Get all airport inputs (use class selector to work for both manual and wizard modes)
+      const allInputs = Array.from(document.querySelectorAll('.airport-input'));
+      const currentIndex = allInputs.indexOf(input);
+
+      // Tab key (without Shift) - Navigate to next input
+      if (event.key === 'Tab' && !event.shiftKey) {
+        event.preventDefault();
+
+        if (isDropdownOpen) {
+          // Close dropdown if open
+          hideAutocomplete(ledIndex);
+        }
+
+        // Determine next input index
+        if (currentIndex < allInputs.length - 1) {
+          // Not last field - move to next
+          allInputs[currentIndex + 1].focus();
+        } else {
+          // Last field - handle based on mode
+          if (wizardActive) {
+            // Wizard mode: This is handled by the wizard's "Next" button logic
+            // Don't auto-create here, as wizard already has that behavior
+            // Just wrap to first input for now
+            allInputs[0].focus();
+          } else {
+            // Manual config mode: Wrap to first input
+            allInputs[0].focus();
+          }
+        }
+      }
+
+      // Shift+Tab - Navigate to previous input
+      else if (event.key === 'Tab' && event.shiftKey) {
+        event.preventDefault();
+
+        if (isDropdownOpen) {
+          hideAutocomplete(ledIndex);
+        }
+
+        const prevIndex = currentIndex === 0 ? allInputs.length - 1 : currentIndex - 1;
+        allInputs[prevIndex].focus();
+      }
+
+      // Enter key - Select autocomplete item and advance
+      else if (event.key === 'Enter') {
+        event.preventDefault();
+
+        if (isDropdownOpen) {
+          const selectedItem = dropdown.querySelector('.autocomplete-item.selected');
+          if (selectedItem) {
+            // Get code from data attribute
+            const code = selectedItem.dataset.code;
+            selectAirport(ledIndex, code);
+          }
+          hideAutocomplete(ledIndex);
+        }
+
+        // Advance to next field (same logic as Tab)
+        if (currentIndex < allInputs.length - 1) {
+          allInputs[currentIndex + 1].focus();
+        } else {
+          // Last field behavior
+          if (wizardActive) {
+            allInputs[0].focus();
+          } else {
+            allInputs[0].focus();
+          }
+        }
+      }
+
+      // Arrow Down - Open or navigate autocomplete
+      else if (event.key === 'ArrowDown') {
+        event.preventDefault();
+
+        if (!isDropdownOpen) {
+          // Open autocomplete if closed
+          handleAutocompleteInput({ target: input });
+        } else {
+          // Navigate down in autocomplete
+          moveAutocompleteSelection(ledIndex, 'down');
+        }
+      }
+
+      // Arrow Up - Navigate autocomplete
+      else if (event.key === 'ArrowUp' && isDropdownOpen) {
+        event.preventDefault();
+        moveAutocompleteSelection(ledIndex, 'up');
+      }
+
+      // Escape - Close autocomplete
+      else if (event.key === 'Escape') {
+        if (isDropdownOpen) {
+          event.preventDefault();
+          hideAutocomplete(ledIndex);
+          clearAutocompleteSelection(ledIndex);
+        }
+      }
+    }
+
+    /**
+     * Move selection in autocomplete dropdown
+     * Story 3.3: Arrow key navigation within autocomplete
+     * @param {number} ledIndex - LED index
+     * @param {string} direction - 'up' or 'down'
+     */
+    function moveAutocompleteSelection(ledIndex, direction) {
+      const dropdown = document.querySelector(`.autocomplete-dropdown[data-led="${ledIndex}"]`);
+      if (!dropdown) return;
+
+      const items = Array.from(dropdown.querySelectorAll('.autocomplete-item'));
+      if (items.length === 0) return;
+
+      // Find currently selected item
+      let currentIndex = -1;
+      items.forEach((item, i) => {
+        if (item.classList.contains('selected')) {
+          currentIndex = i;
+        }
+      });
+
+      // Remove previous selection
+      if (currentIndex >= 0) {
+        items[currentIndex].classList.remove('selected');
+        items[currentIndex].removeAttribute('aria-selected');
+      }
+
+      // Calculate new index
+      if (direction === 'down') {
+        currentIndex = currentIndex < items.length - 1 ? currentIndex + 1 : 0;
+      } else {
+        currentIndex = currentIndex > 0 ? currentIndex - 1 : items.length - 1;
+      }
+
+      // Add new selection
+      items[currentIndex].classList.add('selected');
+      items[currentIndex].setAttribute('aria-selected', 'true');
+      items[currentIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+
+      // Update aria-activedescendant on input
+      const input = document.querySelector(`.airport-input[data-led="${ledIndex}"]`);
+      if (input) {
+        const itemId = items[currentIndex].id;
+        if (itemId) {
+          input.setAttribute('aria-activedescendant', itemId);
+        }
+      }
+    }
+
+    /**
+     * Clear autocomplete selection
+     * Story 3.3: Remove keyboard selection highlight
+     * @param {number} ledIndex - LED index
+     */
+    function clearAutocompleteSelection(ledIndex) {
+      const dropdown = document.querySelector(`.autocomplete-dropdown[data-led="${ledIndex}"]`);
+      if (!dropdown) return;
+
+      const items = dropdown.querySelectorAll('.autocomplete-item');
+      items.forEach(item => {
+        item.classList.remove('selected');
+        item.removeAttribute('aria-selected');
+      });
+
+      // Clear aria-activedescendant
+      const input = document.querySelector(`.airport-input[data-led="${ledIndex}"]`);
+      if (input) {
+        input.removeAttribute('aria-activedescendant');
+      }
     }
 
     // Setup event listeners
@@ -1082,6 +1295,7 @@
       const inputWrapper = document.createElement('div');
       inputWrapper.className = 'airport-input-wrapper';
 
+      // Story 3.3: Added ARIA attributes and keyboard navigation for wizard inputs
       const input = document.createElement('input');
       input.type = 'text';
       input.id = `wizard-input-${ledIndex}`;
@@ -1091,11 +1305,19 @@
       input.value = wizardState.airports[ledIndex] || '';
       input.autocomplete = 'off';
       input.autocapitalize = 'characters';
+      input.setAttribute('aria-label', `LED ${ledIndex} airport code`);
+      input.setAttribute('aria-autocomplete', 'list');
+      input.setAttribute('aria-controls', `wizard-autocomplete-${ledIndex}`);
+      input.setAttribute('role', 'combobox');
+      input.setAttribute('aria-expanded', 'false');
 
       // Autocomplete dropdown
       const dropdown = document.createElement('div');
       dropdown.className = 'autocomplete-dropdown';
       dropdown.dataset.led = ledIndex;
+      dropdown.id = `wizard-autocomplete-${ledIndex}`;
+      dropdown.setAttribute('role', 'listbox');
+      dropdown.setAttribute('aria-expanded', 'false');
 
       inputWrapper.appendChild(input);
       inputWrapper.appendChild(dropdown);
@@ -1113,6 +1335,8 @@
       input.addEventListener('blur', (e) => {
         setTimeout(() => hideAutocomplete(ledIndex), 200);
       });
+      // Story 3.3: Add keyboard navigation to wizard inputs
+      input.addEventListener('keydown', handleKeyboardNavigation);
 
       // Next button (only on the last LED)
       const nextBtn = document.createElement('button');

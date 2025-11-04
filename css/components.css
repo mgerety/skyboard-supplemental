@@ -855,9 +855,10 @@ button.loading::after {
   text-transform: uppercase;
 }
 
+/* Story 3.3: Focus indicator with 2px offset per AC6 */
 .airport-input:focus {
   outline: 2px solid var(--color-accent);
-  outline-offset: 1px;
+  outline-offset: 2px;
 }
 
 .autocomplete-dropdown {
@@ -895,6 +896,18 @@ button.loading::after {
 
 .autocomplete-item:hover {
   background: var(--color-input-bg);
+}
+
+/* Story 3.3: Keyboard navigation selected item styling */
+.autocomplete-item.selected {
+  background-color: var(--color-accent);
+  color: white;
+}
+
+/* Ensure hover doesn't override keyboard selection */
+.autocomplete-item.selected:hover {
+  background-color: var(--color-accent);
+  color: white;
 }
 
 .autocomplete-no-results {
