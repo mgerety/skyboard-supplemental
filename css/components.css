@@ -861,10 +861,10 @@ button.loading::after {
   outline-offset: 2px;
 }
 
-/* Story 3.4: Keep absolute positioning within wrapper, set top/bottom via JS for smart positioning */
+/* Story 3.4: Absolute positioning within wrapper with smart above/below logic */
 .autocomplete-dropdown {
   position: absolute;
-  /* top, bottom set dynamically via JavaScript for smart positioning */
+  top: calc(100% + 4px); /* Default below input, overridden by JS if needed */
   left: 0;
   right: 0;
   background: var(--color-bg);
