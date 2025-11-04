@@ -861,16 +861,18 @@ button.loading::after {
   outline-offset: 2px;
 }
 
-/* Story 3.4: Changed to fixed positioning for viewport-based positioning */
+/* Story 3.4: Keep absolute positioning within wrapper, set top/bottom via JS for smart positioning */
 .autocomplete-dropdown {
-  position: fixed;
-  /* top, bottom, left, right set dynamically via JavaScript */
+  position: absolute;
+  /* top, bottom set dynamically via JavaScript for smart positioning */
+  left: 0;
+  right: 0;
   background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--border-radius);
   box-shadow: var(--box-shadow);
   overflow-y: auto;
-  z-index: 100;
+  z-index: 1000;
   display: none;
 }
 
@@ -897,6 +899,8 @@ button.loading::after {
 @media (max-width: 599px) {
   .autocomplete-dropdown {
     max-height: 200px;
+    /* Allow dropdown to extend beyond wrapper on mobile for 16px padding */
+    min-width: calc(100vw - 32px);
   }
 }
 

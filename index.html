@@ -466,34 +466,48 @@
      * @param {string} position - 'above' or 'below'
      */
     function applyDropdownPosition(dropdown, inputElement, position) {
-      const inputRect = inputElement.getBoundingClientRect();
       const isMobile = window.innerWidth < 600;
 
       // Clear previous positioning classes
       dropdown.classList.remove('position-above', 'position-below');
       dropdown.classList.add(`position-${position}`);
 
+      // With position: absolute, positioning is relative to the wrapper
       if (position === 'above') {
-        // Position above input
-        dropdown.style.bottom = `${window.innerHeight - inputRect.top + 4}px`;
+        // Position above input (use negative value to go above)
+        dropdown.style.bottom = 'calc(100% + 4px)';
         dropdown.style.top = 'auto';
       } else {
         // Position below input (default)
-        dropdown.style.top = `${inputRect.bottom + 4}px`;
+        dropdown.style.top = 'calc(100% + 4px)';
         dropdown.style.bottom = 'auto';
       }
 
-      // Horizontal positioning
+      // Horizontal positioning for mobile
       if (isMobile) {
-        // Story 3.4: Mobile - full width with 16px padding
-        dropdown.style.left = '16px';
-        dropdown.style.right = '16px';
-        dropdown.style.width = 'auto';
+        // Story 3.4: Mobile - add padding from edges
+        // Since we're position: absolute within wrapper, use negative margins
+        const inputRect = inputElement.getBoundingClientRect();
+        const viewportLeft = inputRect.left;
+
+        // If input is too close to edge, adjust
+        if (viewportLeft < 16) {
+          dropdown.style.left = `-${viewportLeft - 16}px`;
+        } else {
+          dropdown.style.left = '0';
+        }
+
+        // Calculate right position
+        const viewportRight = window.innerWidth - inputRect.right;
+        if (viewportRight < 16) {
+          dropdown.style.right = `-${viewportRight - 16}px`;
+        } else {
+          dropdown.style.right = '0';
+        }
       } else {
-        // Desktop - align with input
-        dropdown.style.left = `${inputRect.left}px`;
-        dropdown.style.width = `${inputRect.width}px`;
-        dropdown.style.right = 'auto';
+        // Desktop - full width of input
+        dropdown.style.left = '0';
+        dropdown.style.right = '0';
       }
     }
 
