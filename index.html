@@ -1046,41 +1046,51 @@
       }
     }
 
-    // Show toast notification (simple implementation without component library)
-    function showToast(message, type = 'info', duration = 8000) {
-      const toast = document.createElement('div');
-      toast.className = `toast toast-${type}`;
-      toast.textContent = message;
-      toast.style.cssText = `
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        padding: 16px;
-        border-radius: 6px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        max-width: 300px;
-        z-index: 10000;
-        background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : type === 'warning' ? '#ffc107' : '#0066cc'};
-        color: white;
-        font-size: 14px;
-        cursor: pointer;
-      `;
+    // Story 3.6: Updated toast notifications with structured HTML, durations, and hideToast()
+    let toastTimeoutId = null;  // Track timeout for manual dismiss
 
-      // Click to dismiss
-      toast.addEventListener('click', () => {
-        if (toast.parentNode) {
-          toast.parentNode.removeChild(toast);
-        }
-      });
+    function showToast(message, type = 'success', duration = null) {
+      const toast = document.getElementById('toast');
 
-      document.body.appendChild(toast);
+      // For compatibility: single-arg call (message) or title/message pattern
+      let title = '';
+      let msg = message;
 
-      // Auto-dismiss after duration
-      setTimeout(() => {
-        if (toast.parentNode) {
-          toast.parentNode.removeChild(toast);
-        }
+      // If message contains ":", split into title and message
+      if (message && message.includes(':')) {
+        const parts = message.split(':');
+        title = parts[0].trim();
+        msg = parts.slice(1).join(':').trim();
+      }
+
+      document.getElementById('toastTitle').textContent = title || (type === 'success' ? 'Success' : type === 'error' ? 'Error' : 'Info');
+      document.getElementById('toastMessage').textContent = msg;
+
+      toast.className = `toast ${type}`;
+      toast.classList.add('show');
+
+      // Clear existing timeout if any
+      if (toastTimeoutId) {
+        clearTimeout(toastTimeoutId);
+      }
+
+      // Story 3.6: Different durations for error vs success (allow override)
+      if (duration === null) {
+        duration = type === 'error' ? 7000 : 5000;
+      }
+
+      toastTimeoutId = setTimeout(() => {
+        hideToast();
       }, duration);
+    }
+
+    function hideToast() {
+      const toast = document.getElementById('toast');
+      toast.classList.remove('show');
+      if (toastTimeoutId) {
+        clearTimeout(toastTimeoutId);
+        toastTimeoutId = null;
+      }
     }
 
     // ====================================================================
@@ -1801,6 +1811,13 @@
         </button>
       </div>
     </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION - Story 3.6: Added close button and ARIA label -->
+  <div id="toast" class="toast">
+    <button class="toast-close" onclick="hideToast()" aria-label="Close notification">&times;</button>
+    <div class="toast-title" id="toastTitle"></div>
+    <div class="toast-message" id="toastMessage"></div>
   </div>
 
 </body>
