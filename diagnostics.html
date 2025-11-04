@@ -411,19 +411,27 @@
 
         async function forceRefresh() {
             const btn = document.getElementById('refreshBtn');
-            btn.classList.add('loading');
+
+            // Story 3.2: Use loading overlay instead of button animation
             btn.disabled = true;
+            showLoadingIndicator('Refreshing weather data...');
 
-            const result = await callForceRefresh();
+            try {
+                const result = await callForceRefresh();
 
-            btn.classList.remove('loading');
-            btn.disabled = false;
+                hideLoadingIndicator();
+                btn.disabled = false;
 
-            if (result.success) {
-                showToast('Refresh complete', 'Weather data updated successfully', 'success');
-                await refreshLEDTable();
-            } else {
-                showToast('Refresh failed', result.error || 'Unknown error', 'error');
+                if (result.success) {
+                    showToast('Refresh complete', 'Weather data updated successfully', 'success');
+                    await refreshLEDTable();
+                } else {
+                    showToast('Refresh failed', result.error || 'Unknown error', 'error');
+                }
+            } catch (error) {
+                hideLoadingIndicator();
+                btn.disabled = false;
+                showToast('Refresh failed', error.message || 'Unknown error', 'error');
             }
         }
 
@@ -451,6 +459,17 @@
         // ===== START APPLICATION =====
 
         window.onload = init;
+
+        // Story 3.2: Global error handler to prevent stuck loading states
+        window.addEventListener('error', (event) => {
+            console.error('Global error caught:', event.error);
+            hideLoadingIndicator();
+        });
+
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error('Unhandled promise rejection:', event.reason);
+            hideLoadingIndicator();
+        });
     </script>
 </body>
 </html>

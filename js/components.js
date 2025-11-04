@@ -229,6 +229,44 @@ class LoadingSpinner {
 }
 
 /**
+ * Loading Indicator Overlay Component
+ * Shows full-screen loading overlay with spinner and message
+ * Story 3.2: Universal Loading Indicator
+ */
+let loadingOverlay = null; // Cached DOM reference for reuse
+
+/**
+ * Show loading indicator overlay
+ * @param {string} message - Loading message (default: "Loading...")
+ */
+function showLoadingIndicator(message = 'Loading...') {
+  if (!loadingOverlay) {
+    // Create overlay on first use
+    loadingOverlay = document.createElement('div');
+    loadingOverlay.id = 'loadingOverlay';
+    loadingOverlay.className = 'loading-overlay';
+    loadingOverlay.innerHTML = `
+      <div class="loading-spinner"></div>
+      <div class="loading-text">${message}</div>
+    `;
+    document.body.appendChild(loadingOverlay);
+  } else {
+    // Reuse existing overlay, update message
+    loadingOverlay.querySelector('.loading-text').textContent = message;
+    loadingOverlay.style.display = 'flex';
+  }
+}
+
+/**
+ * Hide loading indicator overlay
+ */
+function hideLoadingIndicator() {
+  if (loadingOverlay) {
+    loadingOverlay.style.display = 'none';
+  }
+}
+
+/**
  * Utility: Format airport code for display
  * @param {string} code - Airport ICAO code
  * @returns {string} Formatted code
@@ -268,5 +306,5 @@ function createBadge(category) {
 
 // Export for ES6 modules
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { Modal, Toast, LoadingSpinner, formatAirportCode, getFlightCategoryColor, createBadge };
+  module.exports = { Modal, Toast, LoadingSpinner, showLoadingIndicator, hideLoadingIndicator, formatAirportCode, getFlightCategoryColor, createBadge };
 }

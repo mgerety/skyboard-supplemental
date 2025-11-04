@@ -185,23 +185,31 @@
 
     // Initialize on page load
     document.addEventListener('DOMContentLoaded', async function() {
-      // Load airport database from GitHub
-      await loadAirportDatabase();
+      // Story 3.2: Show loading indicator during page initialization
+      showLoadingIndicator('Loading configuration...');
 
-      // Load current config
-      await loadConfig();
+      try {
+        // Load airport database from GitHub
+        await loadAirportDatabase();
 
-      // Load status indicators
-      await loadStatus();
+        // Load current config
+        await loadConfig();
 
-      // Auto-refresh status every 60 seconds
-      setInterval(loadStatus, 60000);
+        // Load status indicators
+        await loadStatus();
 
-      // Setup event listeners
-      setupEventListeners();
+        // Auto-refresh status every 60 seconds
+        setInterval(loadStatus, 60000);
 
-      // Check for crashed wizard session (do this AFTER config loads)
-      setTimeout(() => checkForCrashedWizardSession(), 500);
+        // Setup event listeners
+        setupEventListeners();
+
+        // Check for crashed wizard session (do this AFTER config loads)
+        setTimeout(() => checkForCrashedWizardSession(), 500);
+      } finally {
+        // Story 3.2: Hide loading indicator once everything is loaded
+        hideLoadingIndicator();
+      }
     });
 
     // Load airport database from ESP8266 LittleFS
@@ -673,9 +681,8 @@
         airports
       };
 
-      // Show loading state
-      saveBtn.disabled = true;
-      saveBtn.textContent = '💾 Saving...';
+      // Story 3.2: Show loading indicator
+      showLoadingIndicator('Saving configuration...');
 
       try {
         const response = await fetch('/save', {
@@ -694,11 +701,14 @@
         if (contentType && contentType.includes('application/json')) {
           const data = await response.json();
           if (data.hostnameChanged) {
+            hideLoadingIndicator();
             showToast('⚠️ ' + data.message + ' New URL: http://' + hostname + '.local', 'warning', 8000);
           } else {
+            hideLoadingIndicator();
             showToast('Configuration saved successfully!', 'success');
           }
         } else {
+          hideLoadingIndicator();
           showToast('Configuration saved successfully!', 'success');
         }
 
@@ -707,9 +717,10 @@
 
         // CRITICAL: Force weather update after saving config
         // Otherwise new airport assignments show as "Pending" until next 15-minute cycle
-        saveBtn.textContent = '🔄 Updating weather...';
+        showLoadingIndicator('Updating weather data...');
         try {
           const refreshResponse = await fetch('/api/forceRefresh', { method: 'POST' });
+          hideLoadingIndicator();
           if (refreshResponse.ok) {
             showToast('Weather data updated successfully!', 'success');
             // Reload status to show updated colors
@@ -718,14 +729,13 @@
             console.warn('Force refresh failed, weather will update on next cycle');
           }
         } catch (refreshError) {
+          hideLoadingIndicator();
           console.warn('Force refresh error:', refreshError);
         }
 
       } catch (error) {
+        hideLoadingIndicator();
         showToast('Error saving configuration: ' + error.message, 'error');
-      } finally {
-        saveBtn.disabled = false;
-        saveBtn.textContent = '💾 Save Configuration';
       }
     }
 
@@ -1393,6 +1403,17 @@
       if (saveBtn) {
         saveBtn.addEventListener('click', handleWizardSave);
       }
+    });
+
+    // Story 3.2: Global error handler to prevent stuck loading states
+    window.addEventListener('error', (event) => {
+      console.error('Global error caught:', event.error);
+      hideLoadingIndicator();
+    });
+
+    window.addEventListener('unhandledrejection', (event) => {
+      console.error('Unhandled promise rejection:', event.reason);
+      hideLoadingIndicator();
     });
 
   </script>
