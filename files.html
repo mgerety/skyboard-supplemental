@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0066cc">
+  <title>Skyboard File Browser</title>
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <script src="/js/components.js"></script>
+</head>
+<body>
+  <header class="page-header">
+    <h1>✈️ Skyboard File Browser</h1>
+    <nav>
+      <a href="/">Config</a>
+      <a href="/diagnostics">Diagnostics</a>
+      <a href="/files" class="active">Files</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <!-- File System Stats Card -->
+    <div class="card">
+      <div class="card-title">📁 File System Stats</div>
+      <div class="dashboard-grid">
+        <div class="metric">
+          <div class="metric-label">Total Space</div>
+          <div class="metric-value" id="fsTotal">-- MB</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Used Space</div>
+          <div class="metric-value" id="fsUsed">-- MB</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Free Space</div>
+          <div class="metric-value" id="fsFree">-- MB</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Usage</div>
+          <div class="metric-value" id="fsUsage">--%</div>
+        </div>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill good" id="fsUsageBar" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <!-- File List Card -->
+    <div class="card">
+      <div class="flex justify-between items-center mb-md">
+        <div class="card-title">📄 Files in LittleFS</div>
+        <button id="refreshBtn" class="btn btn-primary">🔄 Refresh</button>
+      </div>
+
+      <table class="led-table">
+        <thead>
+          <tr>
+            <th class="sortable" onclick="sortTable('path')">
+              Path <span id="sortPathArrow"></span>
+            </th>
+            <th class="sortable" onclick="sortTable('size')">
+              Size <span id="sortSizeArrow"></span>
+            </th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="fileTableBody">
+          <tr><td colspan="3">Loading files...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // Global state
+    let files = [];
+    let currentSort = { column: 'path', ascending: true };
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', async function() {
+      showLoadingIndicator('Loading file system...');
+      try {
+        await loadFileSystemStats();
+        await loadFileList();
+      } finally {
+        hideLoadingIndicator();
+      }
+
+      // Setup event listeners
+      document.getElementById('refreshBtn').addEventListener('click', refreshFileList);
+    });
+
+    // Load file system stats from /api/system/info
+    async function loadFileSystemStats() {
+      try {
+        const response = await fetch('/api/system/info');
+        if (!response.ok) throw new Error('Failed to fetch system info');
+
+        const data = await response.json();
+        const totalMB = (data.fsTotal / 1024 / 1024).toFixed(2);
+        const usedMB = (data.fsUsed / 1024 / 1024).toFixed(2);
+        const freeMB = ((data.fsTotal - data.fsUsed) / 1024 / 1024).toFixed(2);
+        const usagePercent = ((data.fsUsed / data.fsTotal) * 100).toFixed(1);
+
+        document.getElementById('fsTotal').textContent = totalMB + ' MB';
+        document.getElementById('fsUsed').textContent = usedMB + ' MB';
+        document.getElementById('fsFree').textContent = freeMB + ' MB';
+        document.getElementById('fsUsage').textContent = usagePercent + '%';
+
+        // Update progress bar
+        const bar = document.getElementById('fsUsageBar');
+        bar.style.width = usagePercent + '%';
+
+        // Color coding
+        bar.className = 'progress-fill';
+        if (usagePercent < 50) bar.classList.add('good');
+        else if (usagePercent < 80) bar.classList.add('warning');
+        else bar.classList.add('danger');
+
+      } catch (error) {
+        console.error('Error loading file system stats:', error);
+        showToast('Failed to load file system stats', 'error');
+      }
+    }
+
+    // Load file list from /api/files/list
+    async function loadFileList() {
+      try {
+        const response = await fetch('/api/files/list');
+        if (!response.ok) throw new Error('Failed to fetch file list');
+
+        const data = await response.json();
+        files = data.files || [];
+        renderFileTable();
+
+      } catch (error) {
+        console.error('Error loading file list:', error);
+        showToast('Failed to load file list. Check ESP8266 connection.', 'error');
+        document.getElementById('fileTableBody').innerHTML =
+          '<tr><td colspan="3" class="text-center text-muted">Failed to load files</td></tr>';
+      }
+    }
+
+    // Render file table
+    function renderFileTable() {
+      const tbody = document.getElementById('fileTableBody');
+
+      if (files.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No files found in LittleFS</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = files.map(file => `
+        <tr>
+          <td>${file.path}</td>
+          <td>${formatFileSize(file.size)}</td>
+          <td>
+            <button class="btn btn-secondary btn-small" onclick="downloadFile('${file.path.replace(/'/g, "\\'")}')">
+              📥 Download
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // Format file size (bytes to KB/MB)
+    function formatFileSize(bytes) {
+      if (bytes < 1024) return bytes + ' bytes';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / 1024 / 1024).toFixed(2) + ' MB';
+    }
+
+    // Download file
+    function downloadFile(path) {
+      showToast('Downloading ' + path.split('/').pop(), 'info');
+      window.location.href = '/api/files/download?path=' + encodeURIComponent(path);
+    }
+
+    // Sort table by column
+    function sortTable(column) {
+      // Toggle sort direction if same column
+      if (currentSort.column === column) {
+        currentSort.ascending = !currentSort.ascending;
+      } else {
+        currentSort.column = column;
+        currentSort.ascending = true;
+      }
+
+      // Sort files array
+      files.sort((a, b) => {
+        let valA = column === 'path' ? a.path : a.size;
+        let valB = column === 'path' ? b.path : b.size;
+
+        if (typeof valA === 'string') valA = valA.toLowerCase();
+        if (typeof valB === 'string') valB = valB.toLowerCase();
+
+        if (valA < valB) return currentSort.ascending ? -1 : 1;
+        if (valA > valB) return currentSort.ascending ? 1 : -1;
+        return 0;
+      });
+
+      // Re-render table
+      renderFileTable();
+
+      // Update sort arrows
+      document.getElementById('sortPathArrow').textContent =
+        column === 'path' ? (currentSort.ascending ? ' ▲' : ' ▼') : '';
+      document.getElementById('sortSizeArrow').textContent =
+        column === 'size' ? (currentSort.ascending ? ' ▲' : ' ▼') : '';
+    }
+
+    // Refresh file list
+    async function refreshFileList() {
+      const button = document.getElementById('refreshBtn');
+      button.disabled = true;
+      showLoadingIndicator('Refreshing file list...');
+      try {
+        await loadFileList();
+        hideLoadingIndicator();
+        button.disabled = false;
+        showToast('File list refreshed', 'success');
+      } catch (error) {
+        hideLoadingIndicator();
+        button.disabled = false;
+        showToast('Refresh failed', 'error');
+      }
+    }
+  </script>
+
+  <!-- TOAST NOTIFICATION (reused from components.js) -->
+  <div id="toast" class="toast">
+    <button class="toast-close" onclick="hideToast()" aria-label="Close notification">&times;</button>
+    <div class="toast-title" id="toastTitle"></div>
+    <div class="toast-message" id="toastMessage"></div>
+  </div>
+
+  <!-- LOADING OVERLAY (Story 3.2) -->
+  <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+    <div class="loading-spinner"></div>
+    <div class="loading-text" id="loadingText">Loading...</div>
+  </div>
+
+</body>
+</html>
