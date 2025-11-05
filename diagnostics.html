@@ -95,6 +95,15 @@
                     <div class="metric-label">Last Weather Update</div>
                     <div class="metric-value" id="lastUpdateValue">--</div>
                 </div>
+                <div class="metric">
+                    <div class="metric-label">Web Files Version</div>
+                    <div class="metric-value" id="webVersionValue">--</div>
+                </div>
+                <div class="button-group">
+                    <button id="updateWebFilesBtn" class="btn btn-secondary" onclick="forceWebUpdate()">
+                        📥 Force Web Files Update
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -268,6 +277,10 @@
             const lastUpdateDate = new Date(systemInfo.lastUpdate);
             const formattedDate = lastUpdateDate.toLocaleString();
             document.getElementById('lastUpdateValue').textContent = `${formattedDate} (${minutesAgo} min ago)`;
+
+            // Web version
+            document.getElementById('webVersionValue').textContent =
+                systemInfo.webVersion ? `v${systemInfo.webVersion}` : 'Unknown';
         }
 
         // ===== LED TABLE RENDERING =====
@@ -444,6 +457,30 @@
             await callClearLogs('error');
             await callClearLogs('info');
             showToast('Logs cleared', 'All logs have been cleared', 'success');
+        }
+
+        async function forceWebUpdate() {
+            const btn = document.getElementById('updateWebFilesBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Updating...';
+
+            try {
+                const res = await fetch('/api/forceWebUpdate', { method: 'POST' });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+
+                if (data.success) {
+                    showToast('Update complete', 'Web files updated successfully! Page will reload...', 'success');
+                    setTimeout(() => location.reload(), 2000);
+                } else {
+                    showToast('Update failed', data.error || 'Unknown error', 'error');
+                }
+            } catch (error) {
+                showToast('Update failed', error.message || 'Unknown error', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '📥 Force Web Files Update';
+            }
         }
 
         // ===== TOAST NOTIFICATIONS =====
