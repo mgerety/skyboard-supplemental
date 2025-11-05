@@ -9,6 +9,208 @@
   <link rel="stylesheet" href="/css/base.css">
   <link rel="stylesheet" href="/css/components.css">
   <script src="/js/components.js"></script>
+  <style>
+    /* File Tree Styles */
+    .file-tree {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      line-height: 1.6;
+      padding: 0;
+      margin: 0;
+      background: var(--surface);
+      border-radius: var(--radius-md);
+      overflow: auto;
+      max-height: 600px;
+    }
+
+    .tree-node {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .tree-node-item {
+      display: flex;
+      align-items: center;
+      padding: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+
+    .tree-node-item:hover {
+      background-color: var(--primary-bg);
+    }
+
+    .tree-node-item.selected {
+      background-color: var(--primary-light);
+      font-weight: 600;
+    }
+
+    .tree-indent {
+      display: inline-block;
+      width: 20px;
+      flex-shrink: 0;
+    }
+
+    .tree-icon {
+      width: 20px;
+      height: 20px;
+      margin-right: 8px;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .tree-icon.folder {
+      color: var(--warning);
+    }
+
+    .tree-icon.file {
+      color: var(--text-secondary);
+    }
+
+    .tree-label {
+      flex-grow: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--text);
+    }
+
+    .tree-info {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-left: auto;
+      padding-left: 12px;
+      flex-shrink: 0;
+    }
+
+    .tree-size {
+      color: var(--text-secondary);
+      font-size: 12px;
+      min-width: 80px;
+      text-align: right;
+    }
+
+    .tree-download {
+      padding: 4px 8px;
+      font-size: 12px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .tree-download:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    .tree-children {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .tree-children.collapsed {
+      display: none;
+    }
+
+    /* Path breadcrumb */
+    .path-breadcrumb {
+      padding: 12px;
+      background: var(--surface-light);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--space-md);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text-secondary);
+      word-break: break-all;
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+    }
+
+    .path-breadcrumb.empty {
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    /* File stats grid */
+    .file-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: var(--space-sm);
+      margin-top: var(--space-md);
+      padding-top: var(--space-md);
+      border-top: 1px solid var(--border);
+    }
+
+    .file-stat {
+      text-align: center;
+    }
+
+    .file-stat-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .file-stat-value {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    /* Loading skeleton */
+    .tree-skeleton {
+      padding: var(--space-md);
+    }
+
+    .skeleton-item {
+      height: 36px;
+      background: linear-gradient(90deg, var(--surface-light) 25%, var(--surface) 50%, var(--surface-light) 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+      margin-bottom: 8px;
+      border-radius: var(--radius-sm);
+    }
+
+    @keyframes loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* Mobile optimizations */
+    @media (max-width: 768px) {
+      .tree-info {
+        gap: 8px;
+      }
+
+      .tree-size {
+        min-width: 60px;
+        font-size: 11px;
+      }
+
+      .tree-download {
+        padding: 3px 6px;
+        font-size: 11px;
+      }
+
+      .file-tree {
+        max-height: 400px;
+      }
+    }
+  </style>
 </head>
 <body>
   <header class="page-header">
@@ -23,7 +225,7 @@
   <div class="container">
     <!-- File System Stats Card -->
     <div class="card">
-      <div class="card-title">📁 File System Stats</div>
+      <div class="card-title">📊 File System Overview</div>
       <div class="dashboard-grid">
         <div class="metric">
           <div class="metric-label">Total Space</div>
@@ -47,36 +249,314 @@
       </div>
     </div>
 
-    <!-- File List Card -->
+    <!-- File Tree Card -->
     <div class="card">
       <div class="flex justify-between items-center mb-md">
-        <div class="card-title">📄 Files in LittleFS</div>
-        <button id="refreshBtn" class="btn btn-primary">🔄 Refresh</button>
+        <div class="card-title">🗂️ LittleFS File System</div>
+        <div class="flex gap-sm">
+          <button id="expandAllBtn" class="btn btn-secondary">↘️ Expand All</button>
+          <button id="collapseAllBtn" class="btn btn-secondary">↖️ Collapse All</button>
+          <button id="refreshBtn" class="btn btn-primary">🔄 Refresh</button>
+        </div>
       </div>
 
-      <table class="led-table">
-        <thead>
-          <tr>
-            <th class="sortable" onclick="sortTable('path')">
-              Path <span id="sortPathArrow"></span>
-            </th>
-            <th class="sortable" onclick="sortTable('size')">
-              Size <span id="sortSizeArrow"></span>
-            </th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="fileTableBody">
-          <tr><td colspan="3">Loading files...</td></tr>
-        </tbody>
-      </table>
+      <!-- Current path display -->
+      <div class="path-breadcrumb empty" id="currentPath">
+        Click a file to see its full path
+      </div>
+
+      <!-- File tree container -->
+      <div class="file-tree" id="fileTree">
+        <div class="tree-skeleton">
+          <div class="skeleton-item"></div>
+          <div class="skeleton-item"></div>
+          <div class="skeleton-item"></div>
+        </div>
+      </div>
+
+      <!-- File statistics -->
+      <div class="file-stats">
+        <div class="file-stat">
+          <div class="file-stat-label">Total Files</div>
+          <div class="file-stat-value" id="totalFiles">0</div>
+        </div>
+        <div class="file-stat">
+          <div class="file-stat-label">Total Folders</div>
+          <div class="file-stat-value" id="totalFolders">0</div>
+        </div>
+        <div class="file-stat">
+          <div class="file-stat-label">Largest File</div>
+          <div class="file-stat-value" id="largestFile">--</div>
+        </div>
+        <div class="file-stat">
+          <div class="file-stat-label">Total Size</div>
+          <div class="file-stat-value" id="totalSize">--</div>
+        </div>
+      </div>
     </div>
   </div>
 
   <script>
-    // Global state
-    let files = [];
-    let currentSort = { column: 'path', ascending: true };
+    // File Tree Component
+    class FileTree {
+      constructor(containerId) {
+        this.container = document.getElementById(containerId);
+        this.files = [];
+        this.tree = {};
+        this.selectedNode = null;
+        this.stats = {
+          totalFiles: 0,
+          totalFolders: 0,
+          largestFile: { name: '', size: 0 },
+          totalSize: 0
+        };
+      }
+
+      // Build tree structure from flat file list
+      buildTree(files) {
+        this.files = files;
+        this.tree = { '/': { type: 'folder', children: {}, size: 0 } };
+        this.stats = {
+          totalFiles: 0,
+          totalFolders: 0,
+          largestFile: { name: '', size: 0 },
+          totalSize: 0
+        };
+
+        // Build tree structure
+        files.forEach(file => {
+          const parts = file.path.split('/').filter(p => p);
+          let current = this.tree['/'];
+          let currentPath = '';
+
+          // Create folder structure
+          for (let i = 0; i < parts.length - 1; i++) {
+            const folderName = parts[i];
+            currentPath += '/' + folderName;
+
+            if (!current.children[folderName]) {
+              current.children[folderName] = {
+                type: 'folder',
+                children: {},
+                size: 0,
+                path: currentPath
+              };
+              this.stats.totalFolders++;
+            }
+            current = current.children[folderName];
+            current.size += file.size; // Accumulate folder size
+          }
+
+          // Add file
+          const fileName = parts[parts.length - 1];
+          current.children[fileName] = {
+            type: 'file',
+            size: file.size,
+            path: file.path
+          };
+
+          // Update stats
+          this.stats.totalFiles++;
+          this.stats.totalSize += file.size;
+          if (file.size > this.stats.largestFile.size) {
+            this.stats.largestFile = { name: fileName, size: file.size };
+          }
+        });
+
+        // Update root folder size
+        this.tree['/'].size = this.stats.totalSize;
+      }
+
+      // Render the tree
+      render() {
+        this.container.innerHTML = '';
+
+        if (this.files.length === 0) {
+          this.container.innerHTML = '<div class="text-center text-muted" style="padding: 40px;">No files found in LittleFS</div>';
+          return;
+        }
+
+        const ul = document.createElement('ul');
+        ul.className = 'tree-node';
+
+        // Render root folder contents
+        Object.entries(this.tree['/'].children).forEach(([name, node]) => {
+          this.renderNode(name, node, ul, 0);
+        });
+
+        this.container.appendChild(ul);
+        this.updateStats();
+      }
+
+      // Render a single node
+      renderNode(name, node, parentElement, depth) {
+        const li = document.createElement('li');
+        li.className = 'tree-node';
+
+        const item = document.createElement('div');
+        item.className = 'tree-node-item';
+
+        // Add indentation
+        for (let i = 0; i < depth; i++) {
+          const indent = document.createElement('span');
+          indent.className = 'tree-indent';
+          item.appendChild(indent);
+        }
+
+        // Add expand/collapse icon for folders
+        const icon = document.createElement('span');
+        icon.className = 'tree-icon';
+
+        if (node.type === 'folder') {
+          icon.className += ' folder';
+          icon.innerHTML = '📁';
+          icon.style.cursor = 'pointer';
+
+          const childrenContainer = document.createElement('ul');
+          childrenContainer.className = 'tree-children';
+
+          // Add folder toggle functionality
+          let expanded = false;
+          icon.onclick = (e) => {
+            e.stopPropagation();
+            expanded = !expanded;
+            icon.innerHTML = expanded ? '📂' : '📁';
+            childrenContainer.classList.toggle('collapsed', !expanded);
+          };
+
+          // Initially collapsed
+          childrenContainer.classList.add('collapsed');
+
+          // Render children
+          Object.entries(node.children).forEach(([childName, childNode]) => {
+            this.renderNode(childName, childNode, childrenContainer, depth + 1);
+          });
+
+          li.appendChild(childrenContainer);
+        } else {
+          icon.className += ' file';
+          icon.innerHTML = this.getFileIcon(name);
+        }
+
+        item.appendChild(icon);
+
+        // Add label
+        const label = document.createElement('span');
+        label.className = 'tree-label';
+        label.textContent = name;
+        item.appendChild(label);
+
+        // Add info section (size and download)
+        const info = document.createElement('div');
+        info.className = 'tree-info';
+
+        // Add size
+        const size = document.createElement('span');
+        size.className = 'tree-size';
+        size.textContent = this.formatSize(node.size);
+        info.appendChild(size);
+
+        // Add download button for files
+        if (node.type === 'file') {
+          const download = document.createElement('button');
+          download.className = 'tree-download';
+          download.textContent = '📥 Download';
+          download.onclick = (e) => {
+            e.stopPropagation();
+            this.downloadFile(node.path);
+          };
+          info.appendChild(download);
+        }
+
+        item.appendChild(info);
+
+        // Add click handler to show path
+        item.onclick = () => {
+          // Remove previous selection
+          if (this.selectedNode) {
+            this.selectedNode.classList.remove('selected');
+          }
+
+          // Add selection to current item
+          item.classList.add('selected');
+          this.selectedNode = item;
+
+          // Update path display
+          const pathDisplay = document.getElementById('currentPath');
+          pathDisplay.textContent = node.path || '/' + name;
+          pathDisplay.classList.remove('empty');
+        };
+
+        li.insertBefore(item, li.firstChild);
+        parentElement.appendChild(li);
+      }
+
+      // Get appropriate file icon based on extension
+      getFileIcon(filename) {
+        const ext = filename.split('.').pop().toLowerCase();
+        const icons = {
+          'html': '🌐',
+          'css': '🎨',
+          'js': '📜',
+          'json': '📋',
+          'txt': '📄',
+          'log': '📝',
+          'md': '📖',
+          'xml': '📰',
+          'ini': '⚙️',
+          'cfg': '⚙️',
+          'config': '⚙️'
+        };
+        return icons[ext] || '📄';
+      }
+
+      // Format file size
+      formatSize(bytes) {
+        if (bytes === 0) return '0 B';
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / 1024 / 1024).toFixed(2) + ' MB';
+      }
+
+      // Download file
+      downloadFile(path) {
+        showToast('Downloading: ' + path, 'info');
+        window.location.href = '/api/files/download?path=' + encodeURIComponent(path);
+      }
+
+      // Update statistics display
+      updateStats() {
+        document.getElementById('totalFiles').textContent = this.stats.totalFiles;
+        document.getElementById('totalFolders').textContent = this.stats.totalFolders;
+        document.getElementById('largestFile').textContent =
+          this.stats.largestFile.name ?
+          this.formatSize(this.stats.largestFile.size) : '--';
+        document.getElementById('totalSize').textContent = this.formatSize(this.stats.totalSize);
+      }
+
+      // Expand all folders
+      expandAll() {
+        this.container.querySelectorAll('.tree-children').forEach(children => {
+          children.classList.remove('collapsed');
+        });
+        this.container.querySelectorAll('.tree-icon.folder').forEach(icon => {
+          icon.innerHTML = '📂';
+        });
+      }
+
+      // Collapse all folders
+      collapseAll() {
+        this.container.querySelectorAll('.tree-children').forEach(children => {
+          children.classList.add('collapsed');
+        });
+        this.container.querySelectorAll('.tree-icon.folder').forEach(icon => {
+          icon.innerHTML = '📁';
+        });
+      }
+    }
+
+    // Global file tree instance
+    let fileTree = new FileTree('fileTree');
 
     // Initialize on page load
     document.addEventListener('DOMContentLoaded', async function() {
@@ -90,6 +570,8 @@
 
       // Setup event listeners
       document.getElementById('refreshBtn').addEventListener('click', refreshFileList);
+      document.getElementById('expandAllBtn').addEventListener('click', () => fileTree.expandAll());
+      document.getElementById('collapseAllBtn').addEventListener('click', () => fileTree.collapseAll());
     });
 
     // Load file system stats from /api/system/info
@@ -132,83 +614,18 @@
         if (!response.ok) throw new Error('Failed to fetch file list');
 
         const data = await response.json();
-        files = data.files || [];
-        renderFileTable();
+        const files = data.files || [];
+
+        // Build and render tree
+        fileTree.buildTree(files);
+        fileTree.render();
 
       } catch (error) {
         console.error('Error loading file list:', error);
         showToast('Failed to load file list. Check ESP8266 connection.', 'error');
-        document.getElementById('fileTableBody').innerHTML =
-          '<tr><td colspan="3" class="text-center text-muted">Failed to load files</td></tr>';
+        document.getElementById('fileTree').innerHTML =
+          '<div class="text-center text-muted" style="padding: 40px;">Failed to load files</div>';
       }
-    }
-
-    // Render file table
-    function renderFileTable() {
-      const tbody = document.getElementById('fileTableBody');
-
-      if (files.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No files found in LittleFS</td></tr>';
-        return;
-      }
-
-      tbody.innerHTML = files.map(file => `
-        <tr>
-          <td>${file.path}</td>
-          <td>${formatFileSize(file.size)}</td>
-          <td>
-            <button class="btn btn-secondary btn-small" onclick="downloadFile('${file.path.replace(/'/g, "\\'")}')">
-              📥 Download
-            </button>
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    // Format file size (bytes to KB/MB)
-    function formatFileSize(bytes) {
-      if (bytes < 1024) return bytes + ' bytes';
-      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-      return (bytes / 1024 / 1024).toFixed(2) + ' MB';
-    }
-
-    // Download file
-    function downloadFile(path) {
-      showToast('Downloading ' + path.split('/').pop(), 'info');
-      window.location.href = '/api/files/download?path=' + encodeURIComponent(path);
-    }
-
-    // Sort table by column
-    function sortTable(column) {
-      // Toggle sort direction if same column
-      if (currentSort.column === column) {
-        currentSort.ascending = !currentSort.ascending;
-      } else {
-        currentSort.column = column;
-        currentSort.ascending = true;
-      }
-
-      // Sort files array
-      files.sort((a, b) => {
-        let valA = column === 'path' ? a.path : a.size;
-        let valB = column === 'path' ? b.path : b.size;
-
-        if (typeof valA === 'string') valA = valA.toLowerCase();
-        if (typeof valB === 'string') valB = valB.toLowerCase();
-
-        if (valA < valB) return currentSort.ascending ? -1 : 1;
-        if (valA > valB) return currentSort.ascending ? 1 : -1;
-        return 0;
-      });
-
-      // Re-render table
-      renderFileTable();
-
-      // Update sort arrows
-      document.getElementById('sortPathArrow').textContent =
-        column === 'path' ? (currentSort.ascending ? ' ▲' : ' ▼') : '';
-      document.getElementById('sortSizeArrow').textContent =
-        column === 'size' ? (currentSort.ascending ? ' ▲' : ' ▼') : '';
     }
 
     // Refresh file list
@@ -216,15 +633,20 @@
       const button = document.getElementById('refreshBtn');
       button.disabled = true;
       showLoadingIndicator('Refreshing file list...');
+
+      // Reset path display
+      document.getElementById('currentPath').textContent = 'Click a file to see its full path';
+      document.getElementById('currentPath').classList.add('empty');
+
       try {
+        await loadFileSystemStats();
         await loadFileList();
-        hideLoadingIndicator();
-        button.disabled = false;
         showToast('File list refreshed', 'success');
       } catch (error) {
+        showToast('Refresh failed', 'error');
+      } finally {
         hideLoadingIndicator();
         button.disabled = false;
-        showToast('Refresh failed', 'error');
       }
     }
   </script>
