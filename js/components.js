@@ -4,6 +4,75 @@
  * Vanilla JavaScript, no dependencies
  */
 
+// Global variable to track toast timeout
+let toastTimeoutId = null;
+
+/**
+ * Show toast notification
+ * @param {string} message - The message to display (can be used as title)
+ * @param {string} type - Type of toast: 'success', 'error', 'warning', 'info'
+ * @param {number} duration - Optional duration in milliseconds
+ */
+function showToast(message, type = 'success', duration = null) {
+    // Handle both single-param (files.html style) and dual-param (diagnostics style) calls
+    const toast = document.getElementById('toast');
+    const toastTitle = document.getElementById('toastTitle');
+    const toastMessage = document.getElementById('toastMessage');
+
+    if (!toast) {
+        console.error('Toast element not found');
+        return;
+    }
+
+    // If called with (title, message, type) from diagnostics.html
+    if (arguments.length >= 2 && (arguments[1] === 'success' || arguments[1] === 'error' || arguments[1] === 'warning' || arguments[1] === 'info')) {
+        // Single parameter style (files.html) - message is the first param, type is second
+        toastTitle.textContent = '';
+        toastMessage.textContent = message;
+        type = arguments[1];
+    } else if (arguments.length >= 2) {
+        // Two parameter style (diagnostics.html) - first is title, second is message
+        toastTitle.textContent = message;  // First param becomes title
+        toastMessage.textContent = arguments[1];  // Second param is message
+        type = arguments[2] || 'success';
+    } else {
+        // Single parameter - just show as message
+        toastTitle.textContent = '';
+        toastMessage.textContent = message;
+    }
+
+    toast.className = `toast ${type}`;
+    toast.classList.add('show');
+
+    // Clear existing timeout if any
+    if (toastTimeoutId) {
+        clearTimeout(toastTimeoutId);
+    }
+
+    // Different durations for error vs success
+    if (!duration) {
+        duration = type === 'error' ? 7000 : 5000;
+    }
+
+    toastTimeoutId = setTimeout(() => {
+        hideToast();
+    }, duration);
+}
+
+/**
+ * Hide toast notification
+ */
+function hideToast() {
+    const toast = document.getElementById('toast');
+    if (toast) {
+        toast.classList.remove('show');
+    }
+    if (toastTimeoutId) {
+        clearTimeout(toastTimeoutId);
+        toastTimeoutId = null;
+    }
+}
+
 /**
  * Modal Component
  * Creates accessible modal dialogs with overlay and close handling
