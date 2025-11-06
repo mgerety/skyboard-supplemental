@@ -608,7 +608,9 @@
 
         // Process directories first to build folder structure
         directories.forEach(dir => {
-          const parts = dir.path.split('/').filter(p => p);
+          // Remove leading slash and split path
+          const cleanPath = dir.path.startsWith('/') ? dir.path.substring(1) : dir.path;
+          const parts = cleanPath.split('/').filter(p => p);
           let current = this.tree;
 
           // Navigate/create nested folder structure
@@ -634,49 +636,56 @@
 
         // Now add files to the tree
         files.forEach(file => {
-          const parts = file.path.split('/').filter(p => p);
+          // Remove leading slash and split path
+          const cleanPath = file.path.startsWith('/') ? file.path.substring(1) : file.path;
+          const parts = cleanPath.split('/');
           let current = this.tree;
 
-          // Navigate to the correct folder
-          for (let i = 0; i < parts.length - 1; i++) {
-            const folderName = parts[i];
+          // If file is in a subdirectory, navigate to it
+          if (parts.length > 1) {
+            // Navigate to the correct folder (all parts except last which is filename)
+            for (let i = 0; i < parts.length - 1; i++) {
+              const folderName = parts[i];
 
-            let folder = current.children.find(c => c.name === folderName && c.type === 'folder');
-            if (!folder) {
-              // Create folder if it doesn't exist (shouldn't happen if ESP sends all dirs)
-              folder = {
-                name: folderName,
-                type: 'folder',
-                path: '/' + parts.slice(0, i + 1).join('/'),
-                children: [],
-                size: 0,
-                expanded: false
-              };
-              current.children.push(folder);
-              this.stats.folders++;
+              let folder = current.children.find(c => c.name === folderName && c.type === 'folder');
+              if (!folder) {
+                // Create folder if it doesn't exist (shouldn't happen if ESP sends all dirs)
+                folder = {
+                  name: folderName,
+                  type: 'folder',
+                  path: '/' + parts.slice(0, i + 1).join('/'),
+                  children: [],
+                  size: 0,
+                  expanded: false
+                };
+                current.children.push(folder);
+                this.stats.folders++;
+              }
+
+              // Accumulate size in parent folders
+              folder.size += file.size;
+              current = folder;
             }
-
-            // Accumulate size in parent folders
-            folder.size += file.size;
-            current = folder;
           }
 
-          // Add the file
-          const fileName = parts[parts.length - 1] || file.path.substring(1); // Handle root files
-          current.children.push({
-            name: fileName,
-            type: 'file',
-            path: file.path,
-            size: file.size
-          });
+          // Add the file to the current folder
+          const fileName = parts[parts.length - 1];
+          if (fileName) {  // Only add if there's a filename
+            current.children.push({
+              name: fileName,
+              type: 'file',
+              path: file.path,
+              size: file.size
+            });
 
-          // Update stats
-          this.stats.files++;
-          this.stats.totalSize += file.size;
-          this.tree.size += file.size;
+            // Update stats
+            this.stats.files++;
+            this.stats.totalSize += file.size;
+            this.tree.size += file.size;
 
-          if (file.size > this.stats.largestFile.size) {
-            this.stats.largestFile = { name: fileName, size: file.size };
+            if (file.size > this.stats.largestFile.size) {
+              this.stats.largestFile = { name: fileName, size: file.size };
+            }
           }
         });
 
