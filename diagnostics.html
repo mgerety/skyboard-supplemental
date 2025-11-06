@@ -484,39 +484,8 @@
         }
 
         // ===== TOAST NOTIFICATIONS =====
-        // Story 3.6: Updated durations (5s for success, 7s for error) and added hideToast()
-
-        let toastTimeoutId = null;  // Track timeout for manual dismiss
-
-        function showToast(title, message, type = 'success') {
-            const toast = document.getElementById('toast');
-            document.getElementById('toastTitle').textContent = title;
-            document.getElementById('toastMessage').textContent = message;
-
-            toast.className = `toast ${type}`;
-            toast.classList.add('show');
-
-            // Clear existing timeout if any
-            if (toastTimeoutId) {
-                clearTimeout(toastTimeoutId);
-            }
-
-            // Story 3.6: Different durations for error vs success
-            const duration = type === 'error' ? 7000 : 5000;
-
-            toastTimeoutId = setTimeout(() => {
-                hideToast();
-            }, duration);
-        }
-
-        function hideToast() {
-            const toast = document.getElementById('toast');
-            toast.classList.remove('show');
-            if (toastTimeoutId) {
-                clearTimeout(toastTimeoutId);
-                toastTimeoutId = null;
-            }
-        }
+        // Story 3.6: Toast functions provided by /js/components.js
+        // No redeclaration needed - showToast() and hideToast() are global
 
         // ===== START APPLICATION =====
 
