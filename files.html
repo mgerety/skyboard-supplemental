@@ -151,24 +151,33 @@
 
     /* Download button */
     .tree-download {
-      padding: 2px 6px;
-      font-size: 11px;
+      padding: 4px 10px;
+      font-size: 14px;
       background: #0e639c;
       color: white;
       border: none;
-      border-radius: 3px;
+      border-radius: 4px;
       cursor: pointer;
       opacity: 0;
-      transition: opacity 0.2s;
+      transition: opacity 0.2s, background 0.2s;
       flex-shrink: 0;
+      font-weight: 500;
+      margin-left: 8px;
     }
 
-    .tree-item:hover .tree-download {
+    /* Show download button on hover OR when selected (for mobile/touch) */
+    .tree-item:hover .tree-download,
+    .tree-item.selected .tree-download {
       opacity: 1;
     }
 
     .tree-download:hover {
       background: #1177bb;
+      transform: scale(1.05);
+    }
+
+    .tree-download:active {
+      transform: scale(0.95);
     }
 
     /* Folder contents */
@@ -382,9 +391,10 @@
       }
 
       .tree-download {
-        opacity: 1;
-        padding: 2px 4px;
-        font-size: 10px;
+        opacity: 1; /* Always visible on mobile */
+        padding: 6px 12px;
+        font-size: 13px;
+        min-width: 40px; /* Easier to tap */
       }
 
       .tree-toolbar {
@@ -820,8 +830,8 @@
         if (node.type === 'file') {
           const download = document.createElement('button');
           download.className = 'tree-download';
-          download.textContent = '⬇';
-          download.title = 'Download';
+          download.innerHTML = '⬇ Download';
+          download.title = 'Download this file';
           download.onclick = (e) => {
             e.stopPropagation();
             this.downloadFile(node.path);
@@ -882,9 +892,8 @@
       // Select an item
       selectItem(node, element) {
         // Remove previous selection
-        if (this.selectedItem) {
-          this.selectedItem.classList.remove('selected');
-        }
+        const allItems = this.container.querySelectorAll('.tree-item.selected');
+        allItems.forEach(item => item.classList.remove('selected'));
 
         // Add selection
         element.classList.add('selected');
