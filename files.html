@@ -598,20 +598,52 @@
           largestFile: { name: '', size: 0 }
         };
 
-        // Sort files by path for better organization
-        const sortedFiles = [...this.files].sort((a, b) => a.path.localeCompare(b.path));
+        // Separate directories and files
+        const directories = this.files.filter(f => f.isDirectory);
+        const files = this.files.filter(f => !f.isDirectory);
 
-        // Build the tree
-        sortedFiles.forEach(file => {
+        // Sort for better organization
+        directories.sort((a, b) => a.path.localeCompare(b.path));
+        files.sort((a, b) => a.path.localeCompare(b.path));
+
+        // Process directories first to build folder structure
+        directories.forEach(dir => {
+          const parts = dir.path.split('/').filter(p => p);
+          let current = this.tree;
+
+          // Navigate/create nested folder structure
+          for (let i = 0; i < parts.length; i++) {
+            const folderName = parts[i];
+
+            let folder = current.children.find(c => c.name === folderName && c.type === 'folder');
+            if (!folder) {
+              folder = {
+                name: folderName,
+                type: 'folder',
+                path: '/' + parts.slice(0, i + 1).join('/'),
+                children: [],
+                size: 0,
+                expanded: false
+              };
+              current.children.push(folder);
+              this.stats.folders++;
+            }
+            current = folder;
+          }
+        });
+
+        // Now add files to the tree
+        files.forEach(file => {
           const parts = file.path.split('/').filter(p => p);
           let current = this.tree;
 
-          // Navigate/create folder structure
+          // Navigate to the correct folder
           for (let i = 0; i < parts.length - 1; i++) {
             const folderName = parts[i];
 
             let folder = current.children.find(c => c.name === folderName && c.type === 'folder');
             if (!folder) {
+              // Create folder if it doesn't exist (shouldn't happen if ESP sends all dirs)
               folder = {
                 name: folderName,
                 type: 'folder',
@@ -630,7 +662,7 @@
           }
 
           // Add the file
-          const fileName = parts[parts.length - 1];
+          const fileName = parts[parts.length - 1] || file.path.substring(1); // Handle root files
           current.children.push({
             name: fileName,
             type: 'file',
