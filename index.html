@@ -1099,52 +1099,8 @@
       }
     }
 
-    // Story 3.6: Updated toast notifications with structured HTML, durations, and hideToast()
-    let toastTimeoutId = null;  // Track timeout for manual dismiss
-
-    function showToast(message, type = 'success', duration = null) {
-      const toast = document.getElementById('toast');
-
-      // For compatibility: single-arg call (message) or title/message pattern
-      let title = '';
-      let msg = message;
-
-      // If message contains ":", split into title and message
-      if (message && message.includes(':')) {
-        const parts = message.split(':');
-        title = parts[0].trim();
-        msg = parts.slice(1).join(':').trim();
-      }
-
-      document.getElementById('toastTitle').textContent = title || (type === 'success' ? 'Success' : type === 'error' ? 'Error' : 'Info');
-      document.getElementById('toastMessage').textContent = msg;
-
-      toast.className = `toast ${type}`;
-      toast.classList.add('show');
-
-      // Clear existing timeout if any
-      if (toastTimeoutId) {
-        clearTimeout(toastTimeoutId);
-      }
-
-      // Story 3.6: Different durations for error vs success (allow override)
-      if (duration === null) {
-        duration = type === 'error' ? 7000 : 5000;
-      }
-
-      toastTimeoutId = setTimeout(() => {
-        hideToast();
-      }, duration);
-    }
-
-    function hideToast() {
-      const toast = document.getElementById('toast');
-      toast.classList.remove('show');
-      if (toastTimeoutId) {
-        clearTimeout(toastTimeoutId);
-        toastTimeoutId = null;
-      }
-    }
+    // Story 3.6: Toast notifications are now handled by components.js
+    // showToast and hideToast functions are already defined there
 
     // ====================================================================
     // LED SETUP WIZARD FUNCTIONALITY
