@@ -1,120 +1,1220 @@
 <!DOCTYPE html>
-<!-- Skyboard Web Interface Version: 58 -->
+<!-- Skyboard Web Interface Version: 59 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#0066cc">
+  <meta name="theme-color" content="#1e3a8a">
   <title>Skyboard Configuration</title>
-  <link rel="stylesheet" href="/css/base.css">
-  <link rel="stylesheet" href="/css/components.css">
-  <script src="/js/components.js"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    /* ==================================================
+     * MODERN SKYBOARD DESIGN SYSTEM v2.0
+     * Story 1.4B: Modernize Configuration Page
+     * Reference: design-demo-modern-v5.html
+     * ================================================== */
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      /* Light Theme - Modern Design */
+      --bg-gradient-start: #1e3a8a;
+      --bg-gradient-end: #0c4a6e;
+      --bg-body: linear-gradient(135deg, #1e3a8a 0%, #0c4a6e 100%);
+      --card-bg: #f8f9fa;
+      --card-shadow: rgba(0, 0, 0, 0.08);
+      --card-hover-shadow: rgba(0, 0, 0, 0.12);
+      --text-primary: #1a1a1a;
+      --text-secondary: #4a5568;
+      --text-muted: #718096;
+      --border-color: #dee2e6;
+      --input-bg: #ffffff;
+      --input-border: #dee2e6;
+      --navbar-bg: rgba(255, 255, 255, 0.95);
+      --navbar-shadow: rgba(0, 0, 0, 0.08);
+      --table-hover: #e9ecef;
+      --accent-primary: #1e40af;
+      --accent-secondary: #0369a1;
+      --warning: #f59e0b;
+      --warning-bg: #fef3c7;
+      --warning-border: #fbbf24;
+      --success: #28a745;
+      --error: #dc3545;
+
+      /* Flight Category Colors (Fixed) */
+      --color-lifr: #FF00FF;
+      --color-ifr: #FF0000;
+      --color-mvfr: #0000FF;
+      --color-wvfr: #FFFF00;
+      --color-vfr: #00FF00;
+    }
+
+    [data-theme="dark"] {
+      /* Dark Theme */
+      --bg-gradient-start: #0f172a;
+      --bg-gradient-end: #1e293b;
+      --bg-body: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      --card-bg: #1e293b;
+      --card-shadow: rgba(0, 0, 0, 0.3);
+      --card-hover-shadow: rgba(0, 0, 0, 0.4);
+      --text-primary: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+      --input-bg: #0f172a;
+      --input-border: #334155;
+      --navbar-bg: rgba(30, 41, 59, 0.95);
+      --navbar-shadow: rgba(0, 0, 0, 0.3);
+      --table-hover: #0f172a;
+      --accent-primary: #3b82f6;
+      --accent-secondary: #0ea5e9;
+      --warning: #f59e0b;
+      --warning-bg: #422006;
+      --warning-border: #f59e0b;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Inter', sans-serif;
+      background: var(--bg-body);
+      min-height: 100vh;
+      color: var(--text-primary);
+      transition: all 0.3s ease;
+    }
+
+    /* NAVIGATION BAR */
+    .navbar {
+      background: var(--navbar-bg);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 20px var(--navbar-shadow);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+
+    .navbar-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--accent-primary);
+      text-decoration: none;
+    }
+
+    .navbar-brand svg {
+      width: 28px;
+      height: 28px;
+    }
+
+    .navbar-menu {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .nav-link {
+      padding: 8px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--text-secondary);
+      font-weight: 500;
+      font-size: 15px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-link svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .nav-link:hover {
+      background: var(--input-bg);
+      color: var(--accent-primary);
+    }
+
+    .nav-link.active {
+      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(30, 64, 175, 0.4);
+    }
+
+    .theme-toggle {
+      background: var(--input-bg);
+      border: 2px solid var(--border-color);
+      border-radius: 10px;
+      padding: 8px 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      margin-left: 12px;
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--accent-primary);
+    }
+
+    .theme-toggle svg {
+      width: 20px;
+      height: 20px;
+      color: var(--text-secondary);
+    }
+
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 8px;
+    }
+
+    .hamburger span {
+      width: 24px;
+      height: 3px;
+      background: var(--text-secondary);
+      border-radius: 2px;
+      transition: all 0.3s;
+    }
+
+    /* MOBILE MENU */
+    @media (max-width: 768px) {
+      .navbar-menu {
+        position: fixed;
+        top: 64px;
+        left: 0;
+        right: 0;
+        background: var(--navbar-bg);
+        flex-direction: column;
+        padding: 20px;
+        gap: 12px;
+        box-shadow: 0 8px 20px var(--navbar-shadow);
+        transform: translateY(-120%);
+        transition: transform 0.3s;
+      }
+
+      .navbar-menu.open {
+        transform: translateY(0);
+      }
+
+      .hamburger {
+        display: flex;
+      }
+
+      .nav-link {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .theme-toggle {
+        margin-left: 0;
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    /* MAIN CONTENT */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+
+    .page-header {
+      margin-bottom: 32px;
+    }
+
+    .page-title {
+      font-size: 32px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 8px;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .page-title svg {
+      width: 36px;
+      height: 36px;
+    }
+
+    .page-subtitle {
+      font-size: 16px;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    /* COMPACT LEGEND */
+    .compact-legend {
+      display: flex;
+      gap: 16px;
+      padding: 12px 16px;
+      background: var(--input-bg);
+      border-radius: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      align-items: center;
+      border: 1px solid var(--border-color);
+    }
+
+    .compact-legend-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .compact-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .compact-legend-color {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .compact-legend-item span {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    /* CARDS */
+    .card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 20px var(--card-shadow);
+      transition: all 0.3s ease;
+      border: 1px solid var(--border-color);
+    }
+
+    .card:hover {
+      box-shadow: 0 8px 30px var(--card-hover-shadow);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--border-color);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .card-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+    }
+
+    .card-title svg {
+      width: 24px;
+      height: 24px;
+      color: var(--accent-primary);
+    }
+
+    .card-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .badge {
+      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .card-description {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    /* FORM ELEMENTS */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 24px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-label {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-label svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .form-input {
+      background: var(--input-bg);
+      border: 2px solid var(--input-border);
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 15px;
+      color: var(--text-primary);
+      transition: all 0.2s;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 4px rgba(30, 64, 175, 0.1);
+    }
+
+    .form-input:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: var(--border-color);
+    }
+
+    .form-help {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* TOGGLE SWITCH */
+    .checkbox-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+    }
+
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 52px;
+      height: 28px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--border-color);
+      transition: 0.3s;
+      border-radius: 28px;
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: 0.3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .toggle-slider {
+      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+    }
+
+    input:checked + .toggle-slider:before {
+      transform: translateX(24px);
+    }
+
+    /* TABLE */
+    .table-container {
+      overflow-x: auto;
+      border-radius: 12px;
+      box-shadow: 0 0 0 1px var(--border-color);
+      background: var(--input-bg);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    thead {
+      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+      color: white;
+    }
+
+    th {
+      padding: 16px 20px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    td {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-primary);
+    }
+
+    tbody tr {
+      transition: all 0.15s;
+    }
+
+    tbody tr:hover {
+      background: var(--table-hover);
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .led-number {
+      font-weight: 700;
+      color: var(--accent-primary);
+      font-size: 15px;
+      font-family: 'Courier New', monospace;
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    /* TABLE INPUT - WITH VALIDATION STATES */
+    .table-input-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      position: relative;
+    }
+
+    .table-input, .airport-input {
+      background: var(--card-bg);
+      border: 2px solid var(--input-border);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      width: 100%;
+      transition: all 0.2s;
+      font-family: 'Courier New', monospace;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .table-input:focus, .airport-input:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+    }
+
+    /* WARNING STATE - INLINE VALIDATION */
+    .table-input.warning, .airport-input.warning {
+      background: var(--warning-bg);
+      border-color: var(--warning-border);
+      border-width: 2px;
+    }
+
+    .table-input.warning:focus, .airport-input.warning:focus {
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+    }
+
+    .validation-message {
+      font-size: 12px;
+      color: var(--warning);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 4px;
+    }
+
+    .validation-message svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+
+    /* AUTOCOMPLETE DROPDOWN */
+    .airport-input-wrapper {
+      position: relative;
+    }
+
+    .autocomplete-dropdown {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      background: var(--input-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      max-height: 300px;
+      overflow-y: auto;
+      z-index: 1000;
+      display: none;
+    }
+
+    .autocomplete-dropdown.show {
+      display: block;
+    }
+
+    .autocomplete-item {
+      padding: 12px 16px;
+      cursor: pointer;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      min-height: 44px;
+    }
+
+    .autocomplete-item:last-child {
+      border-bottom: none;
+    }
+
+    .autocomplete-item:hover {
+      background: var(--table-hover);
+    }
+
+    .autocomplete-item.selected {
+      background-color: var(--accent-primary);
+      color: white;
+    }
+
+    .autocomplete-item.selected:hover {
+      background-color: var(--accent-primary);
+    }
+
+    .autocomplete-code {
+      min-width: 60px;
+      font-weight: 600;
+      font-family: 'Courier New', monospace;
+    }
+
+    .autocomplete-name {
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    .autocomplete-item.selected .autocomplete-name {
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .autocomplete-no-results {
+      padding: 16px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    /* BUTTONS */
+    .btn {
+      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+      color: white;
+      border: none;
+      padding: 14px 32px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 16px rgba(30, 64, 175, 0.4);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(30, 64, 175, 0.5);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-block {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .btn-secondary {
+      background: var(--input-bg);
+      color: var(--text-primary);
+      border: 2px solid var(--border-color);
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 10px;
+      box-shadow: none;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent-primary);
+      background: var(--accent-primary);
+      color: white;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+    }
+
+    .btn-success {
+      background: var(--success);
+      box-shadow: 0 4px 16px rgba(40, 167, 69, 0.4);
+    }
+
+    .btn-success:hover {
+      box-shadow: 0 8px 24px rgba(40, 167, 69, 0.5);
+    }
+
+    .btn-ghost {
+      background-color: transparent;
+      color: var(--text-muted);
+      border: 2px solid var(--border-color);
+      box-shadow: none;
+    }
+
+    .btn-ghost:hover {
+      background-color: var(--card-bg);
+      color: var(--text-primary);
+      transform: none;
+    }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      animation: fadeIn 0.2s;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-box {
+      position: relative;
+      background-color: var(--card-bg);
+      padding: 28px;
+      border-radius: 16px;
+      box-shadow: 0 8px 30px var(--card-hover-shadow);
+      max-width: 500px;
+      width: calc(100% - 40px);
+      animation: slideUp 0.3s;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .modal-box h2 {
+      margin-bottom: 16px;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .wizard-modal-description {
+      margin: 16px 0;
+      color: var(--text-primary);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .wizard-modal-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    /* TOAST NOTIFICATIONS */
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      max-width: 400px;
+      width: calc(100% - 40px);
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px;
+      padding-right: 48px;
+      box-shadow: 0 8px 24px var(--card-hover-shadow);
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 2000;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .toast.error {
+      border-left: 4px solid var(--error);
+    }
+
+    .toast.success {
+      border-left: 4px solid var(--success);
+    }
+
+    .toast.info {
+      border-left: 4px solid var(--accent-primary);
+    }
+
+    .toast.warning {
+      border-left: 4px solid var(--warning);
+    }
+
+    .toast-title {
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: var(--text-primary);
+    }
+
+    .toast-message {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .toast-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      line-height: 1;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .toast-close:hover {
+      color: var(--text-primary);
+      background: var(--border-color);
+      border-radius: 4px;
+    }
+
+    /* LOADING OVERLAY */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    .loading-spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      color: white;
+      font-size: 16px;
+      margin-top: 16px;
+      text-align: center;
+    }
+
+    /* WIZARD STYLES */
+    .wizard-container {
+      padding: 24px;
+      background-color: var(--input-bg);
+      border-radius: 12px;
+      margin-bottom: 24px;
+    }
+
+    .wizard-instructions {
+      padding: 16px;
+      background-color: rgba(30, 64, 175, 0.1);
+      border-left: 4px solid var(--accent-primary);
+      border-radius: 8px;
+      margin-bottom: 24px;
+    }
+
+    .wizard-instructions p {
+      margin: 8px 0;
+      color: var(--text-primary);
+    }
+
+    .wizard-instructions p:first-child {
+      font-size: 18px;
+      font-weight: 700;
+      margin-top: 0;
+    }
+
+    .wizard-instructions p:last-child {
+      margin-bottom: 0;
+    }
+
+    .wizard-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .wizard-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      transition: border-color 0.2s;
+    }
+
+    .wizard-row:focus-within {
+      border-color: var(--accent-primary);
+    }
+
+    .wizard-led-label {
+      font-weight: 700;
+      min-width: 80px;
+      color: var(--text-primary);
+    }
+
+    .wizard-input {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .wizard-next-btn {
+      padding: 12px 24px;
+      background-color: var(--accent-primary);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      min-height: 44px;
+      min-width: 100px;
+      transition: all 0.2s;
+    }
+
+    .wizard-next-btn:hover:not(:disabled) {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .wizard-next-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .wizard-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin-top: 24px;
+    }
+
+    /* RESPONSIVE - MOBILE */
+    @media (max-width: 600px) {
+      .wizard-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .wizard-led-label {
+        text-align: center;
+        min-width: auto;
+      }
+
+      .wizard-input,
+      .wizard-next-btn {
+        width: 100%;
+      }
+
+      .wizard-buttons {
+        flex-direction: column;
+      }
+
+      .wizard-modal-buttons {
+        flex-direction: column;
+      }
+
+      .autocomplete-item {
+        min-height: 48px;
+        padding: 12px 16px;
+      }
+
+      .btn {
+        min-height: 48px;
+      }
+    }
+
+    /* UTILITY CLASSES */
+    .hidden { display: none !important; }
+    .flex { display: flex; }
+    .flex-col { flex-direction: column; }
+    .items-center { align-items: center; }
+    .justify-between { justify-content: space-between; }
+    .gap-sm { gap: 8px; }
+    .gap-md { gap: 16px; }
+    .mb-md { margin-bottom: 16px; }
+    .text-muted { color: var(--text-muted); }
+    .font-bold { font-weight: 700; }
+    .w-80 { width: 80px; }
+    .max-w-300 { max-width: 300px; }
+  </style>
 </head>
 <body>
-  <header class="page-header">
-    <h1>✈️ Skyboard Configuration</h1>
-    <nav>
-      <a href="/" class="active">Config</a>
-      <a href="/diagnostics">Diagnostics</a>
-      <a href="/files">Files</a>
-    </nav>
-  </header>
-
-  <div class="container">
-    <!-- Instructions -->
-    <div class="card">
-      <h2>Instructions</h2>
-      <ul>
-        <li><strong>Airport Codes:</strong> Type to search by ICAO code, airport name, or city</li>
-        <li><strong>Legend Values:</strong> Use LIFR, IFR, MVFR, WVFR, or VFR for static color display</li>
-        <li><strong>Skip LEDs:</strong> Enter "NULL" or "BLACK" to turn off</li>
-        <li><strong>CSV Import:</strong> Upload a CSV file with format: index,code (e.g., "0,KSFO")</li>
-        <li><strong>Changes save:</strong> Click "Save Configuration" when done</li>
-      </ul>
-    </div>
-
-    <!-- Flight Category Legend -->
-    <div class="legend">
-      <div class="legend-item">
-        <div class="legend-color" style="background: var(--color-lifr)"></div>
-        <span>LIFR</span>
+  <!-- NAVIGATION BAR -->
+  <nav class="navbar">
+    <div class="navbar-container">
+      <a href="/" class="navbar-brand">
+        <i data-lucide="plane"></i>
+        <span>Skyboard</span>
+      </a>
+      <div class="hamburger" onclick="toggleMenu()">
+        <span></span>
+        <span></span>
+        <span></span>
       </div>
-      <div class="legend-item">
-        <div class="legend-color" style="background: var(--color-ifr)"></div>
-        <span>IFR</span>
-      </div>
-      <div class="legend-item">
-        <div class="legend-color" style="background: var(--color-mvfr)"></div>
-        <span>MVFR</span>
-      </div>
-      <div class="legend-item">
-        <div class="legend-color" style="background: var(--color-wvfr)"></div>
-        <span>WVFR (Windy)</span>
-      </div>
-      <div class="legend-item">
-        <div class="legend-color" style="background: var(--color-vfr)"></div>
-        <span>VFR</span>
-      </div>
-      <div class="legend-item">
-        <div class="legend-color" style="background: var(--color-pending)"></div>
-        <span>No Wx Data</span>
-      </div>
-    </div>
-
-    <!-- Settings -->
-    <div class="card">
-      <h2>Settings</h2>
-      <div class="settings-grid">
-        <div class="setting-row">
-          <label for="numLeds">Number of LEDs:</label>
-          <input type="number" id="numLeds" class="input max-w-120" min="1" max="150" value="80">
-        </div>
-        <div class="setting-row">
-          <label for="brightness">Brightness (0-255):</label>
-          <div class="flex gap-md items-center flex-1">
-            <input type="range" id="brightness" class="flex-1 max-w-300" min="0" max="255" value="20">
-            <input type="number" id="brightnessValue" class="input w-80" min="0" max="255" value="20">
-          </div>
-        </div>
-        <div class="setting-row">
-          <label for="updateInterval">Update Interval:</label>
-          <div class="flex gap-sm items-center">
-            <input type="number" id="updateInterval" class="input w-80" min="5" max="60" value="15">
-            <span>minutes</span>
-          </div>
-        </div>
-        <div class="setting-row">
-          <label for="hostname">Hostname:</label>
-          <div class="flex flex-col gap-xs">
-            <input type="text" id="hostname" class="input max-w-250" maxlength="32" placeholder="led-sectional" pattern="[a-zA-Z0-9\-]+">
-            <small class="text-muted">
-              Access via: http://<span id="hostnamePreview" class="font-bold">led-sectional</span>.local
-            </small>
-          </div>
-        </div>
-        <div class="setting-row">
-          <label>Enable mDNS:</label>
-          <div class="flex items-center">
-            <input type="checkbox" id="useMDNS" checked>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- LED Assignments -->
-    <div class="card">
-      <div class="flex justify-between items-center mb-md">
-        <h2 class="m-0">LED Assignments</h2>
-        <button id="startWizardBtn" class="btn btn-primary">
-          🔧 Start LED Setup Wizard
+      <div class="navbar-menu" id="navMenu">
+        <a href="/" class="nav-link active">
+          <i data-lucide="settings"></i>
+          Configuration
+        </a>
+        <a href="/diagnostics" class="nav-link">
+          <i data-lucide="activity"></i>
+          Diagnostics
+        </a>
+        <a href="/files" class="nav-link">
+          <i data-lucide="folder"></i>
+          Files
+        </a>
+        <button class="theme-toggle" onclick="toggleTheme()">
+          <i data-lucide="sun" id="themeIcon"></i>
         </button>
       </div>
+    </div>
+  </nav>
 
-      <!-- Setup Wizard Container (hidden by default) -->
+  <!-- MAIN CONTENT -->
+  <div class="container">
+    <div class="page-header">
+      <h1 class="page-title">
+        <i data-lucide="sliders"></i>
+        LED Configuration
+      </h1>
+      <p class="page-subtitle">Configure your aviation weather LED sectional chart</p>
+    </div>
+
+    <!-- SETTINGS CARD -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">
+          <i data-lucide="settings-2"></i>
+          Settings
+        </h2>
+      </div>
+      <p class="card-description">Configure LED strip parameters and network settings</p>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Number of LEDs</label>
+          <input type="number" id="numLeds" class="form-input" min="1" max="150" value="80">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Brightness (0-255)</label>
+          <input type="number" id="brightnessValue" class="form-input" min="0" max="255" value="20">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Update Interval (minutes)</label>
+          <input type="number" id="updateInterval" class="form-input" min="5" max="60" value="15">
+        </div>
+      </div>
+
+      <hr style="border: none; border-top: 2px solid var(--border-color); margin: 24px 0;">
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">
+            <i data-lucide="wifi"></i>
+            Enable mDNS
+          </label>
+          <div class="checkbox-wrapper">
+            <label class="toggle-switch">
+              <input type="checkbox" id="useMDNS" checked>
+              <span class="toggle-slider"></span>
+            </label>
+            <span class="text-muted" style="font-size: 14px;">Allow access via .local domain</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            <i data-lucide="link"></i>
+            Hostname
+          </label>
+          <input type="text" id="hostname" class="form-input" value="led-sectional" maxlength="32" pattern="[a-zA-Z0-9\-]+">
+          <div class="form-help">
+            Access at: <strong>http://<span id="hostnamePreview">led-sectional</span>.local</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LED ASSIGNMENTS -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">
+          <i data-lucide="map-pin"></i>
+          LED Assignments
+        </h2>
+        <div class="card-header-actions">
+          <span class="badge"><span id="ledCountBadge">0</span> configured</span>
+          <button id="startWizardBtn" class="btn-secondary">
+            <i data-lucide="wand-2"></i>
+            Setup Wizard
+          </button>
+        </div>
+      </div>
+
+      <!-- COMPACT LEGEND -->
+      <div class="compact-legend">
+        <span class="compact-legend-label">Legend:</span>
+        <div class="compact-legend-item">
+          <div class="compact-legend-color" style="background: #FF00FF;"></div>
+          <span>LIFR</span>
+        </div>
+        <div class="compact-legend-item">
+          <div class="compact-legend-color" style="background: #FF0000;"></div>
+          <span>IFR</span>
+        </div>
+        <div class="compact-legend-item">
+          <div class="compact-legend-color" style="background: #0000FF;"></div>
+          <span>MVFR</span>
+        </div>
+        <div class="compact-legend-item">
+          <div class="compact-legend-color" style="background: #FFFF00;"></div>
+          <span>WVFR</span>
+        </div>
+        <div class="compact-legend-item">
+          <div class="compact-legend-color" style="background: #00FF00;"></div>
+          <span>VFR</span>
+        </div>
+      </div>
+
+      <!-- WIZARD CONTAINER (hidden by default) -->
       <div id="wizardContainer" class="wizard-container" style="display: none;">
         <div class="wizard-instructions">
-          <p><strong>LED Setup Wizard</strong></p>
+          <p>LED Setup Wizard</p>
           <p>This wizard will help you identify each LED. The current LED will blink ORANGE. Previous LEDs will be GREEN. You can edit ANY textbox at ANY time. Click 'Next' to add the next LED.</p>
         </div>
 
@@ -124,49 +1224,88 @@
 
         <div class="wizard-buttons">
           <button id="wizardSaveBtn" class="btn btn-success">
-            💾 Save Configuration
+            <i data-lucide="save"></i>
+            Save Configuration
           </button>
         </div>
       </div>
 
-      <!-- Manual LED Table (shown when wizard is not active) -->
+      <!-- MANUAL LED TABLE (shown when wizard is not active) -->
       <div id="manualLedConfig">
-        <div class="flex justify-between items-center mb-md gap-md">
-          <input type="text" id="searchBox" class="input max-w-300" placeholder="Search by LED or airport code...">
+        <div class="flex justify-between items-center mb-md gap-md" style="flex-wrap: wrap;">
+          <input type="text" id="searchBox" class="form-input max-w-300" placeholder="Search by LED or airport code...">
 
-          <!-- CSV Import/Export Buttons -->
           <div class="flex gap-sm items-center">
             <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
-            <button id="importCsvBtn" class="btn btn-secondary">
-              📄 Import CSV
+            <button id="importCsvBtn" class="btn-secondary">
+              <i data-lucide="file-text"></i>
+              Import CSV
             </button>
-            <button id="exportCsvBtn" class="btn btn-secondary">
-              📥 Download CSV
+            <button id="exportCsvBtn" class="btn-secondary">
+              <i data-lucide="download"></i>
+              Download CSV
             </button>
           </div>
         </div>
-        <table class="led-table">
-        <thead>
-          <tr>
-            <th>LED</th>
-            <th>Airport</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody id="ledTableBody">
-          <!-- Populated by JavaScript -->
-        </tbody>
-      </table>
-      </div> <!-- /manualLedConfig -->
+
+        <p class="card-description">Assign airport codes to each LED. Use Tab to move between fields, Enter to save and advance.</p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>LED</th>
+                <th>Airport Code</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="ledTableBody">
+              <!-- Populated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
-    <!-- Save Button -->
-    <button id="saveBtn" class="btn btn-primary btn-block">
-      💾 Save Configuration
+    <!-- SAVE BUTTON -->
+    <button id="saveBtn" class="btn btn-block">
+      <i data-lucide="save"></i>
+      Save Configuration
     </button>
   </div>
 
+  <!-- WIZARD START MODAL -->
+  <div id="wizardStartModal" class="modal-overlay" style="display: none;">
+    <div class="modal-box">
+      <h2>Start LED Setup Wizard</h2>
+      <p class="wizard-modal-description" id="wizardModalLedCount">
+        You currently have <strong>0 LEDs</strong> configured.
+      </p>
+      <div class="wizard-modal-buttons">
+        <button id="wizardStartScratchBtn" class="btn btn-secondary">
+          Start from Scratch
+        </button>
+        <button id="wizardContinueBtn" class="btn">
+          Continue from Existing (<span id="wizardContinueLedCount">0</span> LEDs)
+        </button>
+        <button id="wizardCancelBtn" class="btn btn-ghost">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="toast">
+    <button class="toast-close" onclick="hideToast()" aria-label="Close notification">&times;</button>
+    <div class="toast-title" id="toastTitle"></div>
+    <div class="toast-message" id="toastMessage"></div>
+  </div>
+
   <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
     // Global state
     let currentConfig = {
       numLeds: 80,
@@ -176,7 +1315,7 @@
       useMDNS: true,
       airports: []
     };
-    // Fallback inline airport database (used if GitHub fetch fails)
+
     let airportsDatabase = [
       { code: "LIFR", name: "Low IFR (Legend)", city: "Flight Category" },
       { code: "IFR", name: "IFR (Legend)", city: "Flight Category" },
@@ -186,65 +1325,65 @@
       { code: "NULL", name: "Off (No Assignment)", city: "Special" },
       { code: "BLACK", name: "Off (Black)", city: "Special" }
     ];
+
     let statusData = [];
+    let wizardActive = false;
+    let wizardState = {
+      numLeds: 0,
+      currentIndex: 0,
+      airports: [],
+      brightness: 20
+    };
+    let cachedConfigForWizard = null;
+    let toastTimeoutId = null;
+
+    const WIZARD_STATE_KEY = 'skyboard_wizard_state';
+    const WIZARD_STATE_TIMESTAMP_KEY = 'skyboard_wizard_timestamp';
 
     // Initialize on page load
     document.addEventListener('DOMContentLoaded', async function() {
-      // Story 3.2: Show loading indicator during page initialization
       showLoadingIndicator('Loading configuration...');
 
       try {
-        // Load airport database from GitHub
         await loadAirportDatabase();
-
-        // Load current config
         await loadConfig();
-
-        // Load status indicators
         await loadStatus();
-
-        // Auto-refresh status every 60 seconds
         setInterval(loadStatus, 60000);
-
-        // Setup event listeners
         setupEventListeners();
-
-        // Check for crashed wizard session (do this AFTER config loads)
         setTimeout(() => checkForCrashedWizardSession(), 500);
       } finally {
-        // Story 3.2: Hide loading indicator once everything is loaded
         hideLoadingIndicator();
       }
+
+      // Initialize Lucide icons after content is loaded
+      lucide.createIcons();
     });
 
-    // Load airport database from ESP8266 LittleFS
+    // Load airport database
     async function loadAirportDatabase() {
       try {
         const response = await fetch('/data/airports.json');
         if (!response.ok) {
-          console.warn('Failed to load airport database from ESP8266, using fallback values only');
+          console.warn('Failed to load airport database, using fallback');
           return;
         }
         const airportsFromESP = await response.json();
-        // Transform array format [code, name, state] to object format {code, name, city}
-        // Note: "city" field is actually state abbreviation in current data format
         const transformedAirports = airportsFromESP.map(a => ({
           code: a[0],
           name: a[1],
-          city: a[2]  // This is STATE, not city - but kept for compatibility
+          city: a[2]
         }));
-        // APPEND to existing fallback values, don't replace
         airportsDatabase = [...airportsDatabase, ...transformedAirports];
-        console.log(`Loaded ${airportsDatabase.length} airports total from ESP8266`);
+        console.log(`Loaded ${airportsDatabase.length} airports`);
       } catch (error) {
-        console.warn('Airport database unavailable from ESP8266, using fallback values:', error);
+        console.warn('Airport database unavailable:', error);
       }
     }
 
-    // Load configuration from ESP8266
+    // Load configuration - UPDATED TO USE /api/v1/config
     async function loadConfig() {
       try {
-        const response = await fetch('/config');
+        const response = await fetch('/api/v1/config');
         if (!response.ok) throw new Error('Failed to load config');
 
         const data = await response.json();
@@ -257,24 +1396,20 @@
           airports: data.airports || []
         };
 
-        // Populate form fields
         document.getElementById('numLeds').value = currentConfig.numLeds;
-        document.getElementById('brightness').value = currentConfig.brightness;
         document.getElementById('brightnessValue').value = currentConfig.brightness;
         document.getElementById('updateInterval').value = currentConfig.updateIntervalMinutes;
         document.getElementById('hostname').value = currentConfig.hostname;
         document.getElementById('hostnamePreview').textContent = currentConfig.hostname;
         document.getElementById('useMDNS').checked = currentConfig.useMDNS;
 
-        // Render LED table
         renderLEDTable();
-
       } catch (error) {
         showToast('Error loading configuration: ' + error.message, 'error');
       }
     }
 
-    // Load LED status from ESP8266
+    // Load LED status
     async function loadStatus() {
       try {
         const response = await fetch('/api/status');
@@ -284,48 +1419,43 @@
         }
 
         const data = await response.json();
-        statusData = data.leds || [];  // Extract the "leds" array
+        statusData = data.leds || [];
         updateStatusIndicators();
-
       } catch (error) {
         console.warn('Failed to load status:', error);
       }
     }
 
-    // Derive display color from flight category, not LED color
+    // Get color from flight category
     function getColorFromFlightCategory(assignment, wxValue) {
-      // LEGEND LEDs: Assignment IS the flight category (LIFR, IFR, etc.)
-      // These can be at ANY LED index, not just 0-4
       const legendValues = ['LIFR', 'IFR', 'MVFR', 'WVFR', 'VFR'];
       if (legendValues.includes(assignment)) {
         switch(assignment) {
-          case 'LIFR': return '#FF00FF';  // Magenta
-          case 'IFR':  return '#FF0000';  // Red
-          case 'MVFR': return '#0000FF';  // Blue
-          case 'WVFR': return '#FFFF00';  // Yellow (windy VFR)
-          case 'VFR':  return '#00FF00';  // Green
+          case 'LIFR': return '#FF00FF';
+          case 'IFR':  return '#FF0000';
+          case 'MVFR': return '#0000FF';
+          case 'WVFR': return '#FFFF00';
+          case 'VFR':  return '#00FF00';
         }
       }
 
-      // NULL/BLACK assignments
       if (assignment === 'NULL' || assignment === 'BLACK' || !wxValue) {
-        return '#000000';  // Black
+        return '#000000';
       }
 
-      // AIRPORT LEDs: Color based on wxValue from weather cache
       switch(wxValue) {
-        case 'LIFR': return '#FF00FF';  // Magenta
-        case 'IFR':  return '#FF0000';  // Red
-        case 'MVFR': return '#0000FF';  // Blue
-        case 'WVFR': return '#FFFF00';  // Yellow (windy VFR)
-        case 'VFR':  return '#00FF00';  // Green
-        case 'Pending': return '#FFA500';  // Orange (no data yet)
-        case '-':    return '#000000';  // Black (NULL/BLACK assignment)
-        default:     return '#888888';  // Gray (unknown)
+        case 'LIFR': return '#FF00FF';
+        case 'IFR':  return '#FF0000';
+        case 'MVFR': return '#0000FF';
+        case 'WVFR': return '#FFFF00';
+        case 'VFR':  return '#00FF00';
+        case 'Pending': return '#FFA500';
+        case '-':    return '#000000';
+        default:     return '#888888';
       }
     }
 
-    // Render LED table with autocomplete inputs
+    // Render LED table
     function renderLEDTable() {
       const tbody = document.getElementById('ledTableBody');
       tbody.innerHTML = '';
@@ -336,14 +1466,11 @@
 
         const tr = document.createElement('tr');
 
-        // LED number
         const tdNum = document.createElement('td');
         tdNum.className = 'led-number';
         tdNum.textContent = i;
         tr.appendChild(tdNum);
 
-        // Airport code (editable with autocomplete)
-        // Story 3.3: Added ARIA attributes for accessibility
         const tdAirport = document.createElement('td');
         tdAirport.innerHTML = `
           <div class="airport-input-wrapper">
@@ -367,7 +1494,6 @@
         `;
         tr.appendChild(tdAirport);
 
-        // Status dot - derive color from flight category, NOT LED color
         const tdStatus = document.createElement('td');
         const statusDot = document.createElement('span');
         statusDot.className = 'status-dot';
@@ -379,16 +1505,21 @@
         tbody.appendChild(tr);
       }
 
-      // Add autocomplete event listeners
       document.querySelectorAll('.airport-input').forEach(input => {
         input.addEventListener('input', handleAutocompleteInput);
         input.addEventListener('focus', handleAutocompleteInput);
         input.addEventListener('blur', (e) => {
           setTimeout(() => hideAutocomplete(e.target.dataset.led), 200);
         });
-        // Story 3.3: Add keyboard navigation event listener
         input.addEventListener('keydown', handleKeyboardNavigation);
       });
+
+      // Update badge count
+      const configuredCount = currentConfig.airports.filter(a => a && a !== 'NULL' && a !== '').length;
+      document.getElementById('ledCountBadge').textContent = configuredCount;
+
+      // Reinitialize Lucide icons for dynamically added content
+      lucide.createIcons();
     }
 
     // Update status indicators
@@ -396,7 +1527,6 @@
       statusData.forEach(item => {
         const dot = document.querySelector(`.status-dot[data-led="${item.index}"]`);
         if (dot) {
-          // Derive color from flight category, NOT LED color
           const assignment = currentConfig.airports[item.index] || 'NULL';
           dot.style.backgroundColor = getColorFromFlightCategory(assignment, item.wxValue);
         }
@@ -409,10 +1539,9 @@
       const ledIndex = input.dataset.led;
       const query = input.value.trim().toUpperCase();
 
-      // If empty, show all options (special values + some airports)
       let matches;
       if (query.length === 0) {
-        matches = airportsDatabase.slice(0, 20);  // Show first 20 options
+        matches = airportsDatabase.slice(0, 20);
       } else {
         matches = searchAirports(query);
       }
@@ -423,97 +1552,13 @@
     // Search airports
     function searchAirports(query) {
       const q = query.toLowerCase();
-
-      // Filter from airportsDatabase (already includes special values + airports)
       const matches = airportsDatabase.filter(a =>
         a && a.code && a.name && a.city &&
         (a.code.toLowerCase().includes(q) ||
          a.name.toLowerCase().includes(q) ||
          a.city.toLowerCase().includes(q))
       );
-
       return matches.slice(0, 10);
-    }
-
-    /**
-     * Calculate dropdown positioning based on available viewport space
-     * Story 3.4: Smart dropdown positioning (above/below)
-     * @param {HTMLElement} inputElement - The input element
-     * @returns {Object} - { position: 'below' | 'above', spaceBelow, spaceAbove }
-     */
-    function calculateDropdownPosition(inputElement) {
-      const inputRect = inputElement.getBoundingClientRect();
-      const dropdownHeight = 300; // Estimated max height (matches CSS)
-
-      const spaceBelow = window.innerHeight - inputRect.bottom;
-      const spaceAbove = inputRect.top;
-
-      // Check if mobile and keyboard might be visible
-      const isMobile = window.innerWidth < 600;
-      const keyboardLikelyVisible = isMobile && window.visualViewport
-        ? window.visualViewport.height < window.innerHeight - 100
-        : false;
-
-      // Decide position: prefer above if keyboard visible or insufficient space below
-      let position = 'below'; // default
-      if (keyboardLikelyVisible || (spaceBelow < dropdownHeight && spaceAbove > spaceBelow)) {
-        position = 'above';
-      }
-
-      return { position, spaceBelow, spaceAbove };
-    }
-
-    /**
-     * Apply dropdown positioning styles
-     * Story 3.4: Smart dropdown positioning
-     * @param {HTMLElement} dropdown - The dropdown element
-     * @param {HTMLElement} inputElement - The input element
-     * @param {string} position - 'above' or 'below'
-     */
-    function applyDropdownPosition(dropdown, inputElement, position) {
-      const isMobile = window.innerWidth < 600;
-
-      // Clear previous positioning classes
-      dropdown.classList.remove('position-above', 'position-below');
-      dropdown.classList.add(`position-${position}`);
-
-      // With position: absolute, positioning is relative to the wrapper
-      if (position === 'above') {
-        // Position above input (use negative value to go above)
-        dropdown.style.bottom = 'calc(100% + 4px)';
-        dropdown.style.top = 'auto';
-      } else {
-        // Position below input (default)
-        dropdown.style.top = 'calc(100% + 4px)';
-        dropdown.style.bottom = 'auto';
-      }
-
-      // Horizontal positioning for mobile
-      if (isMobile) {
-        // Story 3.4: Mobile - add padding from edges
-        // Since we're position: absolute within wrapper, use negative margins
-        const inputRect = inputElement.getBoundingClientRect();
-        const viewportLeft = inputRect.left;
-
-        // If input is too close to edge, adjust
-        if (viewportLeft < 16) {
-          dropdown.style.left = `-${viewportLeft - 16}px`;
-        } else {
-          dropdown.style.left = '0';
-        }
-
-        // Calculate right position
-        const viewportRight = window.innerWidth - inputRect.right;
-        if (viewportRight < 16) {
-          dropdown.style.right = `-${viewportRight - 16}px`;
-        } else {
-          dropdown.style.right = '0';
-        }
-      } else {
-        // Desktop - full width of input
-        dropdown.style.left = '0';
-        dropdown.style.right = '0';
-      }
     }
 
     // Show autocomplete dropdown
@@ -523,16 +1568,10 @@
       if (matches.length === 0) {
         dropdown.innerHTML = '<div class="autocomplete-no-results">No airports found</div>';
         dropdown.classList.add('show');
-        // Story 3.3: Set ARIA expanded state
         dropdown.setAttribute('aria-expanded', 'true');
-        // Story 3.4: Apply smart positioning (even for no results)
-        const positionInfo = calculateDropdownPosition(inputEl);
-        applyDropdownPosition(dropdown, inputEl, positionInfo.position);
         return;
       }
 
-      const query = inputEl.value.toUpperCase();
-      // Story 3.3: Add data-code and unique IDs for keyboard navigation and ARIA
       dropdown.innerHTML = matches.map((a, idx) => {
         const displayName = a.name.length > 35 ? a.name.substring(0, 32) + '...' : a.name;
         const itemId = `autocomplete-led${ledIndex}-item${idx}`;
@@ -548,12 +1587,7 @@
       }).join('');
 
       dropdown.classList.add('show');
-      // Story 3.3: Set ARIA expanded state
       dropdown.setAttribute('aria-expanded', 'true');
-
-      // Story 3.4: Apply smart positioning
-      const positionInfo = calculateDropdownPosition(inputEl);
-      applyDropdownPosition(dropdown, inputEl, positionInfo.position);
     }
 
     // Hide autocomplete dropdown
@@ -561,7 +1595,6 @@
       const dropdown = document.querySelector(`.autocomplete-dropdown[data-led="${ledIndex}"]`);
       if (dropdown) {
         dropdown.classList.remove('show');
-        // Story 3.3: Set ARIA expanded state
         dropdown.setAttribute('aria-expanded', 'false');
       }
     }
@@ -574,7 +1607,6 @@
         input.value = code;
       }
 
-      // Also update wizard state if wizard is active
       if (wizardActive && wizardState.airports) {
         wizardState.airports[ledIndex] = code;
       }
@@ -582,117 +1614,63 @@
       hideAutocomplete(ledIndex);
     }
 
-    // Story 3.3: Keyboard Navigation for Airport Inputs
-    // Handles Tab, Shift+Tab, Enter, Arrow keys, and Escape for airport inputs
-
-    /**
-     * Handle keyboard navigation in airport inputs
-     * Story 3.3: Keyboard Navigation for Airport Grid
-     * @param {KeyboardEvent} event - Keyboard event
-     */
+    // Keyboard navigation
     function handleKeyboardNavigation(event) {
       const input = event.target;
       const ledIndex = parseInt(input.dataset.led);
       const dropdown = document.querySelector(`.autocomplete-dropdown[data-led="${ledIndex}"]`);
       const isDropdownOpen = dropdown && dropdown.classList.contains('show');
 
-      // Get all airport inputs (use class selector to work for both manual and wizard modes)
       const allInputs = Array.from(document.querySelectorAll('.airport-input'));
       const currentIndex = allInputs.indexOf(input);
 
-      // Tab key (without Shift) - Navigate to next input
       if (event.key === 'Tab' && !event.shiftKey) {
         event.preventDefault();
+        if (isDropdownOpen) hideAutocomplete(ledIndex);
 
-        if (isDropdownOpen) {
-          // Close dropdown if open
-          hideAutocomplete(ledIndex);
-        }
-
-        // Determine next input index
         if (currentIndex < allInputs.length - 1) {
-          // Not last field - move to next
           const nextInput = allInputs[currentIndex + 1];
-          // Story 3.4: Auto-scroll to next input
           nextInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
           setTimeout(() => nextInput.focus(), 100);
         } else {
-          // Last field - handle based on mode
-          if (wizardActive) {
-            // Wizard mode: This is handled by the wizard's "Next" button logic
-            // Don't auto-create here, as wizard already has that behavior
-            // Just wrap to first input for now
-            allInputs[0].focus();
-          } else {
-            // Manual config mode: Wrap to first input
-            allInputs[0].focus();
-          }
+          allInputs[0].focus();
         }
-      }
-
-      // Shift+Tab - Navigate to previous input
-      else if (event.key === 'Tab' && event.shiftKey) {
+      } else if (event.key === 'Tab' && event.shiftKey) {
         event.preventDefault();
-
-        if (isDropdownOpen) {
-          hideAutocomplete(ledIndex);
-        }
+        if (isDropdownOpen) hideAutocomplete(ledIndex);
 
         const prevIndex = currentIndex === 0 ? allInputs.length - 1 : currentIndex - 1;
         allInputs[prevIndex].focus();
-      }
-
-      // Enter key - Select autocomplete item and advance
-      else if (event.key === 'Enter') {
+      } else if (event.key === 'Enter') {
         event.preventDefault();
 
         if (isDropdownOpen) {
           const selectedItem = dropdown.querySelector('.autocomplete-item.selected');
           if (selectedItem) {
-            // Get code from data attribute
             const code = selectedItem.dataset.code;
             selectAirport(ledIndex, code);
           }
           hideAutocomplete(ledIndex);
         }
 
-        // Advance to next field (same logic as Tab)
         if (currentIndex < allInputs.length - 1) {
           const nextInput = allInputs[currentIndex + 1];
-          // Story 3.4: Auto-scroll to next input
           nextInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
           setTimeout(() => nextInput.focus(), 100);
         } else {
-          // Last field behavior
-          if (wizardActive) {
-            allInputs[0].focus();
-          } else {
-            allInputs[0].focus();
-          }
+          allInputs[0].focus();
         }
-      }
-
-      // Arrow Down - Open or navigate autocomplete
-      else if (event.key === 'ArrowDown') {
+      } else if (event.key === 'ArrowDown') {
         event.preventDefault();
-
         if (!isDropdownOpen) {
-          // Open autocomplete if closed
           handleAutocompleteInput({ target: input });
         } else {
-          // Navigate down in autocomplete
           moveAutocompleteSelection(ledIndex, 'down');
         }
-      }
-
-      // Arrow Up - Navigate autocomplete
-      else if (event.key === 'ArrowUp' && isDropdownOpen) {
+      } else if (event.key === 'ArrowUp' && isDropdownOpen) {
         event.preventDefault();
         moveAutocompleteSelection(ledIndex, 'up');
-      }
-
-      // Escape - Close autocomplete
-      else if (event.key === 'Escape') {
+      } else if (event.key === 'Escape') {
         if (isDropdownOpen) {
           event.preventDefault();
           hideAutocomplete(ledIndex);
@@ -701,12 +1679,6 @@
       }
     }
 
-    /**
-     * Move selection in autocomplete dropdown
-     * Story 3.3: Arrow key navigation within autocomplete
-     * @param {number} ledIndex - LED index
-     * @param {string} direction - 'up' or 'down'
-     */
     function moveAutocompleteSelection(ledIndex, direction) {
       const dropdown = document.querySelector(`.autocomplete-dropdown[data-led="${ledIndex}"]`);
       if (!dropdown) return;
@@ -714,7 +1686,6 @@
       const items = Array.from(dropdown.querySelectorAll('.autocomplete-item'));
       if (items.length === 0) return;
 
-      // Find currently selected item
       let currentIndex = -1;
       items.forEach((item, i) => {
         if (item.classList.contains('selected')) {
@@ -722,25 +1693,21 @@
         }
       });
 
-      // Remove previous selection
       if (currentIndex >= 0) {
         items[currentIndex].classList.remove('selected');
         items[currentIndex].removeAttribute('aria-selected');
       }
 
-      // Calculate new index
       if (direction === 'down') {
         currentIndex = currentIndex < items.length - 1 ? currentIndex + 1 : 0;
       } else {
         currentIndex = currentIndex > 0 ? currentIndex - 1 : items.length - 1;
       }
 
-      // Add new selection
       items[currentIndex].classList.add('selected');
       items[currentIndex].setAttribute('aria-selected', 'true');
       items[currentIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 
-      // Update aria-activedescendant on input
       const input = document.querySelector(`.airport-input[data-led="${ledIndex}"]`);
       if (input) {
         const itemId = items[currentIndex].id;
@@ -750,11 +1717,6 @@
       }
     }
 
-    /**
-     * Clear autocomplete selection
-     * Story 3.3: Remove keyboard selection highlight
-     * @param {number} ledIndex - LED index
-     */
     function clearAutocompleteSelection(ledIndex) {
       const dropdown = document.querySelector(`.autocomplete-dropdown[data-led="${ledIndex}"]`);
       if (!dropdown) return;
@@ -765,7 +1727,6 @@
         item.removeAttribute('aria-selected');
       });
 
-      // Clear aria-activedescendant
       const input = document.querySelector(`.airport-input[data-led="${ledIndex}"]`);
       if (input) {
         input.removeAttribute('aria-activedescendant');
@@ -774,29 +1735,10 @@
 
     // Setup event listeners
     function setupEventListeners() {
-      // Hostname preview
       document.getElementById('hostname').addEventListener('input', (e) => {
         document.getElementById('hostnamePreview').textContent = e.target.value || 'led-sectional';
       });
 
-      // Brightness slider sync
-      const brightnessSlider = document.getElementById('brightness');
-      const brightnessValue = document.getElementById('brightnessValue');
-
-      brightnessSlider.addEventListener('input', (e) => {
-        brightnessValue.value = e.target.value;
-      });
-
-      brightnessValue.addEventListener('input', (e) => {
-        let val = parseInt(e.target.value);
-        if (isNaN(val)) val = 0;
-        if (val < 0) val = 0;
-        if (val > 255) val = 255;
-        brightnessSlider.value = val;
-        brightnessValue.value = val;
-      });
-
-      // Number of LEDs change
       document.getElementById('numLeds').addEventListener('change', (e) => {
         const newNum = parseInt(e.target.value);
         if (newNum >= 5 && newNum <= 150 && newNum !== currentConfig.numLeds) {
@@ -805,7 +1747,6 @@
         }
       });
 
-      // Search box filtering
       document.getElementById('searchBox').addEventListener('input', (e) => {
         const query = e.target.value.toLowerCase();
         const rows = document.querySelectorAll('#ledTableBody tr');
@@ -823,26 +1764,66 @@
         });
       });
 
-      // Save button
       document.getElementById('saveBtn').addEventListener('click', saveConfiguration);
 
-      // CSV import button
       document.getElementById('importCsvBtn').addEventListener('click', () => {
         document.getElementById('csvFileInput').click();
       });
 
       document.getElementById('csvFileInput').addEventListener('change', handleCSVImport);
-
-      // CSV export button - Story 3.8
       document.getElementById('exportCsvBtn').addEventListener('click', exportConfigurationAsCSV);
+
+      // Wizard button
+      document.getElementById('startWizardBtn').addEventListener('click', async () => {
+        try {
+          const response = await fetch('/api/v1/config');
+          if (!response.ok) throw new Error('Failed to fetch config');
+          cachedConfigForWizard = await response.json();
+          showWizardStartModal(cachedConfigForWizard.numLeds);
+        } catch (error) {
+          console.error('Failed to load current config:', error);
+          showToast('Failed to load current config. Check ESP8266 connection.', 'error');
+        }
+      });
+
+      // Wizard modal buttons
+      document.getElementById('wizardStartScratchBtn').addEventListener('click', () => {
+        hideWizardStartModal();
+        startWizard(false);
+      });
+
+      document.getElementById('wizardContinueBtn').addEventListener('click', () => {
+        hideWizardStartModal();
+        startWizard(true);
+      });
+
+      document.getElementById('wizardCancelBtn').addEventListener('click', () => {
+        hideWizardStartModal();
+      });
+
+      document.getElementById('wizardStartModal').addEventListener('click', (e) => {
+        if (e.target.id === 'wizardStartModal') {
+          hideWizardStartModal();
+        }
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          const modal = document.getElementById('wizardStartModal');
+          if (modal && modal.style.display === 'flex') {
+            hideWizardStartModal();
+          }
+        }
+      });
+
+      document.getElementById('wizardSaveBtn').addEventListener('click', handleWizardSave);
     }
 
-    // CSV Import Handler
+    // CSV Import
     async function handleCSVImport(e) {
       const file = e.target.files[0];
       if (!file) return;
 
-      // Reset file input for next import
       e.target.value = '';
 
       if (!file.name.endsWith('.csv')) {
@@ -861,13 +1842,12 @@
 
         let imported = 0;
         let errors = [];
-        const newAirports = [...currentConfig.airports]; // Clone existing array
+        const newAirports = [...currentConfig.airports];
 
         for (let i = 0; i < lines.length; i++) {
           const line = lines[i].trim();
           if (!line) continue;
 
-          // Parse CSV line (simple comma split - handles most cases)
           const parts = line.split(',').map(p => p.trim());
 
           if (parts.length < 2) {
@@ -878,7 +1858,6 @@
           const index = parseInt(parts[0]);
           const code = parts[1].toUpperCase();
 
-          // Validation
           if (isNaN(index)) {
             errors.push(`Line ${i+1}: Invalid index "${parts[0]}"`);
             continue;
@@ -889,7 +1868,6 @@
             continue;
           }
 
-          // Validate airport code format
           if (!/^([A-Z0-9]{4}|NULL|BLACK|LIFR|IFR|MVFR|WVFR|VFR)$/.test(code)) {
             errors.push(`Line ${i+1}: Invalid code "${code}"`);
             continue;
@@ -899,7 +1877,6 @@
           imported++;
         }
 
-        // Only apply if at least one import succeeded
         if (imported === 0) {
           showToast('No valid entries found in CSV', 'error');
           if (errors.length > 0) {
@@ -909,21 +1886,17 @@
           return;
         }
 
-        // Update LED count to highest index + 1
         const highestIndex = Math.max(...newAirports.map((code, idx) =>
           (code && code !== 'NULL') ? idx : -1
         ));
         const newNumLeds = Math.max(highestIndex + 1, currentConfig.numLeds);
 
-        // Update config
         currentConfig.airports = newAirports;
         currentConfig.numLeds = newNumLeds;
         document.getElementById('numLeds').value = newNumLeds;
 
-        // Re-render table
         renderLEDTable();
 
-        // Show success/warning message
         if (errors.length > 0) {
           showToast(`Imported ${imported} LEDs with ${errors.length} errors (check console)`, 'warning', 8000);
           console.error('CSV Import Errors:', errors);
@@ -937,15 +1910,13 @@
       }
     }
 
-    // CSV Export Handler - Story 3.8
+    // CSV Export
     function exportConfigurationAsCSV() {
-      // Check if any LEDs are configured
       if (!currentConfig || !currentConfig.airports || currentConfig.airports.length === 0) {
         showToast('No LEDs configured to download', 'warning');
         return;
       }
 
-      // Generate CSV lines (only include configured LEDs, filter out empty/undefined)
       const csvLines = currentConfig.airports
         .map((code, index) => `${index},${code}`)
         .filter(line => {
@@ -960,41 +1931,32 @@
       }
 
       const csvContent = csvLines.join('\n');
-
-      // Create blob and download link
       const blob = new Blob([csvContent], { type: 'text/csv' });
       const url = URL.createObjectURL(blob);
 
-      // Generate filename with current date (YYYY-MM-DD)
       const date = new Date().toISOString().split('T')[0];
       const filename = `skyboard-config-${date}.csv`;
 
-      // Create temporary download link and trigger click
       const a = document.createElement('a');
       a.href = url;
       a.download = filename;
       document.body.appendChild(a);
       a.click();
 
-      // Cleanup
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
       showToast(`Configuration exported to ${filename}`, 'success');
     }
 
-    // Save configuration
+    // Save configuration - UPDATED TO USE /api/v1/config POST
     async function saveConfiguration() {
-      const saveBtn = document.getElementById('saveBtn');
-
-      // Gather form data
       const numLeds = parseInt(document.getElementById('numLeds').value);
-      const brightness = parseInt(document.getElementById('brightness').value);
+      const brightness = parseInt(document.getElementById('brightnessValue').value);
       const updateIntervalMinutes = parseInt(document.getElementById('updateInterval').value);
       const hostname = document.getElementById('hostname').value.trim() || 'led-sectional';
       const useMDNS = document.getElementById('useMDNS').checked;
 
-      // Validation
       if (numLeds < 1 || numLeds > 150) {
         showToast('Number of LEDs must be between 1 and 150', 'error');
         return;
@@ -1010,7 +1972,6 @@
         return;
       }
 
-      // Hostname validation
       if (!/^[a-zA-Z0-9-]+$/.test(hostname)) {
         showToast('Hostname can only contain letters, numbers, and hyphens', 'error');
         return;
@@ -1026,7 +1987,6 @@
         return;
       }
 
-      // Gather airport assignments
       const airports = [];
       for (let i = 0; i < numLeds; i++) {
         const input = document.querySelector(`.airport-input[data-led="${i}"]`);
@@ -1042,11 +2002,10 @@
         airports
       };
 
-      // Story 3.2: Show loading indicator
       showLoadingIndicator('Saving configuration...');
 
       try {
-        const response = await fetch('/save', {
+        const response = await fetch('/api/v1/config', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(config)
@@ -1057,7 +2016,6 @@
           throw new Error(errorText || 'Failed to save configuration');
         }
 
-        // Check for hostname change warning
         const contentType = response.headers.get('content-type');
         if (contentType && contentType.includes('application/json')) {
           const data = await response.json();
@@ -1073,18 +2031,14 @@
           showToast('Configuration saved successfully!', 'success');
         }
 
-        // Update current config
         currentConfig = config;
 
-        // CRITICAL: Force weather update after saving config
-        // Otherwise new airport assignments show as "Pending" until next 15-minute cycle
         showLoadingIndicator('Updating weather data...');
         try {
           const refreshResponse = await fetch('/api/forceRefresh', { method: 'POST' });
           hideLoadingIndicator();
           if (refreshResponse.ok) {
             showToast('Weather data updated successfully!', 'success');
-            // Reload status to show updated colors
             await loadStatus();
           } else {
             console.warn('Force refresh failed, weather will update on next cycle');
@@ -1100,34 +2054,7 @@
       }
     }
 
-    // Story 3.6: Toast notifications are now handled by components.js
-    // showToast and hideToast functions are already defined there
-
-    // ====================================================================
-    // LED SETUP WIZARD FUNCTIONALITY
-    // ====================================================================
-
-    // Wizard state
-    let wizardActive = false;
-    let wizardState = {
-      numLeds: 0,
-      currentIndex: 0,
-      airports: [],
-      brightness: 20
-    };
-
-    // Cache for config when modal opens
-    let cachedConfigForWizard = null;
-
-    // ====================================================================
-    // WIZARD CRASH RECOVERY - localStorage Auto-Save
-    // ====================================================================
-    const WIZARD_STATE_KEY = 'skyboard_wizard_state';
-    const WIZARD_STATE_TIMESTAMP_KEY = 'skyboard_wizard_timestamp';
-
-    /**
-     * Save wizard state to localStorage (called after every change)
-     */
+    // Wizard localStorage functions
     function saveWizardStateToLocalStorage() {
       if (!wizardActive) return;
 
@@ -1146,9 +2073,6 @@
       }
     }
 
-    /**
-     * Load wizard state from localStorage (called on page load if crash detected)
-     */
     function loadWizardStateFromLocalStorage() {
       try {
         const savedState = localStorage.getItem(WIZARD_STATE_KEY);
@@ -1157,7 +2081,7 @@
         if (!savedState || !savedTimestamp) return null;
 
         const age = Date.now() - parseInt(savedTimestamp);
-        const MAX_AGE = 24 * 60 * 60 * 1000; // 24 hours
+        const MAX_AGE = 24 * 60 * 60 * 1000;
 
         if (age > MAX_AGE) {
           console.log('[Wizard] Saved state too old, discarding');
@@ -1174,24 +2098,17 @@
       }
     }
 
-    /**
-     * Clear wizard state from localStorage
-     */
     function clearWizardStateFromLocalStorage() {
       localStorage.removeItem(WIZARD_STATE_KEY);
       localStorage.removeItem(WIZARD_STATE_TIMESTAMP_KEY);
       console.log('[Wizard] Cleared saved state from localStorage');
     }
 
-    /**
-     * Check for crashed wizard session on page load
-     */
     function checkForCrashedWizardSession() {
       const savedState = loadWizardStateFromLocalStorage();
 
       if (savedState && savedState.numLeds > 0) {
-        // Show recovery modal
-        const modal = new Modal();
+        const recoveryModal = new Modal();
         const modalContent = document.createElement('div');
         modalContent.innerHTML = `
           <p><strong>🔧 Wizard Session Recovery</strong></p>
@@ -1199,35 +2116,30 @@
           <p>Would you like to recover your progress?</p>
           <div style="display: flex; gap: 12px; margin-top: 24px;">
             <button id="recoveryDiscardBtn" class="btn btn-secondary" style="flex: 1;">Discard</button>
-            <button id="recoveryRecoverBtn" class="btn btn-primary" style="flex: 1;">✓ Recover</button>
+            <button id="recoveryRecoverBtn" class="btn" style="flex: 1;">✓ Recover</button>
           </div>
         `;
 
-        modal.show('Recover Wizard Session', modalContent);
+        recoveryModal.show('Recover Wizard Session', modalContent);
 
         document.getElementById('recoveryDiscardBtn').onclick = () => {
           clearWizardStateFromLocalStorage();
-          modal.hide();
+          recoveryModal.hide();
           showToast('Wizard session discarded', 'info');
         };
 
         document.getElementById('recoveryRecoverBtn').onclick = async () => {
-          modal.hide();
+          recoveryModal.hide();
           await recoverWizardSession(savedState);
         };
       }
     }
 
-    /**
-     * Recover wizard session from saved state
-     */
     async function recoverWizardSession(savedState) {
       try {
-        // First, try to reset ESP8266 setup state
         showToast('Recovering wizard session...', 'info', 2000);
 
-        // Call /setup/start to reset ESP8266 state (it might be stuck)
-        const brightness = parseInt(document.getElementById('brightness').value) || savedState.brightness || 20;
+        const brightness = parseInt(document.getElementById('brightnessValue').value) || savedState.brightness || 20;
         const response = await fetch('/setup/start', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1241,7 +2153,6 @@
           throw new Error('Failed to restart setup mode');
         }
 
-        // Restore wizard state
         wizardActive = true;
         wizardState = {
           numLeds: savedState.numLeds,
@@ -1250,16 +2161,13 @@
           brightness: savedState.brightness
         };
 
-        // Show wizard UI
         document.getElementById('manualLedConfig').style.display = 'none';
         document.getElementById('wizardContainer').style.display = 'block';
         document.getElementById('startWizardBtn').style.display = 'none';
         document.getElementById('saveBtn').style.display = 'none';
 
-        // Render wizard rows
         renderWizardRows();
 
-        // Focus last input
         const lastInput = document.getElementById(`wizard-input-${wizardState.currentIndex}`);
         if (lastInput) {
           lastInput.focus();
@@ -1273,46 +2181,32 @@
       }
     }
 
-    /**
-     * Show wizard start modal
-     */
     function showWizardStartModal(numLeds) {
       const modal = document.getElementById('wizardStartModal');
       const ledCountText = document.getElementById('wizardModalLedCount');
       const continueLedCount = document.getElementById('wizardContinueLedCount');
 
-      // Update LED count displays
       ledCountText.innerHTML = `You currently have <strong>${numLeds} LED${numLeds !== 1 ? 's' : ''}</strong> configured.`;
       continueLedCount.textContent = numLeds;
 
       modal.style.display = 'flex';
     }
 
-    /**
-     * Hide wizard start modal
-     */
     function hideWizardStartModal() {
       const modal = document.getElementById('wizardStartModal');
       modal.style.display = 'none';
     }
 
-    /**
-     * Start the LED setup wizard
-     */
     async function startWizard(continueFromExisting = false) {
       try {
-        // Build request body
-        const brightness = parseInt(document.getElementById('brightness').value) || 20;
+        const brightness = parseInt(document.getElementById('brightnessValue').value) || 20;
         let requestBody = {
           brightness: brightness
         };
 
-        // If continuing from existing, add airports array
         if (continueFromExisting && cachedConfigForWizard) {
-          // Extract existing airports (only up to numLeds)
           const existingAirports = cachedConfigForWizard.airports.slice(0, cachedConfigForWizard.numLeds);
 
-          // Validate airports array length (max 150 LEDs)
           if (existingAirports.length > 150) {
             showToast('Cannot start wizard: too many LEDs (max 150)', 'error');
             return;
@@ -1321,7 +2215,6 @@
           requestBody.airports = existingAirports;
         }
 
-        // Call backend to enter setup mode
         const response = await fetch('/setup/start', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1334,10 +2227,8 @@
 
         const result = await response.json();
 
-        // Initialize wizard state based on mode
         wizardActive = true;
         if (continueFromExisting && cachedConfigForWizard) {
-          // Continue mode: Pre-fill with existing airports + empty slot for next LED
           wizardState = {
             numLeds: cachedConfigForWizard.numLeds + 1,
             currentIndex: cachedConfigForWizard.numLeds,
@@ -1345,7 +2236,6 @@
             brightness: brightness
           };
         } else {
-          // Start from scratch: Empty config
           wizardState = {
             numLeds: 1,
             currentIndex: 0,
@@ -1354,19 +2244,15 @@
           };
         }
 
-        // CRITICAL: Save initial state to localStorage
         saveWizardStateToLocalStorage();
 
-        // Hide manual config, show wizard
         document.getElementById('manualLedConfig').style.display = 'none';
         document.getElementById('wizardContainer').style.display = 'block';
         document.getElementById('startWizardBtn').style.display = 'none';
-        document.getElementById('saveBtn').style.display = 'none'; // Hide manual save button
+        document.getElementById('saveBtn').style.display = 'none';
 
-        // Render wizard rows
         renderWizardRows();
 
-        // Show appropriate success message
         if (continueFromExisting) {
           showToast(`Wizard started! Continuing from ${cachedConfigForWizard.numLeds} LEDs. LED ${cachedConfigForWizard.numLeds} is blinking orange.`, 'success');
         } else {
@@ -1378,38 +2264,31 @@
       }
     }
 
-    /**
-     * Render all wizard rows based on current state
-     */
     function renderWizardRows() {
       const container = document.getElementById('wizardRows');
       container.innerHTML = '';
 
-      // Render all existing LED rows
       for (let i = 0; i < wizardState.numLeds; i++) {
         const row = createWizardRow(i);
         container.appendChild(row);
       }
+
+      // Reinitialize Lucide icons
+      lucide.createIcons();
     }
 
-    /**
-     * Create a single wizard row for an LED
-     */
     function createWizardRow(ledIndex) {
       const row = document.createElement('div');
       row.className = 'wizard-row';
       row.id = `wizard-row-${ledIndex}`;
 
-      // LED label
       const label = document.createElement('span');
       label.className = 'wizard-led-label';
       label.textContent = `LED ${ledIndex}`;
 
-      // Airport input with autocomplete wrapper
       const inputWrapper = document.createElement('div');
       inputWrapper.className = 'airport-input-wrapper';
 
-      // Story 3.3: Added ARIA attributes and keyboard navigation for wizard inputs
       const input = document.createElement('input');
       input.type = 'text';
       input.id = `wizard-input-${ledIndex}`;
@@ -1425,7 +2304,6 @@
       input.setAttribute('role', 'combobox');
       input.setAttribute('aria-expanded', 'false');
 
-      // Autocomplete dropdown
       const dropdown = document.createElement('div');
       dropdown.className = 'autocomplete-dropdown';
       dropdown.dataset.led = ledIndex;
@@ -1436,29 +2314,23 @@
       inputWrapper.appendChild(input);
       inputWrapper.appendChild(dropdown);
 
-      // Update state on input change
       input.addEventListener('input', (e) => {
         wizardState.airports[ledIndex] = e.target.value.trim().toUpperCase();
         handleAutocompleteInput(e);
-        // Auto-save after every keystroke
         saveWizardStateToLocalStorage();
       });
 
-      // Autocomplete focus/blur handlers
       input.addEventListener('focus', handleAutocompleteInput);
       input.addEventListener('blur', (e) => {
         setTimeout(() => hideAutocomplete(ledIndex), 200);
       });
-      // Story 3.3: Add keyboard navigation to wizard inputs
       input.addEventListener('keydown', handleKeyboardNavigation);
 
-      // Next button (only on the last LED)
       const nextBtn = document.createElement('button');
       nextBtn.className = 'wizard-next-btn';
       nextBtn.textContent = 'Next';
       nextBtn.dataset.led = ledIndex;
 
-      // Only enable Next button on the last LED
       if (ledIndex !== wizardState.numLeds - 1) {
         nextBtn.disabled = true;
         nextBtn.style.opacity = '0.3';
@@ -1474,21 +2346,16 @@
       return row;
     }
 
-    /**
-     * Handle clicking "Next" to add another LED
-     */
     async function handleWizardNext(ledIndex) {
       const input = document.getElementById(`wizard-input-${ledIndex}`);
       const value = input.value.trim().toUpperCase();
 
-      // Validate input
       if (!value) {
         showToast('Please enter an airport code or "NULL"', 'error');
         input.focus();
         return;
       }
 
-      // Validate ICAO format (4 alphanumeric characters) or special values
       if (!/^([A-Z0-9]{4}|NULL|BLACK)$/.test(value)) {
         showToast('Invalid airport code. Use 4-character ICAO code (e.g., K1B9) or "NULL".', 'error', 8000);
         input.focus();
@@ -1496,16 +2363,13 @@
       }
 
       try {
-        // Update state
         wizardState.airports[ledIndex] = value;
         wizardState.numLeds += 1;
         wizardState.currentIndex = wizardState.numLeds - 1;
-        wizardState.airports[wizardState.currentIndex] = ''; // New empty slot
+        wizardState.airports[wizardState.currentIndex] = '';
 
-        // CRITICAL: Save to localStorage BEFORE network call
         saveWizardStateToLocalStorage();
 
-        // Send update to backend
         const response = await fetch('/setup/update', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1516,18 +2380,14 @@
           throw new Error('Failed to update setup state');
         }
 
-        // Re-render rows to add new one
         renderWizardRows();
 
-        // Focus new input
         const newInput = document.getElementById(`wizard-input-${wizardState.currentIndex}`);
         if (newInput) {
-          // Story 3.4: Auto-scroll new input into view (smooth, centered)
           newInput.scrollIntoView({
             behavior: 'smooth',
             block: 'center'
           });
-          // Focus after scroll animation starts
           setTimeout(() => newInput.focus(), 300);
         }
 
@@ -1536,20 +2396,14 @@
         console.error('Failed to add next LED:', error);
         showToast('Failed to update. Check ESP8266 connection.', 'error');
 
-        // Revert state
         wizardState.numLeds -= 1;
         wizardState.currentIndex = wizardState.numLeds - 1;
         wizardState.airports.pop();
-        // Re-save reverted state
         saveWizardStateToLocalStorage();
       }
     }
 
-    /**
-     * Handle clicking "Save Configuration"
-     */
     async function handleWizardSave() {
-      // Validate last LED has a value
       const lastIndex = wizardState.numLeds - 1;
       const lastInput = document.getElementById(`wizard-input-${lastIndex}`);
       const lastValue = lastInput ? lastInput.value.trim().toUpperCase() : '';
@@ -1560,18 +2414,15 @@
         return;
       }
 
-      // Validate ICAO format
       if (!/^([A-Z0-9]{4}|NULL|BLACK)$/.test(lastValue)) {
         showToast('Invalid airport code on last LED. Use 4-character ICAO code (e.g., K1B9) or "NULL".', 'error', 8000);
         lastInput.focus();
         return;
       }
 
-      // Update last value in state
       wizardState.airports[lastIndex] = lastValue;
 
-      // Show confirmation modal
-      const modal = new Modal();
+      const confirmModal = new Modal();
       const modalContent = document.createElement('div');
       modalContent.innerHTML = `
         <p>Are you sure you want to save this configuration?</p>
@@ -1582,22 +2433,20 @@
         </div>
       `;
 
-      modal.show('Confirm Save', modalContent);
+      confirmModal.show('Confirm Save', modalContent);
 
-      // Attach button handlers
-      document.getElementById('modalCancelBtn').onclick = () => modal.hide();
+      document.getElementById('modalCancelBtn').onclick = () => confirmModal.hide();
       document.getElementById('modalConfirmBtn').onclick = async () => {
-        modal.hide();
+        confirmModal.hide();
         await saveWizardConfig();
       };
+
+      // Reinitialize Lucide icons in modal
+      lucide.createIcons();
     }
 
-    /**
-     * Save wizard configuration and exit wizard mode
-     */
     async function saveWizardConfig() {
       try {
-        // Build full config object (150 airports, filled with NULL)
         const fullAirports = new Array(150).fill('NULL');
         for (let i = 0; i < wizardState.numLeds; i++) {
           fullAirports[i] = wizardState.airports[i] || 'NULL';
@@ -1612,7 +2461,6 @@
           updateIntervalMinutes: parseInt(document.getElementById('updateInterval').value)
         };
 
-        // Send to backend
         const response = await fetch('/setup/finish', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1625,13 +2473,10 @@
 
         showToast(`Configuration saved! ${wizardState.numLeds} LEDs configured.`, 'success', 5000);
 
-        // CRITICAL: Clear localStorage since wizard completed successfully
         clearWizardStateFromLocalStorage();
 
-        // Exit wizard mode
         exitWizard();
 
-        // Reload config to update UI
         setTimeout(() => {
           loadConfig();
         }, 1000);
@@ -1641,9 +2486,6 @@
       }
     }
 
-    /**
-     * Exit wizard mode and restore manual config UI
-     */
     function exitWizard() {
       wizardActive = false;
       wizardState = {
@@ -1653,22 +2495,16 @@
         brightness: 20
       };
 
-      // Clear localStorage (wizard is over)
       clearWizardStateFromLocalStorage();
 
-      // Hide wizard, show manual config
       document.getElementById('wizardContainer').style.display = 'none';
       document.getElementById('manualLedConfig').style.display = 'block';
       document.getElementById('startWizardBtn').style.display = 'inline-block';
-      document.getElementById('saveBtn').style.display = 'block'; // Show manual save button
+      document.getElementById('saveBtn').style.display = 'block';
 
-      // Clear wizard rows
       document.getElementById('wizardRows').innerHTML = '';
     }
 
-    /**
-     * Warn user if navigating away during wizard
-     */
     window.addEventListener('beforeunload', (e) => {
       if (wizardActive) {
         e.preventDefault();
@@ -1677,79 +2513,177 @@
       }
     });
 
-    // Attach wizard button event listeners after DOM loads
-    document.addEventListener('DOMContentLoaded', () => {
-      const startBtn = document.getElementById('startWizardBtn');
-      if (startBtn) {
-        startBtn.addEventListener('click', async () => {
-          try {
-            // Fetch current config to populate modal
-            const response = await fetch('/config');
-            if (!response.ok) {
-              throw new Error('Failed to fetch config');
-            }
-            cachedConfigForWizard = await response.json();
+    // Toast functions
+    function showToast(message, type = 'success', duration = null) {
+      const toast = document.getElementById('toast');
+      const toastTitle = document.getElementById('toastTitle');
+      const toastMessage = document.getElementById('toastMessage');
 
-            // Show modal with current LED count
-            showWizardStartModal(cachedConfigForWizard.numLeds);
-          } catch (error) {
-            console.error('Failed to load current config:', error);
-            showToast('Failed to load current config. Check ESP8266 connection.', 'error');
-          }
-        });
+      if (!toast) {
+        console.error('Toast element not found');
+        return;
       }
 
-      // Wire up modal buttons
-      const startScratchBtn = document.getElementById('wizardStartScratchBtn');
-      if (startScratchBtn) {
-        startScratchBtn.addEventListener('click', () => {
-          hideWizardStartModal();
-          startWizard(false); // Start from scratch
-        });
+      toastTitle.textContent = '';
+      toastMessage.textContent = message;
+
+      toast.className = `toast ${type}`;
+      toast.classList.add('show');
+
+      if (toastTimeoutId) {
+        clearTimeout(toastTimeoutId);
       }
 
-      const continueBtn = document.getElementById('wizardContinueBtn');
-      if (continueBtn) {
-        continueBtn.addEventListener('click', () => {
-          hideWizardStartModal();
-          startWizard(true); // Continue from existing
-        });
+      if (!duration) {
+        duration = type === 'error' ? 7000 : 5000;
       }
 
-      const cancelBtn = document.getElementById('wizardCancelBtn');
-      if (cancelBtn) {
-        cancelBtn.addEventListener('click', () => {
-          hideWizardStartModal();
-        });
+      toastTimeoutId = setTimeout(() => {
+        hideToast();
+      }, duration);
+    }
+
+    function hideToast() {
+      const toast = document.getElementById('toast');
+      if (toast) {
+        toast.classList.remove('show');
+      }
+      if (toastTimeoutId) {
+        clearTimeout(toastTimeoutId);
+        toastTimeoutId = null;
+      }
+    }
+
+    // Loading indicator
+    let loadingOverlay = null;
+
+    function showLoadingIndicator(message = 'Loading...') {
+      if (!loadingOverlay) {
+        loadingOverlay = document.createElement('div');
+        loadingOverlay.className = 'loading-overlay';
+        loadingOverlay.innerHTML = `
+          <div class="loading-spinner"></div>
+          <div class="loading-text">${message}</div>
+        `;
+        document.body.appendChild(loadingOverlay);
+      } else {
+        loadingOverlay.querySelector('.loading-text').textContent = message;
+        loadingOverlay.style.display = 'flex';
+      }
+    }
+
+    function hideLoadingIndicator() {
+      if (loadingOverlay) {
+        loadingOverlay.style.display = 'none';
+      }
+    }
+
+    // Modal class
+    class Modal {
+      constructor() {
+        this.overlay = null;
+        this.modal = null;
+        this.onCloseCallback = null;
       }
 
-      // Close modal on backdrop click
-      const modal = document.getElementById('wizardStartModal');
-      if (modal) {
-        modal.addEventListener('click', (e) => {
-          if (e.target === modal) {
-            hideWizardStartModal();
-          }
-        });
-      }
+      show(title, content, onClose = null) {
+        this.onCloseCallback = onClose;
 
-      // Close modal on Escape key
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-          const modal = document.getElementById('wizardStartModal');
-          if (modal && modal.style.display === 'flex') {
-            hideWizardStartModal();
-          }
+        this.overlay = document.createElement('div');
+        this.overlay.className = 'modal-overlay';
+        this.overlay.setAttribute('role', 'dialog');
+        this.overlay.setAttribute('aria-modal', 'true');
+        this.overlay.setAttribute('aria-labelledby', 'modal-title');
+
+        this.modal = document.createElement('div');
+        this.modal.className = 'modal-box';
+
+        const header = document.createElement('div');
+        header.style.marginBottom = '16px';
+
+        const titleEl = document.createElement('h2');
+        titleEl.id = 'modal-title';
+        titleEl.textContent = title;
+        titleEl.style.margin = '0';
+        titleEl.style.fontSize = '24px';
+        titleEl.style.fontWeight = '700';
+
+        header.appendChild(titleEl);
+
+        const body = document.createElement('div');
+        if (typeof content === 'string') {
+          body.innerHTML = content;
+        } else {
+          body.appendChild(content);
         }
-      });
 
-      const saveBtn = document.getElementById('wizardSaveBtn');
-      if (saveBtn) {
-        saveBtn.addEventListener('click', handleWizardSave);
+        this.modal.appendChild(header);
+        this.modal.appendChild(body);
+        this.overlay.appendChild(this.modal);
+
+        document.body.appendChild(this.overlay);
+
+        this.overlay.onclick = (e) => {
+          if (e.target === this.overlay) this.hide();
+        };
+
+        document.addEventListener('keydown', this.handleEscape);
+
+        this.modal.setAttribute('tabindex', '-1');
+        this.modal.focus();
+
+        // Initialize Lucide icons in modal
+        lucide.createIcons();
       }
+
+      hide() {
+        if (this.overlay && this.overlay.parentNode) {
+          this.overlay.parentNode.removeChild(this.overlay);
+        }
+        document.removeEventListener('keydown', this.handleEscape);
+        if (this.onCloseCallback) {
+          this.onCloseCallback();
+        }
+        this.overlay = null;
+        this.modal = null;
+      }
+
+      handleEscape = (e) => {
+        if (e.key === 'Escape') {
+          this.hide();
+        }
+      }
+    }
+
+    // Theme toggle
+    function toggleTheme() {
+      const html = document.documentElement;
+      const currentTheme = html.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', newTheme);
+
+      const icon = document.getElementById('themeIcon');
+      icon.setAttribute('data-lucide', newTheme === 'dark' ? 'moon' : 'sun');
+      lucide.createIcons();
+
+      localStorage.setItem('theme', newTheme);
+    }
+
+    // Mobile menu toggle
+    function toggleMenu() {
+      document.getElementById('navMenu').classList.toggle('open');
+    }
+
+    // Load saved theme
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      const icon = document.getElementById('themeIcon');
+      icon.setAttribute('data-lucide', savedTheme === 'dark' ? 'moon' : 'sun');
+      lucide.createIcons();
     });
 
-    // Story 3.2: Global error handler to prevent stuck loading states
+    // Global error handler
     window.addEventListener('error', (event) => {
       console.error('Global error caught:', event.error);
       hideLoadingIndicator();
@@ -1759,76 +2693,6 @@
       console.error('Unhandled promise rejection:', event.reason);
       hideLoadingIndicator();
     });
-
-    /**
-     * Story 3.4: Handle window resize events
-     * Reposition any open autocomplete dropdowns when window is resized
-     */
-    let resizeTimeout;
-    window.addEventListener('resize', () => {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(() => {
-        // Find any open dropdowns and reposition them
-        document.querySelectorAll('.autocomplete-dropdown.show').forEach(dropdown => {
-          const ledIndex = dropdown.dataset.led;
-          const input = document.querySelector(`.airport-input[data-led="${ledIndex}"]`);
-          if (input) {
-            const positionInfo = calculateDropdownPosition(input);
-            applyDropdownPosition(dropdown, input, positionInfo.position);
-          }
-        });
-      }, 100); // Debounce: wait 100ms after resize stops
-    });
-
-    /**
-     * Story 3.4: Optional - Detect on-screen keyboard on mobile using VisualViewport API
-     */
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', () => {
-        const keyboardVisible = window.visualViewport.height < window.innerHeight - 100;
-
-        if (keyboardVisible) {
-          // Force dropdowns above inputs when keyboard is visible
-          document.querySelectorAll('.autocomplete-dropdown.show').forEach(dropdown => {
-            const ledIndex = dropdown.dataset.led;
-            const input = document.querySelector(`.airport-input[data-led="${ledIndex}"]`);
-            if (input) {
-              applyDropdownPosition(dropdown, input, 'above');
-            }
-          });
-        }
-      });
-    }
-
   </script>
-
-  <!-- Wizard Start Modal -->
-  <div id="wizardStartModal" class="modal-overlay" style="display: none;">
-    <div class="modal-box">
-      <h2>Start LED Setup Wizard</h2>
-      <p id="wizardModalLedCount" class="wizard-modal-description">
-        You currently have <strong>0 LEDs</strong> configured.
-      </p>
-      <div class="wizard-modal-buttons">
-        <button id="wizardStartScratchBtn" class="btn btn-secondary">
-          Start from Scratch
-        </button>
-        <button id="wizardContinueBtn" class="btn btn-primary">
-          Continue from Existing (<span id="wizardContinueLedCount">0</span> LEDs)
-        </button>
-        <button id="wizardCancelBtn" class="btn btn-ghost">
-          Cancel
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- TOAST NOTIFICATION - Story 3.6: Added close button and ARIA label -->
-  <div id="toast" class="toast">
-    <button class="toast-close" onclick="hideToast()" aria-label="Close notification">&times;</button>
-    <div class="toast-title" id="toastTitle"></div>
-    <div class="toast-message" id="toastMessage"></div>
-  </div>
-
 </body>
 </html>
