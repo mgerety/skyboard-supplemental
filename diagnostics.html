@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Skyboard Diagnostics Version: 73 -->
+<!-- Skyboard Diagnostics Version: 74 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -1107,10 +1107,12 @@
         const colorStyle = `background-color: ${color}; ${color.toLowerCase() === '#ffff00' ? 'border: 1px solid #999;' : ''}`;
         const categoryClass = led.error ? 'error' : led.flightCategory.toLowerCase();
         const statusText = led.error ? 'ERROR' : led.flightCategory;
+        // Display "NONE" instead of "NULL" (user-facing term, not developer term)
+        const displayCode = (led.airportCode === 'NULL' || led.airportCode === 'BLACK') ? 'NONE' : led.airportCode;
 
         return `<tr>
           <td><strong>${led.ledNumber}</strong></td>
-          <td><code>${led.airportCode}</code></td>
+          <td><code>${displayCode}</code></td>
           <td><span class="status-badge ${categoryClass}">${statusText}</span></td>
           <td><span class="status-dot" style="${colorStyle}"></span></td>
         </tr>`;

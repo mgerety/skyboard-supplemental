@@ -1537,6 +1537,8 @@
 
       for (let i = 0; i < currentConfig.numLeds; i++) {
         const assignment = currentConfig.airports[i] || 'NULL';
+        // Display "NONE" instead of "NULL" for user-facing UI
+        const displayValue = (assignment === 'NULL' || assignment === 'BLACK') ? 'NONE' : assignment;
         const status = statusData.find(s => s.index === i) || { wxValue: null, color: '#000000' };
 
         const tr = document.createElement('tr');
@@ -1552,7 +1554,7 @@
             <input type="text"
                    class="airport-input"
                    data-led="${i}"
-                   value="${assignment}"
+                   value="${displayValue}"
                    placeholder="Type to search..."
                    autocapitalize="characters"
                    aria-label="LED ${i} airport code"
