@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Skyboard Diagnostics Version: 72 -->
+<!-- Skyboard Diagnostics Version: 73 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -1059,17 +1059,7 @@
 
     // ===== LED TABLE RENDERING =====
 
-    function getColorFromFlightCategory(fltCat) {
-      const colors = {
-        'LIFR': '#FF00FF',  // Magenta
-        'IFR': '#FF0000',    // Red
-        'MVFR': '#0000FF',   // Blue
-        'WVFR': '#FFFF00',   // Yellow (Windy VFR)
-        'VFR': '#00FF00',    // Green
-        'NONE': '#000000'    // Black (for NULL/unassigned/no data)
-      };
-      return colors[fltCat.toUpperCase()] || '#000000';  // Default black
-    }
+    // REMOVED: Client-side color calculation - firmware provides actual colors!
 
     async function refreshLEDTable() {
       ledStatus = await fetchLEDStatus();
@@ -1112,7 +1102,8 @@
       });
 
       tbody.innerHTML = filteredLEDs.map(led => {
-        const color = getColorFromFlightCategory(led.flightCategory);
+        // Use actual color from firmware (server provides it)
+        const color = led.color || '#000000';
         const colorStyle = `background-color: ${color}; ${color.toLowerCase() === '#ffff00' ? 'border: 1px solid #999;' : ''}`;
         const categoryClass = led.error ? 'error' : led.flightCategory.toLowerCase();
         const statusText = led.error ? 'ERROR' : led.flightCategory;

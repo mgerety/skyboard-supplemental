@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Skyboard Web Interface Version: 69 -->
+<!-- Skyboard Web Interface Version: 73 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -1573,7 +1573,8 @@
         const statusDot = document.createElement('span');
         statusDot.className = 'status-dot';
         statusDot.dataset.led = i;
-        statusDot.style.backgroundColor = getColorFromFlightCategory(assignment, status.wxValue);
+        // Use actual color from firmware (server provides it)
+        statusDot.style.backgroundColor = status?.color || '#000000';
         tdStatus.appendChild(statusDot);
         tr.appendChild(tdStatus);
 
@@ -1600,10 +1601,10 @@
     // Update status indicators
     function updateStatusIndicators() {
       statusData.forEach(item => {
-        const dot = document.querySelector(`.status-dot[data-led="${item.index}"]`);
+        const dot = document.querySelector(`.status-dot[data-led="${item.ledNumber}"]`);
         if (dot) {
-          const assignment = currentConfig.airports[item.index] || 'NULL';
-          dot.style.backgroundColor = getColorFromFlightCategory(assignment, item.wxValue);
+          // Use actual color from firmware (server provides it)
+          dot.style.backgroundColor = item.color || '#000000';
         }
       });
     }
