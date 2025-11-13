@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Skyboard File Browser Version: 75 -->
+<!-- Skyboard File Browser Version: 76 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -12,7 +12,7 @@
   <style>
     /* ==================================================
      * MODERN SKYBOARD DESIGN SYSTEM v2.0
-     * Story 1.7B: Modernize File Management Page
+     * Story 1.7B: Modernize File Management Page WITH TREE VIEW
      * Based on Story 1.4B/1.6B design system
      * Reference: index.html, diagnostics.html
      * ================================================== */
@@ -316,6 +316,7 @@
       display: flex;
       align-items: center;
       gap: 12px;
+      flex-wrap: wrap;
     }
 
     .badge {
@@ -390,20 +391,13 @@
       background: linear-gradient(90deg, var(--error), #f87171);
     }
 
-    /* BUTTON GROUP */
-    .button-group {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
     /* BUTTONS */
     .btn {
       background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
       color: white;
       border: none;
-      padding: 12px 24px;
-      font-size: 15px;
+      padding: 10px 20px;
+      font-size: 14px;
       font-weight: 600;
       border-radius: 10px;
       cursor: pointer;
@@ -411,7 +405,7 @@
       box-shadow: 0 4px 16px rgba(30, 64, 175, 0.4);
       display: inline-flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
 
     .btn svg {
@@ -450,81 +444,154 @@
       box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
     }
 
-    .btn-primary {
-      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
-    }
-
-    .no-underline {
-      text-decoration: none;
-    }
-
-    /* FILE LIST TABLE */
-    .table-container {
-      overflow-x: auto;
-      border-radius: 12px;
-      box-shadow: 0 0 0 1px var(--border-color);
+    /* TREE VIEW STYLES */
+    .tree-view {
       background: var(--input-bg);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-    }
-
-    thead {
-      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
-      color: white;
-    }
-
-    th {
-      padding: 16px 20px;
-      text-align: left;
-      font-weight: 600;
+      border-radius: 12px;
+      padding: 20px;
+      min-height: 400px;
+      max-height: 600px;
+      overflow-y: auto;
+      font-family: 'Courier New', Consolas, Monaco, monospace;
       font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+    }
+
+    .tree-view ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .tree-view li {
+      margin: 0;
+      padding: 0;
+    }
+
+    .tree-item {
+      display: flex;
+      align-items: center;
+      padding: 6px 8px;
+      border-radius: 6px;
       cursor: pointer;
+      transition: all 0.15s;
+      gap: 6px;
       user-select: none;
     }
 
-    th.sortable:hover {
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    td {
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border-color);
-      color: var(--text-primary);
-    }
-
-    tbody tr {
-      transition: all 0.15s;
-    }
-
-    tbody tr:hover {
+    .tree-item:hover {
       background: var(--table-hover);
     }
 
-    tbody tr:last-child td {
-      border-bottom: none;
+    .tree-item.selected {
+      background: var(--accent-primary);
+      color: white;
     }
 
-    .file-icon {
-      width: 20px;
-      height: 20px;
-      color: var(--accent-primary);
+    .tree-item.folder {
+      font-weight: 600;
     }
 
-    .file-name {
-      font-family: 'Courier New', monospace;
+    .tree-arrow {
+      width: 16px;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: var(--text-muted);
+      transition: transform 0.2s;
+    }
+
+    .tree-arrow.expanded {
+      transform: rotate(90deg);
+    }
+
+    .tree-arrow.empty {
+      opacity: 0;
+    }
+
+    .tree-icon {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    .tree-label {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .tree-size {
+      color: var(--text-muted);
+      font-size: 11px;
+      margin-left: auto;
+      padding-left: 12px;
+    }
+
+    .tree-download {
+      background: var(--accent-primary);
+      color: white;
+      border: none;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      cursor: pointer;
+      opacity: 0;
+      transition: all 0.2s;
+      margin-left: 8px;
+    }
+
+    .tree-item:hover .tree-download {
+      opacity: 1;
+    }
+
+    .tree-download:hover {
+      background: var(--accent-secondary);
+    }
+
+    .tree-folder-content {
+      padding-left: 20px;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .tree-folder-content.expanded {
+      max-height: 10000px;
+    }
+
+    .tree-loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      gap: 16px;
+      color: var(--text-muted);
+    }
+
+    .tree-stats {
+      display: flex;
+      gap: 24px;
+      padding: 16px;
+      background: var(--input-bg);
+      border-radius: 8px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+      font-size: 13px;
+    }
+
+    .tree-stat {
+      display: flex;
+      gap: 6px;
+      color: var(--text-secondary);
+    }
+
+    .tree-stat-value {
       font-weight: 600;
       color: var(--text-primary);
-    }
-
-    .file-size {
-      color: var(--text-muted);
-      font-size: 13px;
     }
 
     /* TOAST NOTIFICATIONS */
@@ -716,44 +783,53 @@
       </div>
     </div>
 
-    <!-- FILE LIST CARD -->
+    <!-- FILE TREE CARD -->
     <div class="card">
       <div class="card-header">
         <h2 class="card-title">
-          <i data-lucide="folder-open"></i>
+          <i data-lucide="folder-tree"></i>
           Files
         </h2>
         <div class="card-header-actions">
-          <span class="badge"><span id="fileCount">0</span> files</span>
-          <button class="btn-secondary" id="refreshBtn" onclick="refreshFiles()">
+          <button class="btn-secondary" id="expandAllBtn">
+            <i data-lucide="chevrons-down"></i>
+            Expand All
+          </button>
+          <button class="btn-secondary" id="collapseAllBtn">
+            <i data-lucide="chevrons-up"></i>
+            Collapse All
+          </button>
+          <button class="btn-secondary" id="refreshBtn">
             <i data-lucide="refresh-cw"></i>
             Refresh
           </button>
         </div>
       </div>
 
-      <div class="table-container">
-        <table id="fileTable">
-          <thead>
-            <tr>
-              <th class="sortable" onclick="sortTable(0)">
-                <i data-lucide="file"></i>
-                Name
-              </th>
-              <th class="sortable" onclick="sortTable(1)">
-                <i data-lucide="hard-drive"></i>
-                Size
-              </th>
-              <th>
-                <i data-lucide="download"></i>
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody id="fileTableBody">
-            <!-- Populated by JavaScript -->
-          </tbody>
-        </table>
+      <div class="tree-view" id="treeView">
+        <div class="tree-loading">
+          <div class="loading-spinner"></div>
+          <span>Loading file system...</span>
+        </div>
+      </div>
+
+      <div class="tree-stats">
+        <div class="tree-stat">
+          <span>Files:</span>
+          <span class="tree-stat-value" id="statFiles">0</span>
+        </div>
+        <div class="tree-stat">
+          <span>Folders:</span>
+          <span class="tree-stat-value" id="statFolders">0</span>
+        </div>
+        <div class="tree-stat">
+          <span>Total Size:</span>
+          <span class="tree-stat-value" id="statTotalSize">0 B</span>
+        </div>
+        <div class="tree-stat">
+          <span>Largest File:</span>
+          <span class="tree-stat-value" id="statLargestFile">--</span>
+        </div>
       </div>
     </div>
   </div>
@@ -766,10 +842,425 @@
   </div>
 
   <script>
-    // Global state
-    let files = [];
-    let sortColumn = 0;
-    let sortAscending = true;
+    // ===== FILE EXPLORER CLASS =====
+    class FileExplorer {
+      constructor() {
+        this.container = document.getElementById('treeView');
+        this.files = [];
+        this.tree = null;
+        this.selectedItem = null;
+        this.stats = {
+          files: 0,
+          folders: 0,
+          totalSize: 0,
+          largestFile: { name: '', size: 0 }
+        };
+      }
+
+      async init() {
+        await this.loadFileSystem();
+        this.setupEventListeners();
+      }
+
+      setupEventListeners() {
+        document.getElementById('expandAllBtn').addEventListener('click', () => this.expandAll());
+        document.getElementById('collapseAllBtn').addEventListener('click', () => this.collapseAll());
+        document.getElementById('refreshBtn').addEventListener('click', () => this.refresh());
+      }
+
+      async loadFileSystem() {
+        this.showLoading();
+
+        try {
+          await this.loadStats();
+
+          const response = await fetch('/api/v1/files');
+          if (!response.ok) throw new Error('Failed to load files');
+
+          const data = await response.json();
+          this.files = Array.isArray(data) ? data : [];
+
+          this.buildTree();
+          this.render();
+          this.updateStatistics();
+
+        } catch (error) {
+          console.error('Error loading files:', error);
+          this.showError('Failed to load file system');
+        }
+      }
+
+      async loadStats() {
+        try {
+          const response = await fetch('/api/v1/status');
+          if (!response.ok) throw new Error('Failed to fetch system info');
+
+          const data = await response.json();
+          const totalMB = (data.fsTotal / 1024 / 1024).toFixed(2);
+          const usedMB = (data.fsUsed / 1024 / 1024).toFixed(2);
+          const freeMB = ((data.fsTotal - data.fsUsed) / 1024 / 1024).toFixed(2);
+          const usagePercent = ((data.fsUsed / data.fsTotal) * 100).toFixed(1);
+
+          document.getElementById('fsTotal').textContent = totalMB + ' MB';
+          document.getElementById('fsUsed').textContent = usedMB + ' MB';
+          document.getElementById('fsFree').textContent = freeMB + ' MB';
+          document.getElementById('fsPercent').textContent = usagePercent + '%';
+
+          const usageBar = document.getElementById('fsUsageBar');
+          usageBar.style.width = usagePercent + '%';
+          usageBar.className = 'progress-fill ' + (usagePercent < 70 ? 'good' : usagePercent < 90 ? 'warning' : 'danger');
+
+        } catch (error) {
+          console.error('Error loading stats:', error);
+        }
+      }
+
+      buildTree() {
+        this.tree = {
+          name: 'root',
+          type: 'folder',
+          path: '/',
+          children: [],
+          size: 0,
+          expanded: true
+        };
+
+        this.stats = {
+          files: 0,
+          folders: 0,
+          totalSize: 0,
+          largestFile: { name: '', size: 0 }
+        };
+
+        const directories = this.files.filter(f => f.isDirectory);
+        const files = this.files.filter(f => !f.isDirectory);
+
+        directories.sort((a, b) => a.path.localeCompare(b.path));
+        files.sort((a, b) => a.path.localeCompare(b.path));
+
+        directories.forEach(dir => {
+          const cleanPath = dir.path.startsWith('/') ? dir.path.substring(1) : dir.path;
+          const parts = cleanPath.split('/').filter(p => p);
+          let current = this.tree;
+
+          for (let i = 0; i < parts.length; i++) {
+            const folderName = parts[i];
+            let folder = current.children.find(c => c.name === folderName && c.type === 'folder');
+            if (!folder) {
+              folder = {
+                name: folderName,
+                type: 'folder',
+                path: '/' + parts.slice(0, i + 1).join('/'),
+                children: [],
+                size: 0,
+                expanded: false
+              };
+              current.children.push(folder);
+              this.stats.folders++;
+            }
+            current = folder;
+          }
+        });
+
+        files.forEach(file => {
+          const cleanPath = file.path.startsWith('/') ? file.path.substring(1) : file.path;
+          const parts = cleanPath.split('/');
+          let current = this.tree;
+
+          if (parts.length > 1) {
+            for (let i = 0; i < parts.length - 1; i++) {
+              const folderName = parts[i];
+              let folder = current.children.find(c => c.name === folderName && c.type === 'folder');
+              if (!folder) {
+                folder = {
+                  name: folderName,
+                  type: 'folder',
+                  path: '/' + parts.slice(0, i + 1).join('/'),
+                  children: [],
+                  size: 0,
+                  expanded: false
+                };
+                current.children.push(folder);
+                this.stats.folders++;
+              }
+              folder.size += file.size;
+              current = folder;
+            }
+          }
+
+          const fileName = parts[parts.length - 1];
+          if (fileName) {
+            current.children.push({
+              name: fileName,
+              type: 'file',
+              path: file.path,
+              size: file.size
+            });
+
+            this.stats.files++;
+            this.stats.totalSize += file.size;
+            this.tree.size += file.size;
+
+            if (file.size > this.stats.largestFile.size) {
+              this.stats.largestFile = { name: fileName, size: file.size };
+            }
+          }
+        });
+
+        this.sortChildren(this.tree);
+      }
+
+      sortChildren(node) {
+        if (node.children && node.children.length > 0) {
+          node.children.sort((a, b) => {
+            if (a.type !== b.type) {
+              return a.type === 'folder' ? -1 : 1;
+            }
+            return a.name.localeCompare(b.name);
+          });
+
+          node.children.forEach(child => {
+            if (child.type === 'folder') {
+              this.sortChildren(child);
+            }
+          });
+        }
+      }
+
+      render() {
+        this.container.innerHTML = '';
+
+        if (this.files.length === 0) {
+          this.showError('No files found in LittleFS');
+          return;
+        }
+
+        const ul = document.createElement('ul');
+        this.renderNode(this.tree, ul, 0, true);
+        this.container.appendChild(ul);
+
+        // Reinitialize Lucide icons
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      }
+
+      renderNode(node, parentElement, depth, isRoot = false) {
+        if (isRoot) {
+          node.children.forEach(child => {
+            this.renderNode(child, parentElement, depth, false);
+          });
+          return;
+        }
+
+        const li = document.createElement('li');
+        const item = document.createElement('div');
+        item.className = 'tree-item';
+        if (node.type === 'folder') {
+          item.classList.add('folder');
+        }
+
+        if (node.type === 'folder') {
+          const arrow = document.createElement('span');
+          arrow.className = 'tree-arrow';
+          if (node.children.length > 0) {
+            arrow.textContent = '▶';
+            if (node.expanded) {
+              arrow.classList.add('expanded');
+            }
+          } else {
+            arrow.classList.add('empty');
+          }
+          arrow.onclick = (e) => {
+            e.stopPropagation();
+            this.toggleFolder(node, arrow, li);
+          };
+          item.appendChild(arrow);
+        } else {
+          const spacer = document.createElement('span');
+          spacer.className = 'tree-arrow empty';
+          item.appendChild(spacer);
+        }
+
+        const icon = document.createElement('i');
+        icon.className = 'tree-icon';
+        if (node.type === 'folder') {
+          icon.setAttribute('data-lucide', node.expanded ? 'folder-open' : 'folder');
+        } else {
+          icon.setAttribute('data-lucide', this.getFileIcon(node.name));
+        }
+        item.appendChild(icon);
+
+        const label = document.createElement('span');
+        label.className = 'tree-label';
+        label.textContent = node.name;
+        item.appendChild(label);
+
+        const size = document.createElement('span');
+        size.className = 'tree-size';
+        size.textContent = this.formatSize(node.size);
+        item.appendChild(size);
+
+        if (node.type === 'file') {
+          const download = document.createElement('button');
+          download.className = 'tree-download';
+          download.textContent = 'Download';
+          download.onclick = (e) => {
+            e.stopPropagation();
+            this.downloadFile(node.path);
+          };
+          item.appendChild(download);
+        }
+
+        item.onclick = () => this.selectItem(node, item);
+
+        li.appendChild(item);
+
+        if (node.type === 'folder' && node.children.length > 0) {
+          const childrenContainer = document.createElement('ul');
+          childrenContainer.className = 'tree-folder-content';
+          if (node.expanded) {
+            childrenContainer.classList.add('expanded');
+          }
+
+          node.children.forEach(child => {
+            this.renderNode(child, childrenContainer, depth + 1, false);
+          });
+
+          li.appendChild(childrenContainer);
+        }
+
+        parentElement.appendChild(li);
+      }
+
+      toggleFolder(node, arrow, li) {
+        node.expanded = !node.expanded;
+
+        const icon = li.querySelector('.tree-icon');
+        const childrenContainer = li.querySelector('.tree-folder-content');
+
+        if (node.expanded) {
+          arrow.classList.add('expanded');
+          icon.setAttribute('data-lucide', 'folder-open');
+          if (childrenContainer) {
+            childrenContainer.classList.add('expanded');
+          }
+        } else {
+          arrow.classList.remove('expanded');
+          icon.setAttribute('data-lucide', 'folder');
+          if (childrenContainer) {
+            childrenContainer.classList.remove('expanded');
+          }
+        }
+
+        // Reinitialize Lucide icons
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      }
+
+      selectItem(node, element) {
+        const allItems = this.container.querySelectorAll('.tree-item.selected');
+        allItems.forEach(item => item.classList.remove('selected'));
+        element.classList.add('selected');
+        this.selectedItem = element;
+      }
+
+      getFileIcon(filename) {
+        const ext = filename.split('.').pop().toLowerCase();
+        const icons = {
+          'html': 'file-code',
+          'htm': 'file-code',
+          'css': 'palette',
+          'js': 'file-text',
+          'json': 'braces',
+          'txt': 'file-text',
+          'log': 'file-text',
+          'md': 'file-text',
+          'xml': 'file-code',
+          'cfg': 'settings',
+          'config': 'settings',
+          'ini': 'settings'
+        };
+        return icons[ext] || 'file';
+      }
+
+      formatSize(bytes) {
+        if (bytes === 0) return '0 B';
+        const units = ['B', 'KB', 'MB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(1024));
+        return (bytes / Math.pow(1024, i)).toFixed(i > 0 ? 1 : 0) + ' ' + units[i];
+      }
+
+      downloadFile(path) {
+        showToast('Downloading file', path.split('/').pop(), 'info');
+        window.location.href = '/api/v1/file?path=' + encodeURIComponent(path);
+      }
+
+      expandAll() {
+        this.expandAllNodes(this.tree);
+        this.render();
+      }
+
+      expandAllNodes(node) {
+        if (node.type === 'folder') {
+          node.expanded = true;
+          if (node.children) {
+            node.children.forEach(child => this.expandAllNodes(child));
+          }
+        }
+      }
+
+      collapseAll() {
+        this.collapseAllNodes(this.tree);
+        this.tree.expanded = true;
+        this.render();
+      }
+
+      collapseAllNodes(node) {
+        if (node.type === 'folder') {
+          node.expanded = false;
+          if (node.children) {
+            node.children.forEach(child => this.collapseAllNodes(child));
+          }
+        }
+      }
+
+      async refresh() {
+        const btn = document.getElementById('refreshBtn');
+        btn.disabled = true;
+        await this.loadFileSystem();
+        btn.disabled = false;
+        showToast('Success', 'File system refreshed', 'success');
+      }
+
+      updateStatistics() {
+        document.getElementById('statFiles').textContent = this.stats.files;
+        document.getElementById('statFolders').textContent = this.stats.folders;
+        document.getElementById('statTotalSize').textContent = this.formatSize(this.stats.totalSize);
+        document.getElementById('statLargestFile').textContent =
+          this.stats.largestFile.name ?
+          `${this.formatSize(this.stats.largestFile.size)}` : '--';
+      }
+
+      showLoading() {
+        this.container.innerHTML = `
+          <div class="tree-loading">
+            <div class="loading-spinner"></div>
+            <span>Loading file system...</span>
+          </div>
+        `;
+      }
+
+      showError(message) {
+        this.container.innerHTML = `
+          <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+            <div style="font-size: 32px; margin-bottom: 12px;">⚠️</div>
+            <div>${message}</div>
+          </div>
+        `;
+      }
+    }
 
     // ===== THEME FUNCTIONS =====
 
@@ -790,189 +1281,12 @@
       document.getElementById('navMenu').classList.toggle('open');
     }
 
-    // Load saved theme
     document.addEventListener('DOMContentLoaded', () => {
       const savedTheme = localStorage.getItem('theme') || 'light';
       document.documentElement.setAttribute('data-theme', savedTheme);
       const icon = document.getElementById('themeIcon');
       icon.setAttribute('data-lucide', savedTheme === 'dark' ? 'moon' : 'sun');
     });
-
-    // ===== API FUNCTIONS =====
-
-    async function fetchFileSystemInfo() {
-      try {
-        const res = await fetch('/api/v1/status');
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return await res.json();
-      } catch (error) {
-        console.error('Failed to fetch file system info:', error);
-        return null;
-      }
-    }
-
-    async function fetchFileList() {
-      try {
-        const res = await fetch('/api/v1/files');
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        // V1 API returns array directly
-        return Array.isArray(data) ? data : [];
-      } catch (error) {
-        console.error('Failed to fetch file list:', error);
-        return [];
-      }
-    }
-
-    // ===== INITIALIZATION =====
-
-    async function init() {
-      showLoadingIndicator('Loading file system...');
-      await refreshFileSystemInfo();
-      await refreshFiles();
-      hideLoadingIndicator();
-    }
-
-    // ===== FILE SYSTEM INFO =====
-
-    async function refreshFileSystemInfo() {
-      const info = await fetchFileSystemInfo();
-      if (!info) return;
-
-      const totalMB = ((info.fsTotal || 0) / 1024 / 1024).toFixed(2);
-      const usedMB = ((info.fsUsed || 0) / 1024 / 1024).toFixed(2);
-      const freeMB = (((info.fsTotal || 0) - (info.fsUsed || 0)) / 1024 / 1024).toFixed(2);
-      const usagePercent = info.fsTotal > 0 ? ((info.fsUsed / info.fsTotal) * 100).toFixed(1) : 0;
-
-      document.getElementById('fsTotal').textContent = totalMB + ' MB';
-      document.getElementById('fsUsed').textContent = usedMB + ' MB';
-      document.getElementById('fsFree').textContent = freeMB + ' MB';
-      document.getElementById('fsPercent').textContent = usagePercent + '%';
-
-      const usageBar = document.getElementById('fsUsageBar');
-      usageBar.style.width = usagePercent + '%';
-      usageBar.className = 'progress-fill ' + (usagePercent < 70 ? 'good' : usagePercent < 90 ? 'warning' : 'danger');
-    }
-
-    // ===== FILE LIST RENDERING =====
-
-    async function refreshFiles() {
-      const btn = document.getElementById('refreshBtn');
-      btn.disabled = true;
-
-      files = await fetchFileList();
-      document.getElementById('fileCount').textContent = files.length;
-      renderTable();
-
-      btn.disabled = false;
-    }
-
-    function renderTable() {
-      const tbody = document.getElementById('fileTableBody');
-
-      if (files.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 40px; color: var(--text-muted);">No files found</td></tr>';
-        return;
-      }
-
-      // Sort files
-      let sortedFiles = [...files];
-      sortedFiles.sort((a, b) => {
-        let aVal, bVal;
-        if (sortColumn === 0) {
-          aVal = a.name || '';
-          bVal = b.name || '';
-        } else if (sortColumn === 1) {
-          aVal = a.size || 0;
-          bVal = b.size || 0;
-        }
-
-        if (typeof aVal === 'string') {
-          return sortAscending ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
-        } else {
-          return sortAscending ? aVal - bVal : bVal - aVal;
-        }
-      });
-
-      tbody.innerHTML = sortedFiles.map(file => {
-        const fileName = file.name || 'unnamed';
-        const fileSize = formatSize(file.size || 0);
-        const fileIcon = getFileIcon(fileName);
-
-        return `<tr>
-          <td>
-            <div style="display: flex; align-items: center; gap: 12px;">
-              <i data-lucide="${fileIcon}" class="file-icon"></i>
-              <span class="file-name">${escapeHtml(fileName)}</span>
-            </div>
-          </td>
-          <td class="file-size">${fileSize}</td>
-          <td>
-            <button class="btn-secondary" onclick="downloadFile('${escapeHtml(fileName)}')">
-              <i data-lucide="download"></i>
-              Download
-            </button>
-          </td>
-        </tr>`;
-      }).join('');
-
-      // Reinitialize Lucide icons
-      lucide.createIcons();
-    }
-
-    function sortTable(column) {
-      if (sortColumn === column) {
-        sortAscending = !sortAscending;
-      } else {
-        sortColumn = column;
-        sortAscending = true;
-      }
-      renderTable();
-    }
-
-    // ===== HELPER FUNCTIONS =====
-
-    function getFileIcon(filename) {
-      const ext = filename.split('.').pop().toLowerCase();
-      const icons = {
-        'html': 'file-code',
-        'htm': 'file-code',
-        'css': 'palette',
-        'js': 'file-text',
-        'json': 'braces',
-        'txt': 'file-text',
-        'log': 'file-text',
-        'md': 'file-text',
-        'xml': 'file-code',
-        'cfg': 'settings',
-        'config': 'settings',
-        'ini': 'settings'
-      };
-      return icons[ext] || 'file';
-    }
-
-    function formatSize(bytes) {
-      if (bytes === 0) return '0 B';
-      const units = ['B', 'KB', 'MB'];
-      const i = Math.floor(Math.log(bytes) / Math.log(1024));
-      return (bytes / Math.pow(1024, i)).toFixed(i > 0 ? 1 : 0) + ' ' + units[i];
-    }
-
-    function escapeHtml(text) {
-      const map = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#039;'
-      };
-      return text.replace(/[&<>"']/g, m => map[m]);
-    }
-
-    function downloadFile(filename) {
-      showToast('Downloading file', filename, 'info');
-      window.location.href = '/api/v1/file?path=' + encodeURIComponent('/' + filename);
-    }
 
     // ===== TOAST NOTIFICATIONS =====
 
@@ -991,47 +1305,23 @@
       toast.classList.remove('show');
     }
 
-    // ===== LOADING INDICATOR =====
-
-    function showLoadingIndicator(message = 'Loading...') {
-      const overlay = document.createElement('div');
-      overlay.className = 'loading-overlay';
-      overlay.id = 'loadingOverlay';
-      overlay.innerHTML = `
-        <div class="loading-spinner"></div>
-        <div class="loading-text">${message}</div>
-      `;
-      document.body.appendChild(overlay);
-    }
-
-    function hideLoadingIndicator() {
-      const overlay = document.getElementById('loadingOverlay');
-      if (overlay) {
-        overlay.remove();
-      }
-    }
-
     // ===== START APPLICATION =====
 
     window.onload = () => {
-      // Initialize Lucide icons
       if (typeof lucide !== 'undefined') {
         lucide.createIcons();
       }
 
-      // Initialize file browser
-      init();
+      const explorer = new FileExplorer();
+      explorer.init();
     };
 
-    // Global error handler to prevent stuck loading states
     window.addEventListener('error', (event) => {
       console.error('Global error caught:', event.error);
-      hideLoadingIndicator();
     });
 
     window.addEventListener('unhandledrejection', (event) => {
       console.error('Unhandled promise rejection:', event.reason);
-      hideLoadingIndicator();
     });
   </script>
 </body>
