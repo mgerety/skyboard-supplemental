@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Skyboard Web Interface Version: 59 -->
+<!-- Skyboard Web Interface Version: 60 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -1362,7 +1362,8 @@
     // Load airport database
     async function loadAirportDatabase() {
       try {
-        const response = await fetch('/data/airports.json');
+        // Load from GitHub CDN (not stored locally on ESP32 - too large at 170KB)
+        const response = await fetch('https://raw.githubusercontent.com/mgerety/skyboard-supplemental/main/data/airports.json');
         if (!response.ok) {
           console.warn('Failed to load airport database, using fallback');
           return;
