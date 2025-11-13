@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Skyboard Diagnostics Version: 69 -->
+<!-- Skyboard Diagnostics Version: 70 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -1037,13 +1037,13 @@
       });
 
       // Network info
-      document.getElementById('ipValue').textContent = systemInfo.ipAddress || '--';
+      document.getElementById('ipValue').textContent = systemInfo.localIP || '--';
       document.getElementById('hostnameValue').textContent = systemInfo.hostname || '--';
 
       // File system
-      const fsPercent = systemInfo.fsUsedPercent || 0;
-      const fsUsedKB = Math.round((systemInfo.fsUsedBytes || 0) / 1024);
-      const fsTotalKB = Math.round((systemInfo.fsTotalBytes || 0) / 1024);
+      const fsUsedKB = Math.round((systemInfo.fsUsed || 0) / 1024);
+      const fsTotalKB = Math.round((systemInfo.fsTotal || 0) / 1024);
+      const fsPercent = fsTotalKB > 0 ? (fsUsedKB / fsTotalKB) * 100 : 0;
       document.getElementById('fsValue').textContent = `${fsUsedKB}KB / ${fsTotalKB}KB (${Math.round(fsPercent)}%)`;
 
       const fsBar = document.getElementById('fsBar');
@@ -1051,11 +1051,11 @@
       fsBar.className = 'progress-fill ' + (fsPercent < 70 ? 'good' : fsPercent < 90 ? 'warning' : 'danger');
 
       // Weather update
-      const lastUpdate = systemInfo.lastWeatherUpdate || '--';
+      const lastUpdate = systemInfo.lastUpdate ? new Date(systemInfo.lastUpdate).toLocaleString() : '--';
       document.getElementById('lastUpdateValue').textContent = lastUpdate;
 
       // Web version
-      document.getElementById('webVersionValue').textContent = systemInfo.webFilesVersion || '--';
+      document.getElementById('webVersionValue').textContent = systemInfo.webVersion || '--';
     }
 
     // ===== LED TABLE RENDERING =====
