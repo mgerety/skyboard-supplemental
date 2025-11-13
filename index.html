@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Skyboard Web Interface Version: 60 -->
+<!-- Skyboard Web Interface Version: 63 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -1388,13 +1388,26 @@
         if (!response.ok) throw new Error('Failed to load config');
 
         const data = await response.json();
+
+        // Transform airports from array-of-objects to string array
+        // ESP32 API returns: [{ledIndex: 0, airportCode: "KSFO"}, ...]
+        // We need: ["KSFO", "KMRY", ...]
+        const airportsArray = Array(data.numLeds || 80).fill('NULL');
+        if (data.airports && Array.isArray(data.airports)) {
+          data.airports.forEach(item => {
+            if (item.ledIndex >= 0 && item.ledIndex < airportsArray.length) {
+              airportsArray[item.ledIndex] = item.airportCode || 'NULL';
+            }
+          });
+        }
+
         currentConfig = {
           numLeds: data.numLeds || 80,
           brightness: data.brightness || 20,
           updateIntervalMinutes: data.updateIntervalMinutes || 15,
           hostname: data.hostname || 'led-sectional',
           useMDNS: data.useMDNS !== false,
-          airports: data.airports || []
+          airports: airportsArray
         };
 
         document.getElementById('numLeds').value = currentConfig.numLeds;
@@ -1988,10 +2001,16 @@
         return;
       }
 
+      // Build airports array-of-objects for ESP32 API
+      // API expects: [{ledIndex: 0, airportCode: "KSFO"}, ...]
       const airports = [];
       for (let i = 0; i < numLeds; i++) {
         const input = document.querySelector(`.airport-input[data-led="${i}"]`);
-        airports.push(input ? input.value.toUpperCase() : 'NULL');
+        const airportCode = input ? input.value.toUpperCase() : 'NULL';
+        airports.push({
+          ledIndex: i,
+          airportCode: airportCode
+        });
       }
 
       const config = {
