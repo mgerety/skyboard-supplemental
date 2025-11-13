@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Skyboard Diagnostics Version: 71 -->
+<!-- Skyboard Diagnostics Version: 72 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -890,7 +890,6 @@
               <th class="sortable" onclick="sortTable(1)">Assignment</th>
               <th class="sortable" onclick="sortTable(2)">Flight Category</th>
               <th>Color</th>
-              <th>Status</th>
             </tr>
           </thead>
           <tbody id="ledTableBody">
@@ -1067,7 +1066,7 @@
         'MVFR': '#0000FF',   // Blue
         'WVFR': '#FFFF00',   // Yellow (Windy VFR)
         'VFR': '#00FF00',    // Green
-        'PENDING': '#000000' // Black
+        'NONE': '#000000'    // Black (for NULL/unassigned/no data)
       };
       return colors[fltCat.toUpperCase()] || '#000000';  // Default black
     }
@@ -1123,7 +1122,6 @@
           <td><code>${led.airportCode}</code></td>
           <td><span class="status-badge ${categoryClass}">${statusText}</span></td>
           <td><span class="status-dot" style="${colorStyle}"></span></td>
-          <td>${led.status || 'Active'}</td>
         </tr>`;
       }).join('');
     }
