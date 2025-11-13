@@ -301,6 +301,32 @@
       height: 24px;
     }
 
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--border-color);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .card-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .badge {
+      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
     /* DASHBOARD GRID */
     .dashboard-grid {
       display: grid;
@@ -833,9 +859,14 @@
 
     <!-- LED STATUS TABLE -->
     <div class="card">
-      <div class="card-title">
-        <i data-lucide="lightbulb" style="color: var(--color-warning);"></i>
-        LED Status (<span id="ledCount">0</span> configured)
+      <div class="card-header">
+        <h2 class="card-title">
+          <i data-lucide="lightbulb" style="color: var(--color-warning);"></i>
+          LED Status
+        </h2>
+        <div class="card-header-actions">
+          <span class="badge"><span id="ledCount">0</span> configured</span>
+        </div>
       </div>
 
       <div class="search-filter">
