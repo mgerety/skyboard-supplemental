@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Skyboard Web Interface Version: 64 -->
+<!-- Skyboard Web Interface Version: 69 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -1486,14 +1486,15 @@
     // Load LED status
     async function loadStatus() {
       try {
-        const response = await fetch('/api/status');
+        const response = await fetch('/api/v1/weather');
         if (!response.ok) {
           console.warn('Status endpoint not available');
           return;
         }
 
         const data = await response.json();
-        statusData = data.leds || [];
+        // V1 API returns array directly, not wrapped in {leds: [...]}
+        statusData = Array.isArray(data) ? data : [];
         updateStatusIndicators();
       } catch (error) {
         console.warn('Failed to load status:', error);
@@ -2115,7 +2116,7 @@
 
         showLoadingIndicator('Updating weather data...');
         try {
-          const refreshResponse = await fetch('/api/forceRefresh', { method: 'POST' });
+          const refreshResponse = await fetch('/api/v1/refresh', { method: 'POST' });
           hideLoadingIndicator();
           if (refreshResponse.ok) {
             showToast('Weather data updated successfully!', 'success');
