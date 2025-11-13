@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Skyboard Diagnostics Version: 58 -->
+<!-- Skyboard Diagnostics Version: 65 -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -7,15 +7,16 @@
     <title>Skyboard Diagnostics Dashboard</title>
     <link rel="stylesheet" href="/css/base.css">
     <link rel="stylesheet" href="/css/components.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
     <!-- HEADER -->
     <header class="page-header">
-        <h1>🛩️ Skyboard Diagnostics</h1>
+        <h1><i data-lucide="activity" style="width: 28px; height: 28px; vertical-align: middle;"></i> Skyboard Diagnostics</h1>
         <nav>
-            <a href="/">Config</a>
-            <a href="/diagnostics" class="active">Diagnostics</a>
-            <a href="/files">Files</a>
+            <a href="/"><i data-lucide="settings" style="width: 18px; height: 18px;"></i> Config</a>
+            <a href="/diagnostics" class="active"><i data-lucide="activity" style="width: 18px; height: 18px;"></i> Diagnostics</a>
+            <a href="/files"><i data-lucide="folder" style="width: 18px; height: 18px;"></i> Files</a>
         </nav>
     </header>
 
@@ -23,10 +24,10 @@
         <!-- CONTROL BUTTONS -->
         <div class="card">
             <div class="button-group">
-                <button id="refreshBtn" class="btn btn-primary" onclick="forceRefresh()">🔄 Force Refresh</button>
-                <button class="btn btn-secondary" onclick="clearLogs()">🗑️ Clear Logs</button>
+                <button id="refreshBtn" class="btn btn-primary" onclick="forceRefresh()"><i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i> Force Refresh</button>
+                <button class="btn btn-secondary" onclick="clearLogs()"><i data-lucide="trash-2" style="width: 16px; height: 16px;"></i> Clear Logs</button>
                 <a href="/api/downloadWeather" class="no-underline">
-                    <button class="btn btn-secondary">📥 Download Weather Data</button>
+                    <button class="btn btn-secondary"><i data-lucide="download" style="width: 16px; height: 16px;"></i> Download Weather Data</button>
                 </a>
             </div>
         </div>
@@ -35,7 +36,7 @@
         <div class="dashboard-grid">
             <!-- SYSTEM HEALTH CARD -->
             <div class="card">
-                <div class="card-title">💚 System Health</div>
+                <div class="card-title"><i data-lucide="heart-pulse" style="width: 24px; height: 24px; color: var(--color-success);"></i> System Health</div>
                 <div class="metric">
                     <div class="metric-label">Free Heap Memory</div>
                     <div class="metric-value">
@@ -57,7 +58,7 @@
 
             <!-- NETWORK CARD -->
             <div class="card">
-                <div class="card-title">📡 Network</div>
+                <div class="card-title"><i data-lucide="wifi" style="width: 24px; height: 24px; color: var(--color-accent);"></i> Network</div>
                 <div class="metric">
                     <div class="metric-label">WiFi Signal</div>
                     <div class="metric-value">
@@ -82,7 +83,7 @@
 
             <!-- STORAGE & WEATHER CARD -->
             <div class="card">
-                <div class="card-title">💾 Storage & Weather</div>
+                <div class="card-title"><i data-lucide="hard-drive" style="width: 24px; height: 24px; color: var(--color-info);"></i> Storage & Weather</div>
                 <div class="metric">
                     <div class="metric-label">LittleFS Usage</div>
                     <div class="metric-value">
@@ -102,7 +103,7 @@
                 </div>
                 <div class="button-group">
                     <button id="updateWebFilesBtn" class="btn btn-secondary" onclick="forceWebUpdate()">
-                        📥 Force Web Files Update
+                        <i data-lucide="download-cloud" style="width: 16px; height: 16px;"></i> Force Web Files Update
                     </button>
                 </div>
             </div>
@@ -110,7 +111,7 @@
 
         <!-- LED STATUS TABLE -->
         <div class="card">
-            <div class="card-title">💡 LED Status (<span id="ledCount">0</span> configured)</div>
+            <div class="card-title"><i data-lucide="lightbulb" style="width: 24px; height: 24px; color: var(--color-warning);"></i> LED Status (<span id="ledCount">0</span> configured)</div>
 
             <div class="search-filter">
                 <input type="text" id="searchInput" class="input" placeholder="Search LED# or Airport Code..." onkeyup="filterTable()">
@@ -490,7 +491,15 @@
 
         // ===== START APPLICATION =====
 
-        window.onload = init;
+        window.onload = () => {
+            // Initialize Lucide icons
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+
+            // Initialize dashboard
+            init();
+        };
 
         // Story 3.2: Global error handler to prevent stuck loading states
         window.addEventListener('error', (event) => {
