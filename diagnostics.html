@@ -1060,6 +1060,18 @@
 
     // ===== LED TABLE RENDERING =====
 
+    function getColorFromFlightCategory(fltCat) {
+      const colors = {
+        'LIFR': '#FF00FF',  // Magenta
+        'IFR': '#FF0000',    // Red
+        'MVFR': '#0000FF',   // Blue
+        'WVFR': '#FFFF00',   // Yellow (Windy VFR)
+        'VFR': '#00FF00',    // Green
+        'PENDING': '#000000' // Black
+      };
+      return colors[fltCat.toUpperCase()] || '#000000';  // Default black
+    }
+
     async function refreshLEDTable() {
       ledStatus = await fetchLEDStatus();
       document.getElementById('ledCount').textContent = ledStatus.length;
@@ -1101,7 +1113,8 @@
       });
 
       tbody.innerHTML = filteredLEDs.map(led => {
-        const colorStyle = `background-color: ${led.color}; ${led.color.toLowerCase() === '#ffff00' ? 'border: 1px solid #999;' : ''}`;
+        const color = getColorFromFlightCategory(led.flightCategory);
+        const colorStyle = `background-color: ${color}; ${color.toLowerCase() === '#ffff00' ? 'border: 1px solid #999;' : ''}`;
         const categoryClass = led.error ? 'error' : led.flightCategory.toLowerCase();
         const statusText = led.error ? 'ERROR' : led.flightCategory;
 
