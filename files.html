@@ -1,125 +1,1038 @@
 <!DOCTYPE html>
-<!-- Skyboard File Browser Version: 58 -->
+<!-- Skyboard File Browser Version: 75 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#0066cc">
+  <meta name="theme-color" content="#1e3a8a">
   <title>Skyboard File Browser</title>
-  <link rel="stylesheet" href="/css/base.css">
-  <link rel="stylesheet" href="/css/components.css">
-  <link rel="stylesheet" href="/css/file-browser.css">
-  <script src="/js/components.js"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    /* ==================================================
+     * MODERN SKYBOARD DESIGN SYSTEM v2.0
+     * Story 1.7B: Modernize File Management Page
+     * Based on Story 1.4B/1.6B design system
+     * Reference: index.html, diagnostics.html
+     * ================================================== */
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      /* Light Theme - Modern Design */
+      --bg-gradient-start: #1e3a8a;
+      --bg-gradient-end: #0c4a6e;
+      --bg-body: linear-gradient(135deg, #1e3a8a 0%, #0c4a6e 100%);
+      --card-bg: #f8f9fa;
+      --card-shadow: rgba(0, 0, 0, 0.08);
+      --card-hover-shadow: rgba(0, 0, 0, 0.12);
+      --text-primary: #1a1a1a;
+      --text-secondary: #4a5568;
+      --text-muted: #718096;
+      --border-color: #dee2e6;
+      --input-bg: #ffffff;
+      --input-border: #dee2e6;
+      --navbar-bg: rgba(255, 255, 255, 0.95);
+      --navbar-shadow: rgba(0, 0, 0, 0.08);
+      --table-hover: #e9ecef;
+      --accent-primary: #1e40af;
+      --accent-secondary: #0369a1;
+      --warning: #f59e0b;
+      --warning-bg: #fef3c7;
+      --warning-border: #fbbf24;
+      --success: #28a745;
+      --error: #dc3545;
+      --info: #17a2b8;
+
+      /* Flight Category Colors (Fixed) */
+      --color-lifr: #FF00FF;
+      --color-ifr: #FF0000;
+      --color-mvfr: #0000FF;
+      --color-wvfr: #FFFF00;
+      --color-vfr: #00FF00;
+      --color-accent: #1e40af;
+      --color-success: #28a745;
+      --color-warning: #f59e0b;
+      --color-info: #17a2b8;
+    }
+
+    [data-theme="dark"] {
+      /* Dark Theme */
+      --bg-gradient-start: #0f172a;
+      --bg-gradient-end: #1e293b;
+      --bg-body: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      --card-bg: #1e293b;
+      --card-shadow: rgba(0, 0, 0, 0.3);
+      --card-hover-shadow: rgba(0, 0, 0, 0.4);
+      --text-primary: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+      --input-bg: #0f172a;
+      --input-border: #334155;
+      --navbar-bg: rgba(30, 41, 59, 0.95);
+      --navbar-shadow: rgba(0, 0, 0, 0.3);
+      --table-hover: #0f172a;
+      --accent-primary: #3b82f6;
+      --accent-secondary: #0ea5e9;
+      --warning: #f59e0b;
+      --warning-bg: #422006;
+      --warning-border: #f59e0b;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Inter', sans-serif;
+      background: var(--bg-body);
+      min-height: 100vh;
+      color: var(--text-primary);
+      transition: all 0.3s ease;
+    }
+
+    /* NAVIGATION BAR */
+    .navbar {
+      background: var(--navbar-bg);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 20px var(--navbar-shadow);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+
+    .navbar-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--accent-primary);
+      text-decoration: none;
+    }
+
+    .navbar-brand svg {
+      width: 28px;
+      height: 28px;
+    }
+
+    .navbar-menu {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .nav-link {
+      padding: 8px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--text-secondary);
+      font-weight: 500;
+      font-size: 15px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-link svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .nav-link:hover {
+      background: var(--input-bg);
+      color: var(--accent-primary);
+    }
+
+    .nav-link.active {
+      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(30, 64, 175, 0.4);
+    }
+
+    .theme-toggle {
+      background: var(--input-bg);
+      border: 2px solid var(--border-color);
+      border-radius: 10px;
+      padding: 8px 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      margin-left: 12px;
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--accent-primary);
+    }
+
+    .theme-toggle svg {
+      width: 20px;
+      height: 20px;
+      color: var(--text-secondary);
+    }
+
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 8px;
+    }
+
+    .hamburger span {
+      width: 24px;
+      height: 3px;
+      background: var(--text-secondary);
+      border-radius: 2px;
+      transition: all 0.3s;
+    }
+
+    /* MOBILE MENU */
+    @media (max-width: 768px) {
+      .navbar-menu {
+        position: fixed;
+        top: 64px;
+        left: 0;
+        right: 0;
+        background: var(--navbar-bg);
+        flex-direction: column;
+        padding: 20px;
+        gap: 12px;
+        box-shadow: 0 8px 20px var(--navbar-shadow);
+        transform: translateY(-120%);
+        transition: transform 0.3s;
+      }
+
+      .navbar-menu.open {
+        transform: translateY(0);
+      }
+
+      .hamburger {
+        display: flex;
+      }
+
+      .nav-link {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .theme-toggle {
+        margin-left: 0;
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    /* MAIN CONTENT */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+
+    .page-header {
+      margin-bottom: 32px;
+    }
+
+    .page-title {
+      font-size: 32px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 8px;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .page-title svg {
+      width: 36px;
+      height: 36px;
+    }
+
+    .page-subtitle {
+      font-size: 16px;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    /* CARDS */
+    .card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 20px var(--card-shadow);
+      transition: all 0.3s ease;
+      border: 1px solid var(--border-color);
+    }
+
+    .card:hover {
+      box-shadow: 0 8px 30px var(--card-hover-shadow);
+    }
+
+    .card-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 20px 0;
+    }
+
+    .card-title svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--border-color);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .card-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .badge {
+      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* DASHBOARD GRID */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    /* METRICS */
+    .metric {
+      margin-bottom: 20px;
+    }
+
+    .metric:last-child {
+      margin-bottom: 0;
+    }
+
+    .metric-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .metric-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* PROGRESS BAR */
+    .progress-bar {
+      width: 100%;
+      height: 12px;
+      background: var(--border-color);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-top: 12px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      transition: all 0.3s ease;
+      border-radius: 6px;
+    }
+
+    .progress-fill.good {
+      background: linear-gradient(90deg, var(--success), #34d058);
+    }
+
+    .progress-fill.warning {
+      background: linear-gradient(90deg, var(--warning), #fbbf24);
+    }
+
+    .progress-fill.danger {
+      background: linear-gradient(90deg, var(--error), #f87171);
+    }
+
+    /* BUTTON GROUP */
+    .button-group {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    /* BUTTONS */
+    .btn {
+      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 16px rgba(30, 64, 175, 0.4);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    .btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(30, 64, 175, 0.5);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-secondary {
+      background: var(--input-bg);
+      color: var(--text-primary);
+      border: 2px solid var(--border-color);
+      box-shadow: none;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      border-color: var(--accent-primary);
+      background: var(--accent-primary);
+      color: white;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+    }
+
+    .no-underline {
+      text-decoration: none;
+    }
+
+    /* FILE LIST TABLE */
+    .table-container {
+      overflow-x: auto;
+      border-radius: 12px;
+      box-shadow: 0 0 0 1px var(--border-color);
+      background: var(--input-bg);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    thead {
+      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+      color: white;
+    }
+
+    th {
+      padding: 16px 20px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    th.sortable:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    td {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-primary);
+    }
+
+    tbody tr {
+      transition: all 0.15s;
+    }
+
+    tbody tr:hover {
+      background: var(--table-hover);
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .file-icon {
+      width: 20px;
+      height: 20px;
+      color: var(--accent-primary);
+    }
+
+    .file-name {
+      font-family: 'Courier New', monospace;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .file-size {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    /* TOAST NOTIFICATIONS */
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      max-width: 400px;
+      width: calc(100% - 40px);
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px;
+      padding-right: 48px;
+      box-shadow: 0 8px 24px var(--card-hover-shadow);
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 2000;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .toast.error {
+      border-left: 4px solid var(--error);
+    }
+
+    .toast.success {
+      border-left: 4px solid var(--success);
+    }
+
+    .toast.info {
+      border-left: 4px solid var(--accent-primary);
+    }
+
+    .toast.warning {
+      border-left: 4px solid var(--warning);
+    }
+
+    .toast-title {
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: var(--text-primary);
+    }
+
+    .toast-message {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .toast-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      line-height: 1;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .toast-close:hover {
+      color: var(--text-primary);
+      background: var(--border-color);
+      border-radius: 4px;
+    }
+
+    /* LOADING OVERLAY */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    .loading-spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      color: white;
+      font-size: 16px;
+      margin-top: 16px;
+      text-align: center;
+    }
+
+    /* UTILITY CLASSES */
+    .hidden { display: none !important; }
+  </style>
 </head>
 <body>
-  <header class="page-header">
-    <h1>✈️ Skyboard File Browser</h1>
-    <nav>
-      <a href="/">Config</a>
-      <a href="/diagnostics">Diagnostics</a>
-      <a href="/files" class="active">Files</a>
-    </nav>
-  </header>
+  <!-- NAVIGATION BAR -->
+  <nav class="navbar">
+    <div class="navbar-container">
+      <a href="/" class="navbar-brand">
+        <i data-lucide="plane"></i>
+        <span>Skyboard</span>
+      </a>
+      <div class="hamburger" onclick="toggleMenu()">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <div class="navbar-menu" id="navMenu">
+        <a href="/" class="nav-link">
+          <i data-lucide="settings"></i>
+          Configuration
+        </a>
+        <a href="/diagnostics" class="nav-link">
+          <i data-lucide="activity"></i>
+          Diagnostics
+        </a>
+        <a href="/files" class="nav-link active">
+          <i data-lucide="folder"></i>
+          Files
+        </a>
+        <button class="theme-toggle" onclick="toggleTheme()">
+          <i data-lucide="sun" id="themeIcon"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
 
+  <!-- MAIN CONTENT -->
   <div class="container">
-    <!-- File System Overview -->
-    <div class="fs-overview">
-      <h2>📊 File System Overview</h2>
-      <div class="fs-metrics">
-        <div class="fs-metric">
-          <div class="fs-metric-value" id="fsTotal">--</div>
-          <div class="fs-metric-label">Total Space</div>
-        </div>
-        <div class="fs-metric">
-          <div class="fs-metric-value" id="fsUsed">--</div>
-          <div class="fs-metric-label">Used</div>
-        </div>
-        <div class="fs-metric">
-          <div class="fs-metric-value" id="fsFree">--</div>
-          <div class="fs-metric-label">Free</div>
-        </div>
-        <div class="fs-metric">
-          <div class="fs-metric-value" id="fsPercent">--%</div>
-          <div class="fs-metric-label">Usage</div>
+    <div class="page-header">
+      <h1 class="page-title">
+        <i data-lucide="hard-drive"></i>
+        File System Browser
+      </h1>
+      <p class="page-subtitle">Browse and download files from LittleFS</p>
+    </div>
+
+    <!-- FILE SYSTEM OVERVIEW -->
+    <div class="dashboard-grid">
+      <div class="card">
+        <div class="metric">
+          <div class="metric-label">Total Space</div>
+          <div class="metric-value" id="fsTotal">--</div>
         </div>
       </div>
-      <div class="fs-usage-bar">
-        <div class="fs-usage-fill" id="fsUsageBar" style="width: 0%"></div>
+      <div class="card">
+        <div class="metric">
+          <div class="metric-label">Used Space</div>
+          <div class="metric-value" id="fsUsed">--</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="metric">
+          <div class="metric-label">Free Space</div>
+          <div class="metric-value" id="fsFree">--</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="metric">
+          <div class="metric-label">Usage</div>
+          <div class="metric-value" id="fsPercent">--%</div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="fsUsageBar"></div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- File Explorer Card -->
-    <div class="card" style="padding: 0; background: #252526; border: 1px solid #333;">
-      <!-- Toolbar -->
-      <div class="tree-toolbar">
-        <div class="tree-toolbar-title">
-          <span>📁</span>
-          <span>LittleFS File System</span>
-        </div>
-        <div class="tree-toolbar-actions">
-          <button class="tree-btn secondary" id="expandAllBtn">
-            <span style="font-size: 10px;">▼</span> Expand All
-          </button>
-          <button class="tree-btn secondary" id="collapseAllBtn">
-            <span style="font-size: 10px;">▶</span> Collapse All
-          </button>
-          <button class="tree-btn" id="refreshBtn">
-            🔄 Refresh
+    <!-- FILE LIST CARD -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">
+          <i data-lucide="folder-open"></i>
+          Files
+        </h2>
+        <div class="card-header-actions">
+          <span class="badge"><span id="fileCount">0</span> files</span>
+          <button class="btn-secondary" id="refreshBtn" onclick="refreshFiles()">
+            <i data-lucide="refresh-cw"></i>
+            Refresh
           </button>
         </div>
       </div>
 
-      <!-- Tree View Container -->
-      <div class="tree-view" id="treeView">
-        <div class="tree-loading">
-          <div class="spinner"></div>
-          <span>Loading file system...</span>
-        </div>
-      </div>
-
-      <!-- File Details Panel -->
-      <div class="file-details" id="fileDetails">
-        <div class="file-details-empty">
-          Select a file or folder to view details
-        </div>
-      </div>
-
-      <!-- Statistics Bar -->
-      <div class="tree-stats">
-        <div class="tree-stat">
-          <span>Files:</span>
-          <span class="tree-stat-value" id="statFiles">0</span>
-        </div>
-        <div class="tree-stat">
-          <span>Folders:</span>
-          <span class="tree-stat-value" id="statFolders">0</span>
-        </div>
-        <div class="tree-stat">
-          <span>Total Size:</span>
-          <span class="tree-stat-value" id="statTotalSize">0 B</span>
-        </div>
-        <div class="tree-stat">
-          <span>Largest File:</span>
-          <span class="tree-stat-value" id="statLargestFile">--</span>
-        </div>
+      <div class="table-container">
+        <table id="fileTable">
+          <thead>
+            <tr>
+              <th class="sortable" onclick="sortTable(0)">
+                <i data-lucide="file"></i>
+                Name
+              </th>
+              <th class="sortable" onclick="sortTable(1)">
+                <i data-lucide="hard-drive"></i>
+                Size
+              </th>
+              <th>
+                <i data-lucide="download"></i>
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody id="fileTableBody">
+            <!-- Populated by JavaScript -->
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
 
-  <script src="/js/file-browser.js"></script>
-
   <!-- TOAST NOTIFICATION -->
   <div id="toast" class="toast">
-    <button class="toast-close" onclick="hideToast()">&times;</button>
+    <button class="toast-close" onclick="hideToast()" aria-label="Close notification">&times;</button>
     <div class="toast-title" id="toastTitle"></div>
     <div class="toast-message" id="toastMessage"></div>
   </div>
 
-  <!-- LOADING OVERLAY -->
-  <div id="loadingOverlay" class="loading-overlay" style="display: none;">
-    <div class="loading-spinner"></div>
-    <div class="loading-text" id="loadingText">Loading...</div>
-  </div>
+  <script>
+    // Global state
+    let files = [];
+    let sortColumn = 0;
+    let sortAscending = true;
+
+    // ===== THEME FUNCTIONS =====
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const currentTheme = html.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', newTheme);
+
+      const icon = document.getElementById('themeIcon');
+      icon.setAttribute('data-lucide', newTheme === 'dark' ? 'moon' : 'sun');
+      lucide.createIcons();
+
+      localStorage.setItem('theme', newTheme);
+    }
+
+    function toggleMenu() {
+      document.getElementById('navMenu').classList.toggle('open');
+    }
+
+    // Load saved theme
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      const icon = document.getElementById('themeIcon');
+      icon.setAttribute('data-lucide', savedTheme === 'dark' ? 'moon' : 'sun');
+    });
+
+    // ===== API FUNCTIONS =====
+
+    async function fetchFileSystemInfo() {
+      try {
+        const res = await fetch('/api/v1/status');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return await res.json();
+      } catch (error) {
+        console.error('Failed to fetch file system info:', error);
+        return null;
+      }
+    }
+
+    async function fetchFileList() {
+      try {
+        const res = await fetch('/api/v1/files');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        // V1 API returns array directly
+        return Array.isArray(data) ? data : [];
+      } catch (error) {
+        console.error('Failed to fetch file list:', error);
+        return [];
+      }
+    }
+
+    // ===== INITIALIZATION =====
+
+    async function init() {
+      showLoadingIndicator('Loading file system...');
+      await refreshFileSystemInfo();
+      await refreshFiles();
+      hideLoadingIndicator();
+    }
+
+    // ===== FILE SYSTEM INFO =====
+
+    async function refreshFileSystemInfo() {
+      const info = await fetchFileSystemInfo();
+      if (!info) return;
+
+      const totalMB = ((info.fsTotal || 0) / 1024 / 1024).toFixed(2);
+      const usedMB = ((info.fsUsed || 0) / 1024 / 1024).toFixed(2);
+      const freeMB = (((info.fsTotal || 0) - (info.fsUsed || 0)) / 1024 / 1024).toFixed(2);
+      const usagePercent = info.fsTotal > 0 ? ((info.fsUsed / info.fsTotal) * 100).toFixed(1) : 0;
+
+      document.getElementById('fsTotal').textContent = totalMB + ' MB';
+      document.getElementById('fsUsed').textContent = usedMB + ' MB';
+      document.getElementById('fsFree').textContent = freeMB + ' MB';
+      document.getElementById('fsPercent').textContent = usagePercent + '%';
+
+      const usageBar = document.getElementById('fsUsageBar');
+      usageBar.style.width = usagePercent + '%';
+      usageBar.className = 'progress-fill ' + (usagePercent < 70 ? 'good' : usagePercent < 90 ? 'warning' : 'danger');
+    }
+
+    // ===== FILE LIST RENDERING =====
+
+    async function refreshFiles() {
+      const btn = document.getElementById('refreshBtn');
+      btn.disabled = true;
+
+      files = await fetchFileList();
+      document.getElementById('fileCount').textContent = files.length;
+      renderTable();
+
+      btn.disabled = false;
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('fileTableBody');
+
+      if (files.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 40px; color: var(--text-muted);">No files found</td></tr>';
+        return;
+      }
+
+      // Sort files
+      let sortedFiles = [...files];
+      sortedFiles.sort((a, b) => {
+        let aVal, bVal;
+        if (sortColumn === 0) {
+          aVal = a.name || '';
+          bVal = b.name || '';
+        } else if (sortColumn === 1) {
+          aVal = a.size || 0;
+          bVal = b.size || 0;
+        }
+
+        if (typeof aVal === 'string') {
+          return sortAscending ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+        } else {
+          return sortAscending ? aVal - bVal : bVal - aVal;
+        }
+      });
+
+      tbody.innerHTML = sortedFiles.map(file => {
+        const fileName = file.name || 'unnamed';
+        const fileSize = formatSize(file.size || 0);
+        const fileIcon = getFileIcon(fileName);
+
+        return `<tr>
+          <td>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <i data-lucide="${fileIcon}" class="file-icon"></i>
+              <span class="file-name">${escapeHtml(fileName)}</span>
+            </div>
+          </td>
+          <td class="file-size">${fileSize}</td>
+          <td>
+            <button class="btn-secondary" onclick="downloadFile('${escapeHtml(fileName)}')">
+              <i data-lucide="download"></i>
+              Download
+            </button>
+          </td>
+        </tr>`;
+      }).join('');
+
+      // Reinitialize Lucide icons
+      lucide.createIcons();
+    }
+
+    function sortTable(column) {
+      if (sortColumn === column) {
+        sortAscending = !sortAscending;
+      } else {
+        sortColumn = column;
+        sortAscending = true;
+      }
+      renderTable();
+    }
+
+    // ===== HELPER FUNCTIONS =====
+
+    function getFileIcon(filename) {
+      const ext = filename.split('.').pop().toLowerCase();
+      const icons = {
+        'html': 'file-code',
+        'htm': 'file-code',
+        'css': 'palette',
+        'js': 'file-text',
+        'json': 'braces',
+        'txt': 'file-text',
+        'log': 'file-text',
+        'md': 'file-text',
+        'xml': 'file-code',
+        'cfg': 'settings',
+        'config': 'settings',
+        'ini': 'settings'
+      };
+      return icons[ext] || 'file';
+    }
+
+    function formatSize(bytes) {
+      if (bytes === 0) return '0 B';
+      const units = ['B', 'KB', 'MB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(1024));
+      return (bytes / Math.pow(1024, i)).toFixed(i > 0 ? 1 : 0) + ' ' + units[i];
+    }
+
+    function escapeHtml(text) {
+      const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      };
+      return text.replace(/[&<>"']/g, m => map[m]);
+    }
+
+    function downloadFile(filename) {
+      showToast('Downloading file', filename, 'info');
+      window.location.href = '/api/v1/file?path=' + encodeURIComponent('/' + filename);
+    }
+
+    // ===== TOAST NOTIFICATIONS =====
+
+    function showToast(title, message, type = 'info') {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastTitle').textContent = title;
+      document.getElementById('toastMessage').textContent = message;
+
+      toast.className = 'toast show ' + type;
+
+      setTimeout(() => hideToast(), 5000);
+    }
+
+    function hideToast() {
+      const toast = document.getElementById('toast');
+      toast.classList.remove('show');
+    }
+
+    // ===== LOADING INDICATOR =====
+
+    function showLoadingIndicator(message = 'Loading...') {
+      const overlay = document.createElement('div');
+      overlay.className = 'loading-overlay';
+      overlay.id = 'loadingOverlay';
+      overlay.innerHTML = `
+        <div class="loading-spinner"></div>
+        <div class="loading-text">${message}</div>
+      `;
+      document.body.appendChild(overlay);
+    }
+
+    function hideLoadingIndicator() {
+      const overlay = document.getElementById('loadingOverlay');
+      if (overlay) {
+        overlay.remove();
+      }
+    }
+
+    // ===== START APPLICATION =====
+
+    window.onload = () => {
+      // Initialize Lucide icons
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+
+      // Initialize file browser
+      init();
+    };
+
+    // Global error handler to prevent stuck loading states
+    window.addEventListener('error', (event) => {
+      console.error('Global error caught:', event.error);
+      hideLoadingIndicator();
+    });
+
+    window.addEventListener('unhandledrejection', (event) => {
+      console.error('Unhandled promise rejection:', event.reason);
+      hideLoadingIndicator();
+    });
+  </script>
 </body>
 </html>
