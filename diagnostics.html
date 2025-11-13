@@ -946,7 +946,7 @@
 
     async function fetchSystemInfo() {
       try {
-        const res = await fetch('/api/system/info');
+        const res = await fetch('/api/system');
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return await res.json();
       } catch (error) {
@@ -969,7 +969,7 @@
 
     async function callForceRefresh() {
       try {
-        const res = await fetch('/api/forceRefresh', { method: 'POST' });
+        const res = await fetch('/api/refresh', { method: 'POST' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return await res.json();
       } catch (error) {
@@ -980,7 +980,7 @@
 
     async function callClearLogs(type) {
       try {
-        const res = await fetch(`/api/clearLogs?type=${type}`, { method: 'POST' });
+        const res = await fetch(`/api/logs/clear?type=${type}`, { method: 'POST' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return { success: true };
       } catch (error) {
@@ -1167,7 +1167,7 @@
       lucide.createIcons();
 
       try {
-        const res = await fetch('/api/forceWebUpdate', { method: 'POST' });
+        const res = await fetch('/api/update-web', { method: 'POST' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 
