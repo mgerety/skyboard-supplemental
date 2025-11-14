@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Skyboard File Browser Version: 82 -->
+<!-- Skyboard File Browser Version: 83 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -719,6 +719,83 @@
       text-align: center;
     }
 
+    /* FILE DETAIL CARD (Mobile) */
+    .file-detail-card {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(150%);
+      max-width: calc(100% - 40px);
+      width: 400px;
+      background: var(--card-bg);
+      border: 2px solid var(--accent-primary);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      z-index: 1500;
+      transition: transform 0.3s ease;
+    }
+
+    .file-detail-card.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .file-detail-name {
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+      word-wrap: break-word;
+      font-family: 'Courier New', monospace;
+    }
+
+    .file-detail-info {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .file-detail-row {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .file-detail-label {
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .file-detail-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .file-detail-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      color: var(--text-muted);
+      cursor: pointer;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .file-detail-close:hover {
+      color: var(--text-primary);
+      background: var(--border-color);
+      border-radius: 4px;
+    }
+
     /* UTILITY CLASSES */
     .hidden { display: none !important; }
   </style>
@@ -853,6 +930,28 @@
     <button class="toast-close" onclick="hideToast()" aria-label="Close notification">&times;</button>
     <div class="toast-title" id="toastTitle"></div>
     <div class="toast-message" id="toastMessage"></div>
+  </div>
+
+  <!-- FILE DETAIL CARD -->
+  <div id="fileDetailCard" class="file-detail-card">
+    <button class="file-detail-close" onclick="hideFileDetail()">&times;</button>
+    <div class="file-detail-name" id="detailFileName"></div>
+    <div class="file-detail-info">
+      <div class="file-detail-row">
+        <span class="file-detail-label">Size:</span>
+        <span id="detailFileSize">--</span>
+      </div>
+      <div class="file-detail-row">
+        <span class="file-detail-label">Path:</span>
+        <span id="detailFilePath">--</span>
+      </div>
+    </div>
+    <div class="file-detail-actions">
+      <button class="btn" onclick="downloadFromDetail()" id="detailDownloadBtn">
+        <i data-lucide="download"></i>
+        Download
+      </button>
+    </div>
   </div>
 
   <script>
@@ -1177,7 +1276,14 @@
         const allItems = this.container.querySelectorAll('.tree-item.selected');
         allItems.forEach(item => item.classList.remove('selected'));
         element.classList.add('selected');
-        this.selectedItem = element;
+        this.selectedItem = node;
+
+        // Show file detail card for files only
+        if (node.type === 'file') {
+          showFileDetail(node);
+        } else {
+          hideFileDetail();
+        }
       }
 
       getFileIcon(filename) {
@@ -1317,6 +1423,47 @@
     function hideToast() {
       const toast = document.getElementById('toast');
       toast.classList.remove('show');
+    }
+
+    // ===== FILE DETAIL CARD =====
+
+    let currentDetailFile = null;
+
+    function showFileDetail(node) {
+      currentDetailFile = node;
+
+      document.getElementById('detailFileName').textContent = node.name;
+      document.getElementById('detailFileSize').textContent = formatSize(node.size);
+      document.getElementById('detailFilePath').textContent = node.path;
+
+      const card = document.getElementById('fileDetailCard');
+      card.classList.add('show');
+
+      // Reinitialize icons
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    }
+
+    function hideFileDetail() {
+      const card = document.getElementById('fileDetailCard');
+      card.classList.remove('show');
+      currentDetailFile = null;
+    }
+
+    function downloadFromDetail() {
+      if (currentDetailFile && currentDetailFile.path) {
+        showToast('Downloading file', currentDetailFile.name, 'info');
+        window.location.href = '/api/v1/file?path=' + encodeURIComponent(currentDetailFile.path);
+        hideFileDetail();
+      }
+    }
+
+    function formatSize(bytes) {
+      if (bytes === 0) return '0 B';
+      const units = ['B', 'KB', 'MB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(1024));
+      return (bytes / Math.pow(1024, i)).toFixed(i > 0 ? 1 : 0) + ' ' + units[i];
     }
 
     // ===== START APPLICATION =====
