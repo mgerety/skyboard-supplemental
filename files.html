@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Skyboard File Browser Version: 77 -->
+<!-- Skyboard File Browser Version: 78 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -555,7 +555,7 @@
     }
 
     .tree-folder-content {
-      padding-left: 20px;
+      padding-left: 32px;
       max-height: 0;
       overflow: hidden;
       transition: max-height 0.3s ease;
@@ -862,6 +862,7 @@
 
       async init() {
         await this.loadFileSystem();
+        this.expandAll();  // Expand all folders by default
         this.setupEventListeners();
       }
 
