@@ -1,9 +1,10 @@
 {
-  "version": 84,
+  "version": 85,
   "files": [
     "index.html",
     "css/base.css",
     "css/components.css",
-    "js/components.js"
+    "js/components.js",
+    "js/icons.js"
   ]
 }
