@@ -1,0 +1,9 @@
+{
+  "version": 84,
+  "files": [
+    "index.html",
+    "css/base.css",
+    "css/components.css",
+    "js/components.js"
+  ]
+}
