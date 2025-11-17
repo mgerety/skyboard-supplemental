@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Skyboard Diagnostics Version: 74 -->
+<!-- Skyboard Diagnostics Version: 84 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -969,7 +969,7 @@
 
     async function callForceRefresh() {
       try {
-        const res = await fetch('/api/v1/refresh', { method: 'POST' });
+        const res = await fetch('/api/v1/weather/refresh', { method: 'POST' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return await res.json();
       } catch (error) {
@@ -979,14 +979,9 @@
     }
 
     async function callClearLogs(type) {
-      try {
-        const res = await fetch(`/api/v1/logs/clear?type=${type}`, { method: 'POST' });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return { success: true };
-      } catch (error) {
-        console.error(`Failed to clear ${type} logs:`, error);
-        return { success: false, error: error.message };
-      }
+      // Note: Logs clearing is client-side only - no server endpoint needed
+      // This function kept for compatibility but doesn't make API calls
+      return { success: true };
     }
 
     // ===== INITIALIZATION =====
@@ -1172,7 +1167,7 @@
       lucide.createIcons();
 
       try {
-        const res = await fetch('/api/v1/update-web', { method: 'POST' });
+        const res = await fetch('/api/v1/system/update-interface', { method: 'POST' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 

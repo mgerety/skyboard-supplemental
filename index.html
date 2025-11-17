@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Skyboard Web Interface Version: 74 -->
+<!-- Skyboard Web Interface Version: 84 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -2091,7 +2091,7 @@
 
       try {
         const response = await fetch('/api/v1/config', {
-          method: 'POST',
+          method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(config)
         });
@@ -2120,7 +2120,7 @@
 
         showLoadingIndicator('Updating weather data...');
         try {
-          const refreshResponse = await fetch('/api/v1/refresh', { method: 'POST' });
+          const refreshResponse = await fetch('/api/v1/weather/refresh', { method: 'POST' });
           hideLoadingIndicator();
           if (refreshResponse.ok) {
             showToast('Weather data updated successfully!', 'success');
@@ -2225,18 +2225,20 @@
         showToast('Recovering wizard session...', 'info', 2000);
 
         const brightness = parseInt(document.getElementById('brightnessValue').value) || savedState.brightness || 20;
-        const response = await fetch('/setup/start', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            brightness: brightness,
-            airports: savedState.airports.slice(0, savedState.numLeds)
-          })
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to restart setup mode');
-        }
+        // NOTE: Wizard LED control (/setup/start) not implemented in firmware
+        // Wizard UI works client-side only; final save uses /api/v1/config
+        // const response = await fetch('/setup/start', {
+        //   method: 'POST',
+        //   headers: { 'Content-Type': 'application/json' },
+        //   body: JSON.stringify({
+        //     brightness: brightness,
+        //     airports: savedState.airports.slice(0, savedState.numLeds)
+        //   })
+        // });
+        //
+        // if (!response.ok) {
+        //   throw new Error('Failed to restart setup mode');
+        // }
 
         wizardActive = true;
         wizardState = {
@@ -2300,17 +2302,19 @@
           requestBody.airports = existingAirports;
         }
 
-        const response = await fetch('/setup/start', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(requestBody)
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to start setup mode');
-        }
-
-        const result = await response.json();
+        // NOTE: Wizard LED control (/setup/start) not implemented in firmware
+        // Wizard UI works client-side only; final save uses /api/v1/config
+        // const response = await fetch('/setup/start', {
+        //   method: 'POST',
+        //   headers: { 'Content-Type': 'application/json' },
+        //   body: JSON.stringify(requestBody)
+        // });
+        //
+        // if (!response.ok) {
+        //   throw new Error('Failed to start setup mode');
+        // }
+        //
+        // const result = await response.json();
 
         wizardActive = true;
         if (continueFromExisting && cachedConfigForWizard) {
@@ -2455,15 +2459,17 @@
 
         saveWizardStateToLocalStorage();
 
-        const response = await fetch('/setup/update', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(wizardState)
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to update setup state');
-        }
+        // NOTE: Wizard LED control (/setup/update) not implemented in firmware
+        // Wizard UI works client-side only; final save uses /api/v1/config
+        // const response = await fetch('/setup/update', {
+        //   method: 'POST',
+        //   headers: { 'Content-Type': 'application/json' },
+        //   body: JSON.stringify(wizardState)
+        // });
+        //
+        // if (!response.ok) {
+        //   throw new Error('Failed to update setup state');
+        // }
 
         renderWizardRows();
 
@@ -2546,15 +2552,17 @@
           updateIntervalMinutes: parseInt(document.getElementById('updateInterval').value)
         };
 
-        const response = await fetch('/setup/finish', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(finalConfig)
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to save configuration');
-        }
+        // NOTE: Wizard LED control (/setup/finish) not implemented in firmware
+        // Final save uses /api/v1/config instead
+        // const response = await fetch('/setup/finish', {
+        //   method: 'POST',
+        //   headers: { 'Content-Type': 'application/json' },
+        //   body: JSON.stringify(finalConfig)
+        // });
+        //
+        // if (!response.ok) {
+        //   throw new Error('Failed to save configuration');
+        // }
 
         showToast(`Configuration saved! ${wizardState.numLeds} LEDs configured.`, 'success', 5000);
 

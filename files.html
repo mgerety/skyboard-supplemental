@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Skyboard File Browser Version: 83 -->
+<!-- Skyboard File Browser Version: 84 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -1437,7 +1437,7 @@
       }
 
       try {
-        const response = await fetch('/delete', { method: 'POST' });
+        const response = await fetch('/api/v1/system/reset', { method: 'POST' });
         if (response.ok) {
           showToast('Success', 'All local files deleted. Reloading...', 'success');
           setTimeout(() => {
