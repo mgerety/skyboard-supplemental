@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Skyboard Web Interface Version: 91 -->
+<!-- Skyboard Web Interface Version: 92 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -1369,8 +1369,6 @@
     if (typeof lucide !== 'undefined') {
       lucide.createIcons();
     }
-
-    console.log('[DEBUG] After lucide init');
 
     // Global state
     let currentConfig = {
@@ -2766,8 +2764,6 @@
 
       localStorage.setItem('theme', newTheme);
     };
-    console.log('[DEBUG] toggleTheme defined:', typeof window.toggleTheme);
-    console.log('[DEBUG] window.toggleTheme:', window.toggleTheme);
 
     // Mobile menu toggle
     window.toggleMenu = function() {
