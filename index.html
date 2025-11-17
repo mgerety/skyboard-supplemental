@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Skyboard Web Interface Version: 86 -->
+<!-- Skyboard Web Interface Version: 87 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -1365,7 +1365,9 @@
 
   <script>
     // Initialize Lucide icons
-    lucide.createIcons();
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
 
     // Global state
     let currentConfig = {
