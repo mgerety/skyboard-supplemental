@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Skyboard Web Interface Version: 88 -->
+<!-- Skyboard Web Interface Version: 89 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -1364,10 +1364,14 @@
   </div>
 
   <script>
+    console.log('[DEBUG] Script started executing');
+
     // Initialize Lucide icons
     if (typeof lucide !== 'undefined') {
       lucide.createIcons();
     }
+
+    console.log('[DEBUG] After lucide init');
 
     // Global state
     let currentConfig = {
@@ -1993,6 +1997,7 @@
 
     // CSV Export
     function exportConfigurationAsCSV() {
+    console.log("[DEBUG] Reached line 2000");
       if (!currentConfig || !currentConfig.airports || currentConfig.airports.length === 0) {
         showToast('No LEDs configured to download', 'warning');
         return;
@@ -2493,6 +2498,7 @@
         wizardState.currentIndex = wizardState.numLeds - 1;
         wizardState.airports.pop();
         saveWizardStateToLocalStorage();
+    console.log("[DEBUG] Reached line 2500");
       }
     }
 
@@ -2743,6 +2749,7 @@
         this.modal = null;
       }
 
+    console.log("[DEBUG] Reached line 2750 - about to define toggleTheme");
       handleEscape = (e) => {
         if (e.key === 'Escape') {
           this.hide();
