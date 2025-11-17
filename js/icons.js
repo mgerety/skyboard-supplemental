@@ -64,4 +64,13 @@ const observer = new MutationObserver((mutations) => {
   });
 });
 
-observer.observe(document.body, { childList: true, subtree: true });
+// Start observing once document.body exists
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    observer.observe(document.body, { childList: true, subtree: true });
+  });
+} else {
+  if (document.body) {
+    observer.observe(document.body, { childList: true, subtree: true });
+  }
+}
