@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Skyboard Web Interface Version: 94 -->
+<!-- Skyboard Web Interface Version: 95 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -1216,9 +1216,9 @@
             <i data-lucide="link"></i>
             Hostname
           </label>
-          <input type="text" id="hostname" class="form-input" value="led-sectional" maxlength="32" pattern="[a-zA-Z0-9\-]+">
+          <input type="text" id="hostname" class="form-input" value="skyboard" maxlength="32" pattern="[a-zA-Z0-9\-]+">
           <div class="form-help">
-            Access at: <strong>http://<span id="hostnamePreview">led-sectional</span>.local</strong>
+            Access at: <strong>http://<span id="hostnamePreview">skyboard</span>.local</strong>
           </div>
         </div>
       </div>
@@ -1375,7 +1375,7 @@
       numLeds: 80,
       brightness: 20,
       updateIntervalMinutes: 15,
-      hostname: 'led-sectional',
+      hostname: 'skyboard',
       useMDNS: true,
       airports: []
     };
@@ -1469,7 +1469,7 @@
           numLeds: data.numLeds || 80,
           brightness: data.brightness || 20,
           updateIntervalMinutes: data.updateIntervalMinutes || 15,
-          hostname: data.hostname || 'led-sectional',
+          hostname: data.hostname || 'skyboard',
           useMDNS: data.useMDNS !== false,
           airports: airportsArray
         };
@@ -1818,7 +1818,7 @@
     // Setup event listeners
     function setupEventListeners() {
       document.getElementById('hostname').addEventListener('input', (e) => {
-        document.getElementById('hostnamePreview').textContent = e.target.value || 'led-sectional';
+        document.getElementById('hostnamePreview').textContent = e.target.value || 'skyboard';
       });
 
       document.getElementById('numLeds').addEventListener('change', (e) => {
@@ -2036,7 +2036,7 @@
       const numLeds = parseInt(document.getElementById('numLeds').value);
       const brightness = parseInt(document.getElementById('brightnessValue').value);
       const updateIntervalMinutes = parseInt(document.getElementById('updateInterval').value);
-      const hostname = document.getElementById('hostname').value.trim() || 'led-sectional';
+      const hostname = document.getElementById('hostname').value.trim() || 'skyboard';
       const useMDNS = document.getElementById('useMDNS').checked;
 
       if (numLeds < 1 || numLeds > 150) {
