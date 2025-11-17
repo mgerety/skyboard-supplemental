@@ -55,28 +55,6 @@ if (document.readyState === 'loading') {
   initializeIcons();
 }
 
-// Re-initialize when DOM changes (for dynamic content)
-let isInitializing = false;
-const observer = new MutationObserver((mutations) => {
-  // Prevent infinite loop: don't re-initialize while already initializing
-  if (isInitializing) return;
-
-  mutations.forEach((mutation) => {
-    if (mutation.addedNodes.length) {
-      isInitializing = true;
-      initializeIcons();
-      isInitializing = false;
-    }
-  });
-});
-
-// Start observing once document.body exists
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    observer.observe(document.body, { childList: true, subtree: true });
-  });
-} else {
-  if (document.body) {
-    observer.observe(document.body, { childList: true, subtree: true });
-  }
-}
+// MutationObserver REMOVED - was causing infinite loops and browser freezing
+// The index.html file manually calls lucide.createIcons() after adding dynamic content,
+// so automatic observation is not needed and was causing performance issues
