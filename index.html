@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Skyboard Web Interface Version: 90 -->
+<!-- Skyboard Web Interface Version: 91 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -1364,8 +1364,6 @@
   </div>
 
   <script>
-    alert('SCRIPT EXECUTING - If you see this, script tag works');
-    console.log('[DEBUG] Script started executing');
 
     // Initialize Lucide icons
     if (typeof lucide !== 'undefined') {
@@ -1998,7 +1996,6 @@
 
     // CSV Export
     function exportConfigurationAsCSV() {
-    console.log("[DEBUG] Reached line 2000");
       if (!currentConfig || !currentConfig.airports || currentConfig.airports.length === 0) {
         showToast('No LEDs configured to download', 'warning');
         return;
@@ -2499,7 +2496,6 @@
         wizardState.currentIndex = wizardState.numLeds - 1;
         wizardState.airports.pop();
         saveWizardStateToLocalStorage();
-    console.log("[DEBUG] Reached line 2500");
       }
     }
 
@@ -2750,7 +2746,6 @@
         this.modal = null;
       }
 
-    console.log("[DEBUG] Reached line 2750 - about to define toggleTheme");
       handleEscape = (e) => {
         if (e.key === 'Escape') {
           this.hide();
@@ -2760,7 +2755,6 @@
 
     // Theme toggle
     window.toggleTheme = function() {
-      console.log('toggleTheme called');
       const html = document.documentElement;
       const currentTheme = html.getAttribute('data-theme');
       const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
