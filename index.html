@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Skyboard Web Interface Version: 87 -->
+<!-- Skyboard Web Interface Version: 88 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -2752,6 +2752,7 @@
 
     // Theme toggle
     window.toggleTheme = function() {
+      console.log('toggleTheme called');
       const html = document.documentElement;
       const currentTheme = html.getAttribute('data-theme');
       const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
@@ -2763,6 +2764,8 @@
 
       localStorage.setItem('theme', newTheme);
     };
+    console.log('[DEBUG] toggleTheme defined:', typeof window.toggleTheme);
+    console.log('[DEBUG] window.toggleTheme:', window.toggleTheme);
 
     // Mobile menu toggle
     window.toggleMenu = function() {
