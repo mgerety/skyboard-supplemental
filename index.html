@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Skyboard Web Interface Version: 85 -->
+<!-- Skyboard Web Interface Version: 86 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -2749,7 +2749,7 @@
     }
 
     // Theme toggle
-    function toggleTheme() {
+    window.toggleTheme = function() {
       const html = document.documentElement;
       const currentTheme = html.getAttribute('data-theme');
       const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
@@ -2760,12 +2760,12 @@
       lucide.createIcons();
 
       localStorage.setItem('theme', newTheme);
-    }
+    };
 
     // Mobile menu toggle
-    function toggleMenu() {
+    window.toggleMenu = function() {
       document.getElementById('navMenu').classList.toggle('open');
-    }
+    };
 
     // Load saved theme
     document.addEventListener('DOMContentLoaded', () => {
