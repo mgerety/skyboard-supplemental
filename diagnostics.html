@@ -1423,6 +1423,22 @@
       btn.disabled = false;
     }
 
+    function retryDownload() {
+      // Reset and restart
+      forceWebUpdate();
+    }
+
+    function closeDownloadModal() {
+      const modal = document.getElementById('downloadModal');
+      modal.classList.remove('show');
+
+      stopPolling();
+
+      // Re-enable button
+      const btn = document.getElementById('updateWebFilesBtn');
+      btn.disabled = false;
+    }
+
     // ===== TOAST NOTIFICATIONS =====
 
     function showToast(title, message, type = 'info') {
