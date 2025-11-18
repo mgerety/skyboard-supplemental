@@ -705,6 +705,117 @@
 
     /* UTILITY CLASSES */
     .hidden { display: none !important; }
+
+    /* ===== DOWNLOAD PROGRESS MODAL ===== */
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 1000; /* var(--z-modal) */
+      display: none;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--card-bg, #1e293b);
+      border-radius: 12px;
+      padding: 32px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+      max-width: 480px;
+      width: 90%;
+      text-align: center;
+    }
+
+    .modal-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-primary, #f1f5f9);
+      margin-bottom: 16px;
+      margin-top: 0;
+    }
+
+    .modal-status {
+      font-size: 16px;
+      color: var(--text-secondary, #cbd5e1);
+      margin-bottom: 8px;
+    }
+
+    .modal-filename {
+      font-family: 'SF Mono', Monaco, Consolas, 'Courier New', monospace;
+      font-size: 14px;
+      color: var(--text-muted, #94a3b8);
+      margin-bottom: 24px;
+      min-height: 1.5em;
+    }
+
+    .loading-spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid var(--border-color, #334155);
+      border-top-color: var(--accent-primary, #3b82f6);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 24px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .modal-icon {
+      font-size: 48px;
+      margin: 0 auto 24px;
+      display: block;
+    }
+
+    .modal-icon.success {
+      color: var(--success, #10b981);
+    }
+
+    .modal-icon.error {
+      color: var(--error, #ef4444);
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 8px;
+      background: var(--input-bg, #0f172a);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--accent-primary, #3b82f6);
+      border-radius: 4px;
+      transition: width 250ms ease;
+    }
+
+    .progress-bar-fill.success {
+      background: var(--success, #10b981);
+    }
+
+    .progress-bar-fill.error {
+      background: var(--error, #ef4444);
+    }
+
+    .button-group {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin-top: 24px;
+    }
   </style>
 </head>
 <body>
