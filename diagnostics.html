@@ -1294,6 +1294,31 @@
       }
     }
 
+    function showDownloadModal() {
+      const modal = document.getElementById('downloadModal');
+      const spinner = document.getElementById('downloadSpinner');
+      const icon = document.getElementById('downloadIcon');
+      const title = document.getElementById('downloadTitle');
+      const status = document.getElementById('downloadStatus');
+      const filename = document.getElementById('downloadFilename');
+      const progressBar = document.getElementById('downloadProgressBar');
+      const errorDiv = document.getElementById('downloadError');
+      const buttons = document.getElementById('downloadButtons');
+
+      // Reset to initial state
+      spinner.style.display = 'block';
+      icon.style.display = 'none';
+      title.textContent = 'Downloading Files';
+      status.textContent = 'Preparing download...';
+      filename.innerHTML = '&nbsp;';
+      progressBar.style.width = '0%';
+      progressBar.className = 'progress-bar-fill';
+      errorDiv.style.display = 'none';
+      buttons.style.display = 'none';
+
+      modal.classList.add('show');
+    }
+
     // ===== TOAST NOTIFICATIONS =====
 
     function showToast(title, message, type = 'info') {
