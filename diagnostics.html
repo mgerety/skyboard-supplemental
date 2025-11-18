@@ -1355,6 +1355,20 @@
       }
     }
 
+    function updateProgress(data) {
+      const status = document.getElementById('downloadStatus');
+      const filename = document.getElementById('downloadFilename');
+      const progressBar = document.getElementById('downloadProgressBar');
+
+      if (data.totalFiles > 0) {
+        const percentage = Math.round((data.currentFile / data.totalFiles) * 100);
+
+        status.textContent = `Downloading ${data.currentFile} of ${data.totalFiles} files...`;
+        filename.textContent = data.currentFilename || '';
+        progressBar.style.width = percentage + '%';
+      }
+    }
+
     // ===== TOAST NOTIFICATIONS =====
 
     function showToast(title, message, type = 'info') {
