@@ -1013,10 +1013,10 @@
           if (!response.ok) throw new Error('Failed to fetch system info');
 
           const data = await response.json();
-          const totalMB = (data.fsTotal / 1024 / 1024).toFixed(2);
-          const usedMB = (data.fsUsed / 1024 / 1024).toFixed(2);
-          const freeMB = ((data.fsTotal - data.fsUsed) / 1024 / 1024).toFixed(2);
-          const usagePercent = ((data.fsUsed / data.fsTotal) * 100).toFixed(1);
+          const totalMB = (data.filesystem.total / 1024 / 1024).toFixed(2);
+          const usedMB = (data.filesystem.used / 1024 / 1024).toFixed(2);
+          const freeMB = ((data.filesystem.total - data.filesystem.used) / 1024 / 1024).toFixed(2);
+          const usagePercent = ((data.filesystem.used / data.filesystem.total) * 100).toFixed(1);
 
           document.getElementById('fsTotal').textContent = totalMB + ' MB';
           document.getElementById('fsUsed').textContent = usedMB + ' MB';
