@@ -1023,6 +1023,7 @@
     let ledStatus = [];
     let sortColumn = 0;
     let sortAscending = true;
+    let pollInterval = null;
     const TOTAL_HEAP = 35000; // Approximate total heap for ESP8266
 
     // ===== THEME FUNCTIONS =====
@@ -1317,6 +1318,41 @@
       buttons.style.display = 'none';
 
       modal.classList.add('show');
+    }
+
+    function startPolling() {
+      pollInterval = setInterval(pollDownloadStatus, 1000);
+    }
+
+    async function pollDownloadStatus() {
+      try {
+        const res = await fetch('/api/v1/system/update-interface/status');
+        const data = await res.json();
+
+        updateProgress(data);
+
+        // Check if download finished
+        if (!data.isActive) {
+          stopPolling();
+
+          if (data.errorMessage) {
+            showError(data.errorMessage);
+          } else {
+            showSuccess();
+          }
+        }
+
+      } catch (error) {
+        console.error('Poll error:', error);
+        // Keep polling - download might still be active
+      }
+    }
+
+    function stopPolling() {
+      if (pollInterval) {
+        clearInterval(pollInterval);
+        pollInterval = null;
+      }
     }
 
     // ===== TOAST NOTIFICATIONS =====
