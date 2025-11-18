@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Skyboard Web Interface Version: 96 -->
+<!-- Skyboard Web Interface Version: 101 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -2528,20 +2528,18 @@
         showToast('Recovering wizard session...', 'info', 2000);
 
         const brightness = parseInt(document.getElementById('brightnessValue').value) || savedState.brightness || 20;
-        // NOTE: Wizard LED control (/setup/start) not implemented in firmware
-        // Wizard UI works client-side only; final save uses /api/v1/config
-        // const response = await fetch('/setup/start', {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify({
-        //     brightness: brightness,
-        //     airports: savedState.airports.slice(0, savedState.numLeds)
-        //   })
-        // });
-        //
-        // if (!response.ok) {
-        //   throw new Error('Failed to restart setup mode');
-        // }
+        const response = await fetch('/setup/start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            startIndex: savedState.currentIndex,
+            brightness: brightness
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to restart setup mode');
+        }
 
         wizardActive = true;
         wizardState = {
@@ -2590,34 +2588,27 @@
     async function startWizard(continueFromExisting = false) {
       try {
         const brightness = parseInt(document.getElementById('brightnessValue').value) || 20;
-        let requestBody = {
-          brightness: brightness
-        };
+        const startIndex = (continueFromExisting && cachedConfigForWizard) ? cachedConfigForWizard.numLeds : 0;
 
-        if (continueFromExisting && cachedConfigForWizard) {
-          const existingAirports = cachedConfigForWizard.airports.slice(0, cachedConfigForWizard.numLeds);
-
-          if (existingAirports.length > 150) {
-            showToast('Cannot start wizard: too many LEDs (max 150)', 'error');
-            return;
-          }
-
-          requestBody.airports = existingAirports;
+        if (continueFromExisting && cachedConfigForWizard && cachedConfigForWizard.numLeds > 150) {
+          showToast('Cannot start wizard: too many LEDs (max 150)', 'error');
+          return;
         }
 
-        // NOTE: Wizard LED control (/setup/start) not implemented in firmware
-        // Wizard UI works client-side only; final save uses /api/v1/config
-        // const response = await fetch('/setup/start', {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify(requestBody)
-        // });
-        //
-        // if (!response.ok) {
-        //   throw new Error('Failed to start setup mode');
-        // }
-        //
-        // const result = await response.json();
+        const response = await fetch('/setup/start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            startIndex: startIndex,
+            brightness: brightness
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to start setup mode');
+        }
+
+        const result = await response.json();
 
         wizardActive = true;
         if (continueFromExisting && cachedConfigForWizard) {
