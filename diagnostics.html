@@ -1001,8 +1001,8 @@
       if (!systemInfo) return;
 
       // Heap memory
-      const heapPercent = (systemInfo.freeHeap / TOTAL_HEAP) * 100;
-      const heapKB = Math.round(systemInfo.freeHeap / 1024);
+      const heapPercent = (systemInfo.system.freeHeap / TOTAL_HEAP) * 100;
+      const heapKB = Math.round(systemInfo.system.freeHeap / 1024);
       const totalKB = Math.round(TOTAL_HEAP / 1024);
       document.getElementById('heapValue').textContent = `${heapKB}KB / ${totalKB}KB (${Math.round(heapPercent)}%)`;
 
@@ -1011,17 +1011,17 @@
       heapBar.className = 'progress-fill ' + (heapPercent > 60 ? 'good' : heapPercent > 30 ? 'warning' : 'danger');
 
       // Uptime
-      const uptimeMs = systemInfo.uptime;
+      const uptimeMs = systemInfo.system.uptime;
       const days = Math.floor(uptimeMs / (1000 * 60 * 60 * 24));
       const hours = Math.floor((uptimeMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const minutes = Math.floor((uptimeMs % (1000 * 60 * 60)) / (1000 * 60));
       document.getElementById('uptimeValue').textContent = `${days}d ${hours}h ${minutes}m`;
 
       // Firmware
-      document.getElementById('firmwareValue').textContent = `v${systemInfo.firmwareVersion}`;
+      document.getElementById('firmwareValue').textContent = `v${systemInfo.system.firmwareVersion}`;
 
       // WiFi signal
-      const rssi = systemInfo.wifiRSSI;
+      const rssi = systemInfo.wifi.rssi;
       document.getElementById('rssiValue').textContent = `${rssi} dBm`;
 
       const bars = document.querySelectorAll('.wifi-bar');
@@ -1031,12 +1031,12 @@
       });
 
       // Network info
-      document.getElementById('ipValue').textContent = systemInfo.localIP || '--';
-      document.getElementById('hostnameValue').textContent = systemInfo.hostname || '--';
+      document.getElementById('ipValue').textContent = systemInfo.wifi.localIP || '--';
+      document.getElementById('hostnameValue').textContent = systemInfo.system.hostname || '--';
 
       // File system
-      const fsUsedKB = Math.round((systemInfo.fsUsed || 0) / 1024);
-      const fsTotalKB = Math.round((systemInfo.fsTotal || 0) / 1024);
+      const fsUsedKB = Math.round((systemInfo.filesystem.used || 0) / 1024);
+      const fsTotalKB = Math.round((systemInfo.filesystem.total || 0) / 1024);
       const fsPercent = fsTotalKB > 0 ? (fsUsedKB / fsTotalKB) * 100 : 0;
       document.getElementById('fsValue').textContent = `${fsUsedKB}KB / ${fsTotalKB}KB (${Math.round(fsPercent)}%)`;
 
@@ -1045,11 +1045,11 @@
       fsBar.className = 'progress-fill ' + (fsPercent < 70 ? 'good' : fsPercent < 90 ? 'warning' : 'danger');
 
       // Weather update
-      const lastUpdate = systemInfo.lastUpdate ? new Date(systemInfo.lastUpdate).toLocaleString() : '--';
+      const lastUpdate = systemInfo.weather.lastUpdateAgo || '--';
       document.getElementById('lastUpdateValue').textContent = lastUpdate;
 
       // Web version
-      document.getElementById('webVersionValue').textContent = systemInfo.webVersion || '--';
+      document.getElementById('webVersionValue').textContent = systemInfo.web.version || '--';
     }
 
     // ===== LED TABLE RENDERING =====
