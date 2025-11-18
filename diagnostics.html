@@ -1248,5 +1248,44 @@
       hideLoadingIndicator();
     });
   </script>
+
+  <!-- Download Progress Modal -->
+  <div id="downloadModal" class="modal-overlay">
+    <div class="modal-content" onclick="event.stopPropagation()">
+
+      <!-- Loading Spinner (shown during download) -->
+      <div class="loading-spinner" id="downloadSpinner"></div>
+
+      <!-- Success/Error Icon (hidden during download) -->
+      <div class="modal-icon" id="downloadIcon" style="display: none;"></div>
+
+      <!-- Title -->
+      <h2 class="modal-title" id="downloadTitle">Downloading Files</h2>
+
+      <!-- Status Text -->
+      <p class="modal-status" id="downloadStatus">Preparing download...</p>
+
+      <!-- Current Filename -->
+      <p class="modal-filename" id="downloadFilename">&nbsp;</p>
+
+      <!-- Progress Bar -->
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill" id="downloadProgressBar" style="width: 0%"></div>
+      </div>
+
+      <!-- Error Message (hidden by default) -->
+      <div class="alert alert-error" id="downloadError" style="display: none;">
+        <span id="downloadErrorMessage"></span>
+      </div>
+
+      <!-- Action Buttons (hidden until error) -->
+      <div class="button-group" id="downloadButtons" style="display: none;">
+        <button class="btn btn-primary" onclick="retryDownload()">Retry</button>
+        <button class="btn btn-secondary" onclick="closeDownloadModal()">Close</button>
+      </div>
+
+    </div>
+  </div>
+
 </body>
 </html>
