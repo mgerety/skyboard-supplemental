@@ -1392,6 +1392,37 @@
       setTimeout(() => location.reload(), 2000);
     }
 
+    function showError(errorMessage) {
+      const spinner = document.getElementById('downloadSpinner');
+      const icon = document.getElementById('downloadIcon');
+      const title = document.getElementById('downloadTitle');
+      const status = document.getElementById('downloadStatus');
+      const errorDiv = document.getElementById('downloadError');
+      const errorMsgSpan = document.getElementById('downloadErrorMessage');
+      const buttons = document.getElementById('downloadButtons');
+      const progressBar = document.getElementById('downloadProgressBar');
+
+      spinner.style.display = 'none';
+      icon.style.display = 'block';
+      icon.className = 'modal-icon error';
+      icon.innerHTML = '<i data-lucide="x-circle"></i>';
+      lucide.createIcons();
+
+      title.textContent = 'Download Failed';
+      status.textContent = 'An error occurred during download';
+
+      errorDiv.style.display = 'block';
+      errorMsgSpan.textContent = errorMessage;
+
+      buttons.style.display = 'flex';
+
+      progressBar.classList.add('error');
+
+      // Re-enable the update button
+      const btn = document.getElementById('updateWebFilesBtn');
+      btn.disabled = false;
+    }
+
     // ===== TOAST NOTIFICATIONS =====
 
     function showToast(title, message, type = 'info') {
