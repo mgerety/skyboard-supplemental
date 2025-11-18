@@ -1272,30 +1272,25 @@
 
     async function forceWebUpdate() {
       const btn = document.getElementById('updateWebFilesBtn');
-      const originalHTML = btn.innerHTML;
       btn.disabled = true;
-      btn.innerHTML = '<i data-lucide="loader"></i> Updating...';
-      lucide.createIcons();
 
       try {
         const res = await fetch('/api/v1/system/update-interface', { method: 'POST' });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 
-        if (data.success) {
-          showToast('Update complete', 'Web files updated successfully! Page will reload...', 'success');
-          setTimeout(() => location.reload(), 2000);
-        } else {
-          showToast('Update failed', data.error || 'Unknown error', 'error');
+        if (!data.success) {
+          showToast('Update failed', data.error || 'Failed to start download', 'error');
           btn.disabled = false;
-          btn.innerHTML = originalHTML;
-          lucide.createIcons();
+          return;
         }
+
+        // Show modal and start polling
+        showDownloadModal();
+        startPolling();
+
       } catch (error) {
-        showToast('Update failed', error.message || 'Unknown error', 'error');
+        showToast('Network error', error.message, 'error');
         btn.disabled = false;
-        btn.innerHTML = originalHTML;
-        lucide.createIcons();
       }
     }
 
