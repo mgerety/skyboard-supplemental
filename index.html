@@ -1757,11 +1757,11 @@
         // Transform airports from array-of-objects to string array
         // ESP32 API returns: [{ledIndex: 0, airportCode: "KSFO"}, ...]
         // We need: ["KSFO", "KMRY", ...]
-        const airportsArray = Array(data.numLeds || 80).fill('NULL');
+        const airportsArray = Array(data.numLeds || 80).fill('NONE');
         if (data.airports && Array.isArray(data.airports)) {
           data.airports.forEach(item => {
             if (item.ledIndex >= 0 && item.ledIndex < airportsArray.length) {
-              airportsArray[item.ledIndex] = item.airportCode || 'NULL';
+              airportsArray[item.ledIndex] = item.airportCode || 'NONE';
             }
           });
         }
@@ -1819,7 +1819,7 @@
         }
       }
 
-      if (assignment === 'NULL' || assignment === 'BLACK' || !wxValue) {
+      if (assignment === 'NONE' || assignment === 'BLACK' || !wxValue) {
         return '#000000';
       }
 
@@ -1841,9 +1841,9 @@
       tbody.innerHTML = '';
 
       for (let i = 0; i < currentConfig.numLeds; i++) {
-        const assignment = currentConfig.airports[i] || 'NULL';
+        const assignment = currentConfig.airports[i] || 'NONE';
         // Display "NONE" instead of "NULL" for user-facing UI
-        const displayValue = (assignment === 'NULL' || assignment === 'BLACK') ? 'NONE' : assignment;
+        const displayValue = (assignment === 'NONE' || assignment === 'BLACK') ? 'NONE' : assignment;
         const status = statusData.find(s => s.index === i) || { wxValue: null, color: '#000000' };
 
         const tr = document.createElement('tr');
@@ -1898,7 +1898,7 @@
       });
 
       // Update badge count
-      const configuredCount = currentConfig.airports.filter(a => a && a !== 'NULL' && a !== '').length;
+      const configuredCount = currentConfig.airports.filter(a => a && a !== 'NONE' && a !== '').length;
       document.getElementById('ledCountBadge').textContent = configuredCount;
 
       // Reinitialize Lucide icons for dynamically added content
@@ -2269,7 +2269,7 @@
         }
 
         const highestIndex = Math.max(...newAirports.map((code, idx) =>
-          (code && code !== 'NULL') ? idx : -1
+          (code && code !== 'NONE') ? idx : -1
         ));
         const newNumLeds = Math.max(highestIndex + 1, currentConfig.numLeds);
 
@@ -2374,7 +2374,7 @@
       const airports = [];
       for (let i = 0; i < numLeds; i++) {
         const input = document.querySelector(`.airport-input[data-led="${i}"]`);
-        const airportCode = input ? input.value.toUpperCase() : 'NULL';
+        const airportCode = input ? input.value.toUpperCase() : 'NONE';
         airports.push({
           ledIndex: i,
           airportCode: airportCode
@@ -2846,9 +2846,9 @@
 
     async function saveWizardConfig() {
       try {
-        const fullAirports = new Array(150).fill('NULL');
+        const fullAirports = new Array(150).fill('NONE');
         for (let i = 0; i < wizardState.numLeds; i++) {
-          fullAirports[i] = wizardState.airports[i] || 'NULL';
+          fullAirports[i] = wizardState.airports[i] || 'NONE';
         }
 
         const finalConfig = {
