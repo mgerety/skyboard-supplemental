@@ -2789,23 +2789,37 @@
     }
 
     async function handleWizardSave() {
-      const lastIndex = wizardState.numLeds - 1;
-      const lastInput = document.getElementById(`wizard-input-${lastIndex}`);
-      const lastValue = lastInput ? lastInput.value.trim().toUpperCase() : '';
+      // Filter out any blank LED fields from the end of the array
+      let validAirports = [...wizardState.airports];
 
-      if (!lastValue) {
-        showToast(`Please fill in LED ${lastIndex} or remove it before saving.`, 'error');
-        lastInput.focus();
-        return;
+      // Update values from input fields first
+      for (let i = 0; i < wizardState.numLeds; i++) {
+        const input = document.getElementById(`wizard-input-${i}`);
+        if (input) {
+          const value = input.value.trim().toUpperCase();
+          validAirports[i] = value;
+        }
       }
 
-      if (!/^([A-Z0-9]{4}|NULL|BLACK)$/.test(lastValue)) {
-        showToast('Invalid airport code on last LED. Use 4-character ICAO code (e.g., K1B9) or "NULL".', 'error', 8000);
-        lastInput.focus();
-        return;
+      // Filter out blank entries from the end
+      while (validAirports.length > 0 && !validAirports[validAirports.length - 1]) {
+        validAirports.pop();
       }
 
-      wizardState.airports[lastIndex] = lastValue;
+      // Validate remaining non-blank entries
+      for (let i = 0; i < validAirports.length; i++) {
+        const value = validAirports[i];
+        if (value && !/^([A-Z0-9]{4}|NONE|BLACK)$/.test(value)) {
+          showToast(`Invalid airport code on LED ${i}. Use 4-character ICAO code (e.g., K1B9) or "NONE".`, 'error', 8000);
+          const input = document.getElementById(`wizard-input-${i}`);
+          if (input) input.focus();
+          return;
+        }
+      }
+
+      // Update wizard state with filtered airports
+      wizardState.airports = validAirports;
+      wizardState.numLeds = validAirports.length;
 
       const confirmModal = new Modal();
       const modalContent = document.createElement('div');
