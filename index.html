@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Skyboard Web Interface Version: 104 -->
+<!-- Skyboard Web Interface Version: 105 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -1392,7 +1392,8 @@
         </div>
         <div class="form-group">
           <label class="form-label">Update Interval (minutes)</label>
-          <input type="number" id="updateInterval" class="form-input" min="5" max="60" value="15">
+          <input type="number" id="updateInterval" class="form-input" min="5" max="1440" value="15">
+          <small class="form-text text-muted">How often to check for weather updates (5-1440 minutes)</small>
         </div>
       </div>
 
@@ -2348,8 +2349,8 @@
         return;
       }
 
-      if (updateIntervalMinutes < 5 || updateIntervalMinutes > 60) {
-        showToast('Update interval must be between 5 and 60 minutes', 'error');
+      if (updateIntervalMinutes < 5 || updateIntervalMinutes > 1440) {
+        showToast('Update interval must be between 5 and 1440 minutes', 'error');
         return;
       }
 
