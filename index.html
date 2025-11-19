@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Skyboard Web Interface Version: 103 -->
+<!-- Skyboard Web Interface Version: 104 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -2845,17 +2845,26 @@
           updateIntervalMinutes: parseInt(document.getElementById('updateInterval').value)
         };
 
-        // NOTE: Wizard LED control (/setup/finish) not implemented in firmware
-        // Final save uses /api/v1/config instead
-        // const response = await fetch('/setup/finish', {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify(finalConfig)
-        // });
-        //
-        // if (!response.ok) {
-        //   throw new Error('Failed to save configuration');
-        // }
+        // Stop wizard LED mode first
+        const stopResponse = await fetch('/setup/stop', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!stopResponse.ok) {
+          throw new Error('Failed to stop wizard mode');
+        }
+
+        // Save configuration
+        const saveResponse = await fetch('/api/v1/config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(finalConfig)
+        });
+
+        if (!saveResponse.ok) {
+          throw new Error('Failed to save configuration');
+        }
 
         showToast(`Configuration saved! ${wizardState.numLeds} LEDs configured.`, 'success', 5000);
 
@@ -2868,7 +2877,7 @@
         }, 1000);
       } catch (error) {
         console.error('Failed to save wizard config:', error);
-        showToast('Failed to save configuration. Check ESP8266 connection.', 'error');
+        showToast('Failed to save configuration. Check ESP32 connection.', 'error');
       }
     }
 
