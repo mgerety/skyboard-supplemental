@@ -2413,10 +2413,16 @@
           } else {
             hideLoadingIndicator();
             showToast('Configuration saved successfully!', 'success');
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
           }
         } else {
           hideLoadingIndicator();
           showToast('Configuration saved successfully!', 'success');
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
         }
 
         currentConfig = config;
