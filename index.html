@@ -1842,7 +1842,7 @@
 
       for (let i = 0; i < currentConfig.numLeds; i++) {
         const assignment = currentConfig.airports[i] || 'NULL';
-        // Display "NONE" instead of "NONE" for user-facing UI
+        // Display "NONE" instead of "NULL" for user-facing UI
         const displayValue = (assignment === 'NULL' || assignment === 'BLACK') ? 'NONE' : assignment;
         const status = statusData.find(s => s.index === i) || { wxValue: null, color: '#000000' };
 
@@ -2250,7 +2250,7 @@
             continue;
           }
 
-          if (!/^([A-Z0-9]{4}|NULL|BLACK|LIFR|IFR|MVFR|WVFR|VFR)$/.test(code)) {
+          if (!/^([A-Z0-9]{4}|NONE|BLACK|LIFR|IFR|MVFR|WVFR|VFR)$/.test(code)) {
             errors.push(`Line ${i+1}: Invalid code "${code}"`);
             continue;
           }
@@ -2739,7 +2739,7 @@
         return;
       }
 
-      if (!/^([A-Z0-9]{4}|NULL|BLACK)$/.test(value)) {
+      if (!/^([A-Z0-9]{4}|NONE|BLACK)$/.test(value)) {
         showToast('Invalid airport code. Use 4-character ICAO code (e.g., K1B9) or "NONE".', 'error', 8000);
         input.focus();
         return;
