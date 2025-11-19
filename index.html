@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Skyboard Web Interface Version: 102 -->
+<!-- Skyboard Web Interface Version: 103 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -1921,13 +1921,12 @@
       const ledIndex = input.dataset.led;
       const query = input.value.trim().toUpperCase();
 
-      let matches;
       if (query.length === 0) {
-        matches = airportsDatabase.slice(0, 20);
-      } else {
-        matches = searchAirports(query);
+        hideAutocomplete(ledIndex);
+        return;
       }
 
+      const matches = searchAirports(query);
       showAutocomplete(ledIndex, matches, input);
     }
 
