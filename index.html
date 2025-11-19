@@ -1687,7 +1687,7 @@
       { code: "MVFR", name: "Marginal VFR (Legend)", city: "Flight Category" },
       { code: "WVFR", name: "Windy VFR (Legend)", city: "Flight Category" },
       { code: "VFR", name: "VFR (Legend)", city: "Flight Category" },
-      { code: "NULL", name: "Off (No Assignment)", city: "Special" },
+      { code: "NONE", name: "Off (No Assignment)", city: "Special" },
       { code: "BLACK", name: "Off (Black)", city: "Special" }
     ];
 
@@ -1842,7 +1842,7 @@
 
       for (let i = 0; i < currentConfig.numLeds; i++) {
         const assignment = currentConfig.airports[i] || 'NULL';
-        // Display "NONE" instead of "NULL" for user-facing UI
+        // Display "NONE" instead of "NONE" for user-facing UI
         const displayValue = (assignment === 'NULL' || assignment === 'BLACK') ? 'NONE' : assignment;
         const status = statusData.find(s => s.index === i) || { wxValue: null, color: '#000000' };
 
@@ -2734,13 +2734,13 @@
       const value = input.value.trim().toUpperCase();
 
       if (!value) {
-        showToast('Please enter an airport code or "NULL"', 'error');
+        showToast('Please enter an airport code or "NONE"', 'error');
         input.focus();
         return;
       }
 
       if (!/^([A-Z0-9]{4}|NULL|BLACK)$/.test(value)) {
-        showToast('Invalid airport code. Use 4-character ICAO code (e.g., K1B9) or "NULL".', 'error', 8000);
+        showToast('Invalid airport code. Use 4-character ICAO code (e.g., K1B9) or "NONE".', 'error', 8000);
         input.focus();
         return;
       }
