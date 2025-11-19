@@ -1,5 +1,5 @@
 {
-  "version": 106,
+  "version": 107,
   "files": [
     "index.html",
     "diagnostics.html",
@@ -7,7 +7,6 @@
     "css/base.css",
     "css/components.css",
     "js/components.js",
-    "js/icons.js",
-    "version.txt"
+    "js/icons.js"
   ]
 }
