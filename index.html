@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Skyboard Web Interface Version: 101 -->
+<!-- Skyboard Web Interface Version: 102 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -2753,17 +2753,17 @@
 
         saveWizardStateToLocalStorage();
 
-        // NOTE: Wizard LED control (/setup/update) not implemented in firmware
-        // Wizard UI works client-side only; final save uses /api/v1/config
-        // const response = await fetch('/setup/update', {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify(wizardState)
-        // });
-        //
-        // if (!response.ok) {
-        //   throw new Error('Failed to update setup state');
-        // }
+        const response = await fetch('/setup/next', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nextIndex: wizardState.currentIndex
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to update LED index');
+        }
 
         renderWizardRows();
 
