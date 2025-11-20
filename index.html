@@ -2369,8 +2369,8 @@
         return;
       }
 
-      // Build airports array-of-objects for ESP32 API
-      // API expects: [{ledIndex: 0, airportCode: "KSFO"}, ...]
+      // Build airports array-of-objects
+      // Schema: [{ledIndex: 0, airportCode: "KSFO"}, ...]
       const airports = [];
       for (let i = 0; i < numLeds; i++) {
         const input = document.querySelector(`.airport-input[data-led="${i}"]`);
