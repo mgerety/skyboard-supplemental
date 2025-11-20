@@ -1727,7 +1727,7 @@
     // Load airport database
     async function loadAirportDatabase() {
       try {
-        // Load from GitHub CDN (not stored locally on ESP32 - too large at 170KB)
+        // Load from GitHub CDN (not stored locally on ESP32 - too large at ~951KB)
         const response = await fetch('https://raw.githubusercontent.com/mgerety/skyboard-supplemental/main/data/airports.json');
         if (!response.ok) {
           console.warn('Failed to load airport database, using fallback');
@@ -1737,7 +1737,8 @@
         const transformedAirports = airportsFromESP.map(a => ({
           code: a[0],
           name: a[1],
-          city: a[2]
+          city: a[2],
+          state: a[3]
         }));
         airportsDatabase = [...airportsDatabase, ...transformedAirports];
         console.log(`Loaded ${airportsDatabase.length} airports`);
@@ -1935,10 +1936,11 @@
     function searchAirports(query) {
       const q = query.toLowerCase();
       const matches = airportsDatabase.filter(a =>
-        a && a.code && a.name && a.city &&
+        a && a.code && a.name && a.city && a.state &&
         (a.code.toLowerCase().includes(q) ||
          a.name.toLowerCase().includes(q) ||
-         a.city.toLowerCase().includes(q))
+         a.city.toLowerCase().includes(q) ||
+         a.state.toLowerCase().includes(q))
       );
       return matches.slice(0, 10);
     }
@@ -1955,7 +1957,8 @@
       }
 
       dropdown.innerHTML = matches.map((a, idx) => {
-        const displayName = a.name.length > 35 ? a.name.substring(0, 32) + '...' : a.name;
+        const displayText = `${a.name}, ${a.city}, ${a.state}`;
+        const displayName = displayText.length > 50 ? displayText.substring(0, 47) + '...' : displayText;
         const itemId = `autocomplete-led${ledIndex}-item${idx}`;
         return `<div class="autocomplete-item"
                      id="${itemId}"
