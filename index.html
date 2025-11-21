@@ -1525,6 +1525,68 @@
       </div>
     </div>
 
+    <!-- ESTIMATED WEATHER CONFIGURATION -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">
+          <i data-lucide="cloud"></i>
+          Estimated Weather (Optional)
+        </h2>
+      </div>
+      <p class="card-description">Use backup weather sources for airports without METAR data. Requires a free API token from <a href="https://airportdb.io" target="_blank" style="color: var(--accent-primary);">airportdb.io</a>.</p>
+
+      <div class="form-grid">
+        <!-- Enable Estimated Weather -->
+        <div class="form-group">
+          <label class="form-label">
+            <i data-lucide="toggle-left"></i>
+            Enable Estimated Weather
+          </label>
+          <div class="checkbox-wrapper">
+            <label class="toggle-switch">
+              <input type="checkbox" id="use_estimated_weather">
+              <span class="toggle-slider"></span>
+            </label>
+            <span class="text-muted" style="font-size: 14px;">Fetch estimated weather for airports without METAR</span>
+          </div>
+        </div>
+
+        <!-- API Token -->
+        <div class="form-group">
+          <label class="form-label">
+            <i data-lucide="key"></i>
+            airportdb.io API Token
+          </label>
+          <div class="password-input-group">
+            <input type="password" id="airportdb_api_token" class="form-input" placeholder="Enter your API token">
+            <button type="button" class="password-toggle" onclick="toggleEstimatedWeatherTokenVisibility()">
+              <i data-lucide="eye" id="estimatedWeatherTokenToggleIcon"></i>
+            </button>
+          </div>
+          <div style="margin-top: 12px;">
+            <button type="button" class="btn btn-secondary" id="validate_token_btn" onclick="validateToken()">
+              <i data-lucide="check-circle"></i>
+              Validate Token
+            </button>
+            <span id="token_validation_status" style="margin-left: 12px;"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cache Statistics -->
+      <hr style="border: none; border-top: 2px solid var(--border-color); margin: 24px 0;">
+
+      <div class="form-group">
+        <label class="form-label">
+          <i data-lucide="database"></i>
+          Cache Statistics
+        </label>
+        <div id="cache_stats" class="wifi-info-card">
+          <p style="color: var(--text-muted); margin: 0;">Loading cache statistics...</p>
+        </div>
+      </div>
+    </div>
+
     <!-- LED ASSIGNMENTS -->
     <div class="card">
       <div class="card-header">
@@ -1713,6 +1775,7 @@
         await loadAirportDatabase();
         await loadConfig();
         await loadStatus();
+        await loadCacheStats();  // Load estimated weather cache statistics
         setInterval(loadStatus, 60000);
         setupEventListeners();
         setTimeout(() => checkForCrashedWizardSession(), 500);
@@ -1773,7 +1836,9 @@
           updateIntervalMinutes: data.updateIntervalMinutes || 15,
           hostname: data.hostname || 'skyboard',
           useMDNS: data.useMDNS !== false,
-          airports: airportsArray
+          airports: airportsArray,
+          use_estimated_weather: data.use_estimated_weather || false,
+          airportdb_api_token: data.airportdb_api_token || ''
         };
 
         document.getElementById('numLeds').value = currentConfig.numLeds;
@@ -1782,6 +1847,8 @@
         document.getElementById('hostname').value = currentConfig.hostname;
         document.getElementById('hostnamePreview').textContent = currentConfig.hostname;
         document.getElementById('useMDNS').checked = currentConfig.useMDNS;
+        document.getElementById('use_estimated_weather').checked = currentConfig.use_estimated_weather;
+        document.getElementById('airportdb_api_token').value = currentConfig.airportdb_api_token;
 
         renderLEDTable();
       } catch (error) {
@@ -2390,7 +2457,9 @@
         updateIntervalMinutes,
         hostname,
         useMDNS,
-        airports
+        airports,
+        use_estimated_weather: document.getElementById('use_estimated_weather').checked,
+        airportdb_api_token: document.getElementById('airportdb_api_token').value
       };
 
       showLoadingIndicator('Saving configuration...');
@@ -3238,6 +3307,99 @@
 
       if (typeof lucide !== 'undefined') {
         lucide.createIcons();
+      }
+    }
+
+    // Toggle visibility for Estimated Weather token input
+    function toggleEstimatedWeatherTokenVisibility() {
+      const input = document.getElementById('airportdb_api_token');
+      const icon = document.getElementById('estimatedWeatherTokenToggleIcon');
+
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.setAttribute('data-lucide', 'eye-off');
+      } else {
+        input.type = 'password';
+        icon.setAttribute('data-lucide', 'eye');
+      }
+
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    }
+
+    // Load cache statistics for estimated weather
+    async function loadCacheStats() {
+      try {
+        const response = await fetch('/api/v1/cache/stats');
+        if (!response.ok) {
+          throw new Error('Failed to load cache stats');
+        }
+
+        const stats = await response.json();
+
+        const cacheStatsDiv = document.getElementById('cache_stats');
+        cacheStatsDiv.innerHTML = `
+          <div class="wifi-info-row">
+            <span class="wifi-info-label">Cached Airports:</span>
+            <span class="wifi-info-value">${stats.cached_airports} / ${stats.max_cached_airports}</span>
+          </div>
+          <div class="wifi-info-row">
+            <span class="wifi-info-label">Capacity:</span>
+            <span class="wifi-info-value">${Math.round((stats.cached_airports / stats.max_cached_airports) * 100)}%</span>
+          </div>
+          <div class="wifi-info-row">
+            <span class="wifi-info-label">Est. API Calls Remaining:</span>
+            <span class="wifi-info-value">~${stats.estimated_api_calls_remaining || 'N/A'}</span>
+          </div>
+        `;
+      } catch (error) {
+        console.warn('Failed to load cache stats:', error);
+        const cacheStatsDiv = document.getElementById('cache_stats');
+        cacheStatsDiv.innerHTML = '<p style="color: var(--text-muted); margin: 0;">Unable to load cache statistics</p>';
+      }
+    }
+
+    // Validate airportdb.io API token
+    async function validateToken() {
+      const token = document.getElementById('airportdb_api_token').value;
+      const statusEl = document.getElementById('token_validation_status');
+      const validateBtn = document.getElementById('validate_token_btn');
+
+      if (!token) {
+        statusEl.innerHTML = '<span style="color: var(--error);">❌ Please enter a token</span>';
+        return;
+      }
+
+      // Show loading state
+      const originalBtnContent = validateBtn.innerHTML;
+      validateBtn.disabled = true;
+      validateBtn.innerHTML = '<span class="loading"></span> Validating...';
+      statusEl.innerHTML = '<span style="color: var(--accent-primary);">⏳ Validating...</span>';
+
+      try {
+        const response = await fetch('/api/v1/config/validate-airportdb-token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token })
+        });
+
+        const result = await response.json();
+
+        if (result.valid) {
+          statusEl.innerHTML = `<span style="color: var(--success);">✅ ${result.message || 'Token is valid'}</span>`;
+        } else {
+          statusEl.innerHTML = `<span style="color: var(--error);">❌ ${result.message || 'Token is invalid'}</span>`;
+        }
+      } catch (error) {
+        console.error('Token validation error:', error);
+        statusEl.innerHTML = '<span style="color: var(--error);">❌ Validation failed - check connection</span>';
+      } finally {
+        validateBtn.disabled = false;
+        validateBtn.innerHTML = originalBtnContent;
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
       }
     }
 
