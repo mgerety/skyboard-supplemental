@@ -1532,10 +1532,21 @@
           </label>
           <div class="checkbox-wrapper">
             <label class="toggle-switch">
-              <input type="checkbox" id="use_estimated_weather">
+              <input type="checkbox" id="use_estimated_weather" onchange="toggleEstimatedWeatherOptions()">
               <span class="toggle-slider"></span>
             </label>
             <span class="text-muted" style="font-size: 14px;">Use backup sources for airports without METAR</span>
+          </div>
+        </div>
+
+        <!-- Pulse Estimated Weather (sub-option) -->
+        <div class="form-group" id="pulse_estimated_weather_group" style="margin-left: 32px;">
+          <div class="checkbox-wrapper">
+            <label class="toggle-switch">
+              <input type="checkbox" id="pulse_estimated_weather">
+              <span class="toggle-slider"></span>
+            </label>
+            <span class="text-muted" style="font-size: 14px;">Pulse LEDs with estimated weather (subtle 10s pulse, 50-100% brightness)</span>
           </div>
         </div>
       </div>
@@ -1790,7 +1801,8 @@
           hostname: data.hostname || 'skyboard',
           useMDNS: data.useMDNS !== false,
           airports: airportsArray,
-          use_estimated_weather: data.use_estimated_weather || false
+          use_estimated_weather: data.use_estimated_weather || false,
+          pulse_estimated_weather: data.pulse_estimated_weather !== false  // Default true
         };
 
         document.getElementById('numLeds').value = currentConfig.numLeds;
@@ -1800,6 +1812,10 @@
         document.getElementById('hostnamePreview').textContent = currentConfig.hostname;
         document.getElementById('useMDNS').checked = currentConfig.useMDNS;
         document.getElementById('use_estimated_weather').checked = currentConfig.use_estimated_weather;
+        document.getElementById('pulse_estimated_weather').checked = currentConfig.pulse_estimated_weather;
+
+        // Update estimated weather options visibility
+        toggleEstimatedWeatherOptions();
 
         renderLEDTable();
       } catch (error) {
@@ -2409,7 +2425,8 @@
         hostname,
         useMDNS,
         airports,
-        use_estimated_weather: document.getElementById('use_estimated_weather').checked
+        use_estimated_weather: document.getElementById('use_estimated_weather').checked,
+        pulse_estimated_weather: document.getElementById('pulse_estimated_weather').checked
       };
 
       showLoadingIndicator('Saving configuration...');
@@ -3241,6 +3258,20 @@
       document.getElementById('networkCredentials').classList.remove('hidden');
       document.getElementById('testResult').textContent = '';
       document.getElementById('saveNetworkBtn').disabled = true;
+    }
+
+    function toggleEstimatedWeatherOptions() {
+      const estimatedWeatherEnabled = document.getElementById('use_estimated_weather').checked;
+      const pulseGroup = document.getElementById('pulse_estimated_weather_group');
+      const pulseCheckbox = document.getElementById('pulse_estimated_weather');
+
+      if (estimatedWeatherEnabled) {
+        pulseGroup.style.display = 'block';
+        pulseCheckbox.disabled = false;
+      } else {
+        pulseGroup.style.display = 'none';
+        pulseCheckbox.disabled = true;
+      }
     }
 
     function togglePasswordVisibility() {
