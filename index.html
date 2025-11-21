@@ -1521,68 +1521,40 @@
               </button>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ESTIMATED WEATHER CONFIGURATION -->
-    <div class="card">
-      <div class="card-header">
-        <h2 class="card-title">
-          <i data-lucide="cloud"></i>
-          Estimated Weather (Optional)
-        </h2>
-      </div>
-      <p class="card-description">Use backup weather sources for airports without METAR data. Requires a free API token from <a href="https://airportdb.io" target="_blank" style="color: var(--accent-primary);">airportdb.io</a>.</p>
-
-      <div class="form-grid">
-        <!-- Enable Estimated Weather -->
+        <!-- Estimated Weather -->
         <div class="form-group">
           <label class="form-label">
-            <i data-lucide="toggle-left"></i>
-            Enable Estimated Weather
+            <i data-lucide="cloud"></i>
+            Estimated Weather
           </label>
           <div class="checkbox-wrapper">
             <label class="toggle-switch">
               <input type="checkbox" id="use_estimated_weather">
               <span class="toggle-slider"></span>
             </label>
-            <span class="text-muted" style="font-size: 14px;">Fetch estimated weather for airports without METAR</span>
+            <span class="text-muted" style="font-size: 14px;">Use backup sources for airports without METAR</span>
           </div>
         </div>
 
-        <!-- API Token -->
+        <!-- API Token (only visible when estimated weather enabled) -->
         <div class="form-group">
           <label class="form-label">
             <i data-lucide="key"></i>
-            airportdb.io API Token
+            airportdb.io Token
           </label>
           <div class="password-input-group">
-            <input type="password" id="airportdb_api_token" class="form-input" placeholder="Enter your API token">
+            <input type="password" id="airportdb_api_token" class="form-input" placeholder="API token (free at airportdb.io)">
             <button type="button" class="password-toggle" onclick="toggleEstimatedWeatherTokenVisibility()">
               <i data-lucide="eye" id="estimatedWeatherTokenToggleIcon"></i>
             </button>
           </div>
-          <div style="margin-top: 12px;">
-            <button type="button" class="btn btn-secondary" id="validate_token_btn" onclick="validateToken()">
+          <small class="form-text text-muted">
+            <button type="button" class="btn btn-secondary btn-sm" id="validate_token_btn" onclick="validateToken()" style="margin-top: 8px;">
               <i data-lucide="check-circle"></i>
-              Validate Token
+              Validate
             </button>
-            <span id="token_validation_status" style="margin-left: 12px;"></span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Cache Statistics -->
-      <hr style="border: none; border-top: 2px solid var(--border-color); margin: 24px 0;">
-
-      <div class="form-group">
-        <label class="form-label">
-          <i data-lucide="database"></i>
-          Cache Statistics
-        </label>
-        <div id="cache_stats" class="wifi-info-card">
-          <p style="color: var(--text-muted); margin: 0;">Loading cache statistics...</p>
+            <span id="token_validation_status" style="margin-left: 8px;"></span>
+          </small>
         </div>
       </div>
     </div>
@@ -1775,7 +1747,6 @@
         await loadAirportDatabase();
         await loadConfig();
         await loadStatus();
-        await loadCacheStats();  // Load estimated weather cache statistics
         setInterval(loadStatus, 60000);
         setupEventListeners();
         setTimeout(() => checkForCrashedWizardSession(), 500);
@@ -3325,38 +3296,6 @@
 
       if (typeof lucide !== 'undefined') {
         lucide.createIcons();
-      }
-    }
-
-    // Load cache statistics for estimated weather
-    async function loadCacheStats() {
-      try {
-        const response = await fetch('/api/v1/cache/stats');
-        if (!response.ok) {
-          throw new Error('Failed to load cache stats');
-        }
-
-        const stats = await response.json();
-
-        const cacheStatsDiv = document.getElementById('cache_stats');
-        cacheStatsDiv.innerHTML = `
-          <div class="wifi-info-row">
-            <span class="wifi-info-label">Cached Airports:</span>
-            <span class="wifi-info-value">${stats.cached_airports} / ${stats.max_cached_airports}</span>
-          </div>
-          <div class="wifi-info-row">
-            <span class="wifi-info-label">Capacity:</span>
-            <span class="wifi-info-value">${Math.round((stats.cached_airports / stats.max_cached_airports) * 100)}%</span>
-          </div>
-          <div class="wifi-info-row">
-            <span class="wifi-info-label">Est. API Calls Remaining:</span>
-            <span class="wifi-info-value">~${stats.estimated_api_calls_remaining || 'N/A'}</span>
-          </div>
-        `;
-      } catch (error) {
-        console.warn('Failed to load cache stats:', error);
-        const cacheStatsDiv = document.getElementById('cache_stats');
-        cacheStatsDiv.innerHTML = '<p style="color: var(--text-muted); margin: 0;">Unable to load cache statistics</p>';
       }
     }
 

@@ -959,6 +959,10 @@
           <div class="metric-label">Web Files Version</div>
           <div class="metric-value" id="webVersionValue">--</div>
         </div>
+        <div class="metric">
+          <div class="metric-label">Airport Cache</div>
+          <div class="metric-value" id="cacheValue">--</div>
+        </div>
         <div class="button-group" style="margin-top: 16px;">
           <button id="updateWebFilesBtn" class="btn btn-secondary" onclick="forceWebUpdate()">
             <i data-lucide="download-cloud"></i>
@@ -1162,6 +1166,22 @@
 
       // Web version
       document.getElementById('webVersionValue').textContent = systemInfo.web.version || '--';
+
+      // Airport cache (fetch separately)
+      fetchCacheStats();
+    }
+
+    async function fetchCacheStats() {
+      try {
+        const res = await fetch('/api/v1/cache/stats');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        const percent = data.utilization_percent || 0;
+        document.getElementById('cacheValue').textContent = `${data.cached_airports || 0} / ${data.max_capacity || 150} (${percent}%)`;
+      } catch (error) {
+        console.error('Failed to fetch cache stats:', error);
+        document.getElementById('cacheValue').textContent = 'N/A';
+      }
     }
 
     // ===== LED TABLE RENDERING =====
