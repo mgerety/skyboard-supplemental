@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Skyboard Web Interface Version: 128 -->
+<!-- Skyboard Web Interface Version: 106 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -1521,9 +1521,6 @@
               </button>
             </div>
           </div>
-        </div>
-      </div>
-
         <!-- Estimated Weather -->
         <div class="form-group">
           <label class="form-label">
@@ -1532,22 +1529,32 @@
           </label>
           <div class="checkbox-wrapper">
             <label class="toggle-switch">
-              <input type="checkbox" id="use_estimated_weather" onchange="toggleEstimatedWeatherOptions()">
+              <input type="checkbox" id="use_estimated_weather">
               <span class="toggle-slider"></span>
             </label>
             <span class="text-muted" style="font-size: 14px;">Use backup sources for airports without METAR</span>
           </div>
         </div>
 
-        <!-- Pulse Estimated Weather (sub-option) -->
-        <div class="form-group" id="pulse_estimated_weather_group" style="margin-left: 32px;">
-          <div class="checkbox-wrapper">
-            <label class="toggle-switch">
-              <input type="checkbox" id="pulse_estimated_weather">
-              <span class="toggle-slider"></span>
-            </label>
-            <span class="text-muted" style="font-size: 14px;">Pulse LEDs with estimated weather (subtle 10s pulse, 50-100% brightness)</span>
+        <!-- API Token (only visible when estimated weather enabled) -->
+        <div class="form-group">
+          <label class="form-label">
+            <i data-lucide="key"></i>
+            airportdb.io Token
+          </label>
+          <div class="password-input-group">
+            <input type="password" id="airportdb_api_token" class="form-input" placeholder="API token (free at airportdb.io)">
+            <button type="button" class="password-toggle" onclick="toggleEstimatedWeatherTokenVisibility()">
+              <i data-lucide="eye" id="estimatedWeatherTokenToggleIcon"></i>
+            </button>
           </div>
+          <small class="form-text text-muted">
+            <button type="button" class="btn btn-secondary btn-sm" id="validate_token_btn" onclick="validateToken()" style="margin-top: 8px;">
+              <i data-lucide="check-circle"></i>
+              Validate
+            </button>
+            <span id="token_validation_status" style="margin-left: 8px;"></span>
+          </small>
         </div>
       </div>
     </div>
@@ -1802,7 +1809,7 @@
           useMDNS: data.useMDNS !== false,
           airports: airportsArray,
           use_estimated_weather: data.use_estimated_weather || false,
-          pulse_estimated_weather: data.pulse_estimated_weather !== false  // Default true
+          airportdb_api_token: data.airportdb_api_token || ''
         };
 
         document.getElementById('numLeds').value = currentConfig.numLeds;
@@ -1812,10 +1819,7 @@
         document.getElementById('hostnamePreview').textContent = currentConfig.hostname;
         document.getElementById('useMDNS').checked = currentConfig.useMDNS;
         document.getElementById('use_estimated_weather').checked = currentConfig.use_estimated_weather;
-        document.getElementById('pulse_estimated_weather').checked = currentConfig.pulse_estimated_weather;
-
-        // Update estimated weather options visibility
-        toggleEstimatedWeatherOptions();
+        document.getElementById('airportdb_api_token').value = currentConfig.airportdb_api_token;
 
         renderLEDTable();
       } catch (error) {
@@ -2426,7 +2430,7 @@
         useMDNS,
         airports,
         use_estimated_weather: document.getElementById('use_estimated_weather').checked,
-        pulse_estimated_weather: document.getElementById('pulse_estimated_weather').checked
+        airportdb_api_token: document.getElementById('airportdb_api_token').value
       };
 
       showLoadingIndicator('Saving configuration...');
@@ -3260,20 +3264,6 @@
       document.getElementById('saveNetworkBtn').disabled = true;
     }
 
-    function toggleEstimatedWeatherOptions() {
-      const estimatedWeatherEnabled = document.getElementById('use_estimated_weather').checked;
-      const pulseGroup = document.getElementById('pulse_estimated_weather_group');
-      const pulseCheckbox = document.getElementById('pulse_estimated_weather');
-
-      if (estimatedWeatherEnabled) {
-        pulseGroup.style.display = 'block';
-        pulseCheckbox.disabled = false;
-      } else {
-        pulseGroup.style.display = 'none';
-        pulseCheckbox.disabled = true;
-      }
-    }
-
     function togglePasswordVisibility() {
       const input = document.getElementById('wifiPassword');
       const icon = document.getElementById('passwordToggleIcon');
@@ -3288,6 +3278,67 @@
 
       if (typeof lucide !== 'undefined') {
         lucide.createIcons();
+      }
+    }
+
+    // Toggle visibility for Estimated Weather token input
+    function toggleEstimatedWeatherTokenVisibility() {
+      const input = document.getElementById('airportdb_api_token');
+      const icon = document.getElementById('estimatedWeatherTokenToggleIcon');
+
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.setAttribute('data-lucide', 'eye-off');
+      } else {
+        input.type = 'password';
+        icon.setAttribute('data-lucide', 'eye');
+      }
+
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    }
+
+    // Validate airportdb.io API token
+    async function validateToken() {
+      const token = document.getElementById('airportdb_api_token').value;
+      const statusEl = document.getElementById('token_validation_status');
+      const validateBtn = document.getElementById('validate_token_btn');
+
+      if (!token) {
+        statusEl.innerHTML = '<span style="color: var(--error);">❌ Please enter a token</span>';
+        return;
+      }
+
+      // Show loading state
+      const originalBtnContent = validateBtn.innerHTML;
+      validateBtn.disabled = true;
+      validateBtn.innerHTML = '<span class="loading"></span> Validating...';
+      statusEl.innerHTML = '<span style="color: var(--accent-primary);">⏳ Validating...</span>';
+
+      try {
+        const response = await fetch('/api/v1/config/validate-airportdb-token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token })
+        });
+
+        const result = await response.json();
+
+        if (result.valid) {
+          statusEl.innerHTML = `<span style="color: var(--success);">✅ ${result.message || 'Token is valid'}</span>`;
+        } else {
+          statusEl.innerHTML = `<span style="color: var(--error);">❌ ${result.message || 'Token is invalid'}</span>`;
+        }
+      } catch (error) {
+        console.error('Token validation error:', error);
+        statusEl.innerHTML = '<span style="color: var(--error);">❌ Validation failed - check connection</span>';
+      } finally {
+        validateBtn.disabled = false;
+        validateBtn.innerHTML = originalBtnContent;
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
       }
     }
 
