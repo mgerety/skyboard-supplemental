@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Skyboard Web Interface Version: 131 -->
+<!-- Skyboard Web Interface Version: 132 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -1806,7 +1806,7 @@
           updateIntervalMinutes: data.updateIntervalMinutes || 15,
           hostname: data.hostname || 'skyboard',
           useMDNS: data.useMDNS !== false,
-          useEstimatedWeather: data.useEstimatedWeather || false,
+          useEstimatedWeather: data.useEstimatedWeather !== false,
           pulseEstimatedWeather: data.pulseEstimatedWeather !== false,
           airports: airportsArray
         };
@@ -2187,6 +2187,19 @@
       });
 
       document.getElementById('saveBtn').addEventListener('click', saveConfiguration);
+
+      // Estimated weather toggle dependency: pulse is disabled when parent is disabled
+      function updatePulseToggleState() {
+        const useEstimated = document.getElementById('useEstimatedWeather').checked;
+        const pulseToggle = document.getElementById('pulseEstimatedWeather');
+        pulseToggle.disabled = !useEstimated;
+        if (!useEstimated) {
+          pulseToggle.checked = false;
+        }
+      }
+      document.getElementById('useEstimatedWeather').addEventListener('change', updatePulseToggleState);
+      // Set initial state after config loads
+      updatePulseToggleState();
 
       document.getElementById('importCsvBtn').addEventListener('click', () => {
         document.getElementById('csvFileInput').click();
