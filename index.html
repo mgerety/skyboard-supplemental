@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Skyboard Web Interface Version: 130 -->
+<!-- Skyboard Web Interface Version: 131 -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -1399,6 +1399,39 @@
 
       <hr style="border: none; border-top: 2px solid var(--border-color); margin: 24px 0;">
 
+      <!-- Estimated Weather Settings -->
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">
+            <i data-lucide="cloud"></i>
+            Enable Estimated Weather
+          </label>
+          <div class="checkbox-wrapper">
+            <label class="toggle-switch">
+              <input type="checkbox" id="useEstimatedWeather">
+              <span class="toggle-slider"></span>
+            </label>
+            <span class="text-muted" style="font-size: 14px;">Use backup sources for airports without METAR</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            <i data-lucide="lightbulb"></i>
+            Pulse Estimated Weather LEDs
+          </label>
+          <div class="checkbox-wrapper">
+            <label class="toggle-switch">
+              <input type="checkbox" id="pulseEstimatedWeather">
+              <span class="toggle-slider"></span>
+            </label>
+            <span class="text-muted" style="font-size: 14px;">Gently pulse LEDs showing estimated data</span>
+          </div>
+        </div>
+      </div>
+
+      <hr style="border: none; border-top: 2px solid var(--border-color); margin: 24px 0;">
+
       <div class="form-grid">
         <div class="form-group">
           <label class="form-label">
@@ -1773,6 +1806,8 @@
           updateIntervalMinutes: data.updateIntervalMinutes || 15,
           hostname: data.hostname || 'skyboard',
           useMDNS: data.useMDNS !== false,
+          useEstimatedWeather: data.useEstimatedWeather || false,
+          pulseEstimatedWeather: data.pulseEstimatedWeather !== false,
           airports: airportsArray
         };
 
@@ -1782,6 +1817,8 @@
         document.getElementById('hostname').value = currentConfig.hostname;
         document.getElementById('hostnamePreview').textContent = currentConfig.hostname;
         document.getElementById('useMDNS').checked = currentConfig.useMDNS;
+        document.getElementById('useEstimatedWeather').checked = currentConfig.useEstimatedWeather;
+        document.getElementById('pulseEstimatedWeather').checked = currentConfig.pulseEstimatedWeather;
 
         renderLEDTable();
       } catch (error) {
@@ -2341,6 +2378,8 @@
       const updateIntervalMinutes = parseInt(document.getElementById('updateInterval').value);
       const hostname = document.getElementById('hostname').value.trim() || 'skyboard';
       const useMDNS = document.getElementById('useMDNS').checked;
+      const useEstimatedWeather = document.getElementById('useEstimatedWeather').checked;
+      const pulseEstimatedWeather = document.getElementById('pulseEstimatedWeather').checked;
 
       if (numLeds < 1 || numLeds > 150) {
         showToast('Number of LEDs must be between 1 and 150', 'error');
@@ -2390,6 +2429,8 @@
         updateIntervalMinutes,
         hostname,
         useMDNS,
+        useEstimatedWeather,
+        pulseEstimatedWeather,
         airports
       };
 
