@@ -1,11 +1,14 @@
 {
-  "version": 132,
+  "version": 133,
   "files": [
     "index.html",
-    "diagnostics.html",
-    "files.html",
+    "device.html",
+    "airports.html",
+    "weather.html",
+    "system.html",
     "css/base.css",
     "css/components.css",
+    "css/sidebar.css",
     "js/components.js",
     "js/icons.js",
     "data/airports.json"
