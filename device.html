@@ -282,19 +282,20 @@
                     return;
                 }
 
-                // For now, use the existing /api/v1/config endpoint with full config
-                // (Phase 4 will add /api/v1/device endpoint)
-                const fullConfig = {
-                    ...config,
-                    ...deviceSettings
+                // Use dedicated device endpoint (no weather refresh)
+                const devicePayload = {
+                    numLeds: deviceSettings.numLeds,
+                    brightness: deviceSettings.brightness,
+                    mdns_name: deviceSettings.hostname
+                    // Note: useMDNS not currently supported by firmware
                 };
 
-                const response = await fetch('/api/v1/config', {
+                const response = await fetch('/api/v1/device', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(fullConfig)
+                    body: JSON.stringify(devicePayload)
                 });
 
                 if (!response.ok) {

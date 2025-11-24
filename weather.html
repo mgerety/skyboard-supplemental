@@ -304,19 +304,19 @@
                     return;
                 }
 
-                // For now, use the existing /api/v1/config endpoint with full config
-                // (Phase 4 will add /api/v1/weather endpoint)
-                const fullConfig = {
-                    ...config,
-                    ...weatherSettings
+                // Use dedicated weather settings endpoint (no weather refresh)
+                const weatherPayload = {
+                    updateIntervalMinutes: weatherSettings.updateIntervalMinutes,
+                    use_estimated_weather: weatherSettings.useEstimatedWeather,
+                    pulse_estimated_weather: weatherSettings.pulseEstimatedWeather
                 };
 
-                const response = await fetch('/api/v1/config', {
+                const response = await fetch('/api/v1/weather-settings', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(fullConfig)
+                    body: JSON.stringify(weatherPayload)
                 });
 
                 if (!response.ok) {
