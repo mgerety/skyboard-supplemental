@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<!-- Skyboard System Page Version: 1 -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0f172a">
+  <title>Skyboard System</title>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="/css/sidebar.css">
+  <style>
+    /* Additional page-specific styles */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .metric-card {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 10px;
+    }
+
+    .metric-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .metric-value {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .metric-unit {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-left: 4px;
+    }
+
+    .actions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+    }
+
+    .action-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-primary);
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.15s;
+    }
+
+    .action-btn:hover {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .action-btn.danger {
+      border-color: var(--error);
+      color: var(--error);
+    }
+
+    .action-btn.danger:hover {
+      background: var(--error);
+      color: white;
+    }
+
+    .action-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .action-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .danger-zone {
+      border-top: 1px solid var(--border);
+      margin-top: 12px;
+      padding-top: 12px;
+    }
+
+    /* File Browser Tree Styles */
+    .tree-view {
+      background: var(--bg-input);
+      border-radius: 4px;
+      padding: 10px;
+      min-height: 300px;
+      max-height: 500px;
+      overflow-y: auto;
+      font-family: 'Courier New', Consolas, Monaco, monospace;
+      font-size: 12px;
+    }
+
+    .tree-view ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .tree-item {
+      display: flex;
+      align-items: center;
+      padding: 4px 6px;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.1s;
+      gap: 6px;
+      user-select: none;
+    }
+
+    .tree-item:hover {
+      background: var(--bg-primary);
+    }
+
+    .tree-item.selected {
+      background: var(--accent);
+      color: white;
+    }
+
+    .tree-arrow {
+      width: 14px;
+      height: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      color: var(--text-muted);
+      transition: transform 0.2s;
+    }
+
+    .tree-arrow.expanded {
+      transform: rotate(90deg);
+    }
+
+    .tree-arrow.empty {
+      opacity: 0;
+    }
+
+    .tree-icon {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+
+    .tree-label {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .tree-size {
+      color: var(--text-muted);
+      font-size: 10px;
+      margin-left: auto;
+      padding-left: 10px;
+    }
+
+    .tree-download {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 10px;
+      cursor: pointer;
+      opacity: 0;
+      transition: all 0.2s;
+      margin-left: 6px;
+    }
+
+    .tree-item.selected .tree-download {
+      opacity: 1;
+    }
+
+    .tree-download:hover {
+      background: var(--accent-hover);
+    }
+
+    .tree-folder-content {
+      padding-left: 24px;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .tree-folder-content.expanded {
+      max-height: 10000px;
+    }
+
+    .tree-loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      gap: 12px;
+      color: var(--text-muted);
+    }
+
+    .tree-stats {
+      display: flex;
+      gap: 16px;
+      padding: 10px;
+      background: var(--bg-input);
+      border-radius: 4px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+      font-size: 11px;
+    }
+
+    .tree-stat {
+      display: flex;
+      gap: 4px;
+      color: var(--text-secondary);
+    }
+
+    .tree-stat-value {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .browser-header-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .info-row:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      color: var(--text-muted);
+    }
+
+    .info-value {
+      color: var(--text-primary);
+      font-family: monospace;
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Hamburger Menu Button -->
+  <button class="hamburger" onclick="toggleSidebar()">
+    <i data-lucide="menu"></i>
+  </button>
+
+  <!-- Sidebar Overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <i data-lucide="plane"></i>
+      <span>Skyboard</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/index.html" class="nav-item">
+        <i data-lucide="gauge"></i>
+        <span>Device</span>
+      </a>
+      <a href="/airports.html" class="nav-item">
+        <i data-lucide="map-pin"></i>
+        <span>Airports</span>
+      </a>
+      <a href="/weather.html" class="nav-item">
+        <i data-lucide="cloud"></i>
+        <span>Weather</span>
+      </a>
+      <a href="/system.html" class="nav-item active">
+        <i data-lucide="settings"></i>
+        <span>System</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main">
+    <!-- Page Header -->
+    <div class="page-header">
+      <h1>System</h1>
+      <p>Device health, network info, and file management</p>
+    </div>
+
+    <!-- System Health Card -->
+    <div class="card">
+      <div class="card-header">
+        <i data-lucide="cpu"></i>
+        <span>System Health</span>
+      </div>
+      <div class="card-body">
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-label">Free Heap</div>
+            <div class="metric-value" id="freeHeap">--</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Uptime</div>
+            <div class="metric-value" id="uptime">--</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Firmware</div>
+            <div class="metric-value" id="firmwareVersion" style="font-size: 14px;">--</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Web Files</div>
+            <div class="metric-value" id="webVersion" style="font-size: 14px;">--</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Network Info Card -->
+    <div class="card">
+      <div class="card-header">
+        <i data-lucide="wifi"></i>
+        <span>Network Info</span>
+      </div>
+      <div class="card-body">
+        <div class="info-row">
+          <span class="info-label">WiFi Signal</span>
+          <span class="info-value" id="wifiSignal">--</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">IP Address</span>
+          <span class="info-value" id="ipAddress">--</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Hostname</span>
+          <span class="info-value" id="hostname">--</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">MAC Address</span>
+          <span class="info-value" id="macAddress">--</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions Card -->
+    <div class="card">
+      <div class="card-header">
+        <i data-lucide="zap"></i>
+        <span>Actions</span>
+      </div>
+      <div class="card-body">
+        <div class="actions-grid">
+          <button class="action-btn" onclick="forceWeatherRefresh()">
+            <i data-lucide="refresh-cw"></i>
+            <span>Force Weather Refresh</span>
+          </button>
+          <a href="/api/downloadWeather" class="action-btn" style="text-decoration: none;">
+            <i data-lucide="download"></i>
+            <span>Download Weather Data</span>
+          </a>
+          <button class="action-btn" onclick="forceWebFilesUpdate()">
+            <i data-lucide="download-cloud"></i>
+            <span>Force Web Files Update</span>
+          </button>
+          <button class="action-btn" onclick="restartDevice()">
+            <i data-lucide="power"></i>
+            <span>Restart Device</span>
+          </button>
+        </div>
+        <div class="danger-zone">
+          <button class="action-btn danger" onclick="deleteAllFiles()">
+            <i data-lucide="trash-2"></i>
+            <span>Delete All Files</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- File Browser Card (Collapsible) -->
+    <div class="card">
+      <div class="collapsible-header" onclick="toggleFileBrowser()">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <i data-lucide="folder-tree"></i>
+          <span>File Browser</span>
+        </div>
+        <i data-lucide="chevron-down" class="chevron"></i>
+      </div>
+      <div class="collapsible-content" id="fileBrowserContent">
+        <div style="margin-bottom: 10px;">
+          <div class="browser-header-actions">
+            <button class="btn btn-secondary" id="expandAllBtn">
+              <i data-lucide="chevrons-down"></i>
+              Expand All
+            </button>
+            <button class="btn btn-secondary" id="collapseAllBtn">
+              <i data-lucide="chevrons-up"></i>
+              Collapse All
+            </button>
+            <button class="btn btn-secondary" id="refreshFilesBtn">
+              <i data-lucide="refresh-cw"></i>
+              Refresh
+            </button>
+          </div>
+        </div>
+
+        <div class="tree-view" id="treeView">
+          <div class="tree-loading">
+            <div class="loading-spinner"></div>
+            <span>Loading file system...</span>
+          </div>
+        </div>
+
+        <div class="tree-stats">
+          <div class="tree-stat">
+            <span>Files:</span>
+            <span class="tree-stat-value" id="statFiles">0</span>
+          </div>
+          <div class="tree-stat">
+            <span>Folders:</span>
+            <span class="tree-stat-value" id="statFolders">0</span>
+          </div>
+          <div class="tree-stat">
+            <span>Total Size:</span>
+            <span class="tree-stat-value" id="statTotalSize">0 B</span>
+          </div>
+          <div class="tree-stat">
+            <span>Largest File:</span>
+            <span class="tree-stat-value" id="statLargestFile">--</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">
+    <span id="toastMessage"></span>
+    <span class="toast-close" onclick="hideToast()">&times;</span>
+  </div>
+
+  <script>
+    // ===== GLOBAL STATE =====
+    let statusRefreshInterval;
+    let fileExplorer = null;
+
+    // ===== SIDEBAR TOGGLE =====
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('active');
+    }
+
+    // ===== FILE BROWSER TOGGLE =====
+    function toggleFileBrowser() {
+      const content = document.getElementById('fileBrowserContent');
+      const header = event.currentTarget;
+      content.classList.toggle('open');
+      header.classList.toggle('open');
+
+      // Initialize file explorer on first open
+      if (content.classList.contains('open') && !fileExplorer) {
+        fileExplorer = new FileExplorer();
+        fileExplorer.init();
+      }
+
+      lucide.createIcons();
+    }
+
+    // ===== TOAST NOTIFICATION =====
+    function showToast(message, type = 'info') {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMessage').textContent = message;
+      toast.className = 'toast show ' + type;
+      setTimeout(() => hideToast(), 5000);
+    }
+
+    function hideToast() {
+      document.getElementById('toast').classList.remove('show');
+    }
+
+    // ===== LOAD SYSTEM STATUS =====
+    async function loadSystemStatus() {
+      try {
+        const response = await fetch('/api/v1/system/status');
+        if (!response.ok) throw new Error('Failed to fetch system status');
+
+        const data = await response.json();
+
+        // System Health
+        document.getElementById('freeHeap').innerHTML =
+          (data.system.freeHeap / 1024).toFixed(1) + '<span class="metric-unit">KB</span>';
+        document.getElementById('uptime').textContent = formatUptime(data.system.uptime);
+        document.getElementById('firmwareVersion').textContent = data.system.firmwareVersion || '--';
+        document.getElementById('webVersion').textContent = data.system.webFilesVersion || '--';
+
+        // Network Info
+        document.getElementById('wifiSignal').textContent = data.wifi.rssi ? data.wifi.rssi + ' dBm' : '--';
+        document.getElementById('ipAddress').textContent = data.wifi.ip || '--';
+        document.getElementById('hostname').textContent = data.wifi.hostname || '--';
+        document.getElementById('macAddress').textContent = data.wifi.mac || '--';
+
+      } catch (error) {
+        console.error('Error loading system status:', error);
+        showToast('Failed to load system status', 'error');
+      }
+    }
+
+    // ===== FORMAT UPTIME =====
+    function formatUptime(seconds) {
+      if (!seconds) return '--';
+
+      const days = Math.floor(seconds / 86400);
+      const hours = Math.floor((seconds % 86400) / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+
+      if (days > 0) {
+        return `${days}d ${hours}h ${minutes}m`;
+      } else if (hours > 0) {
+        return `${hours}h ${minutes}m`;
+      } else {
+        return `${minutes}m`;
+      }
+    }
+
+    // ===== ACTION HANDLERS =====
+    async function forceWeatherRefresh() {
+      try {
+        const response = await fetch('/api/v1/weather/refresh', { method: 'POST' });
+        if (response.ok) {
+          showToast('Weather refresh triggered', 'success');
+        } else {
+          showToast('Failed to refresh weather', 'error');
+        }
+      } catch (error) {
+        showToast('Error: ' + error.message, 'error');
+      }
+    }
+
+    async function forceWebFilesUpdate() {
+      if (!confirm('Download latest web files from GitHub? This may take a minute.')) {
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/v1/system/update-interface', { method: 'POST' });
+        if (response.ok) {
+          showToast('Web files update started. Reload in 1 minute.', 'success');
+        } else {
+          showToast('Failed to start update', 'error');
+        }
+      } catch (error) {
+        showToast('Error: ' + error.message, 'error');
+      }
+    }
+
+    async function restartDevice() {
+      if (!confirm('Restart the device? This will disconnect you temporarily.')) {
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/v1/system/restart', { method: 'POST' });
+        if (response.ok) {
+          showToast('Device restarting... Reload in 10 seconds.', 'success');
+        } else {
+          showToast('Failed to restart device', 'error');
+        }
+      } catch (error) {
+        showToast('Error: ' + error.message, 'error');
+      }
+    }
+
+    async function deleteAllFiles() {
+      if (!confirm('Delete ALL files from LittleFS? This will reset to factory defaults!')) {
+        return;
+      }
+
+      if (!confirm('Are you ABSOLUTELY SURE? This cannot be undone!')) {
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/v1/system/reset', { method: 'POST' });
+        if (response.ok) {
+          showToast('All files deleted. Reloading...', 'success');
+          setTimeout(() => window.location.reload(), 2000);
+        } else {
+          showToast('Failed to delete files', 'error');
+        }
+      } catch (error) {
+        showToast('Error: ' + error.message, 'error');
+      }
+    }
+
+    // ===== FILE EXPLORER CLASS (Ported from files.html) =====
+    class FileExplorer {
+      constructor() {
+        this.container = document.getElementById('treeView');
+        this.files = [];
+        this.tree = null;
+        this.selectedItem = null;
+        this.stats = {
+          files: 0,
+          folders: 0,
+          totalSize: 0,
+          largestFile: { name: '', size: 0 }
+        };
+      }
+
+      async init() {
+        await this.loadFileSystem();
+        this.setupEventListeners();
+      }
+
+      setupEventListeners() {
+        document.getElementById('expandAllBtn').addEventListener('click', () => this.expandAll());
+        document.getElementById('collapseAllBtn').addEventListener('click', () => this.collapseAll());
+        document.getElementById('refreshFilesBtn').addEventListener('click', () => this.refresh());
+      }
+
+      async loadFileSystem() {
+        this.showLoading();
+
+        try {
+          const response = await fetch('/api/v1/files');
+          if (!response.ok) throw new Error('Failed to load files');
+
+          const data = await response.json();
+          this.files = Array.isArray(data) ? data : [];
+
+          this.buildTree();
+          this.render();
+          this.updateStatistics();
+
+        } catch (error) {
+          console.error('Error loading files:', error);
+          this.showError('Failed to load file system');
+        }
+      }
+
+      buildTree() {
+        this.tree = {
+          name: 'root',
+          type: 'folder',
+          path: '/',
+          children: [],
+          size: 0,
+          expanded: true
+        };
+
+        this.stats = {
+          files: 0,
+          folders: 0,
+          totalSize: 0,
+          largestFile: { name: '', size: 0 }
+        };
+
+        const directories = this.files.filter(f => f.isDirectory);
+        const files = this.files.filter(f => !f.isDirectory);
+
+        directories.sort((a, b) => a.path.localeCompare(b.path));
+        files.sort((a, b) => a.path.localeCompare(b.path));
+
+        // Build directory structure
+        directories.forEach(dir => {
+          const cleanPath = dir.path.startsWith('/') ? dir.path.substring(1) : dir.path;
+          const parts = cleanPath.split('/').filter(p => p);
+          let current = this.tree;
+
+          for (let i = 0; i < parts.length; i++) {
+            const folderName = parts[i];
+            let folder = current.children.find(c => c.name === folderName && c.type === 'folder');
+            if (!folder) {
+              folder = {
+                name: folderName,
+                type: 'folder',
+                path: '/' + parts.slice(0, i + 1).join('/'),
+                children: [],
+                size: 0,
+                expanded: false
+              };
+              current.children.push(folder);
+              this.stats.folders++;
+            }
+            current = folder;
+          }
+        });
+
+        // Add files to tree
+        files.forEach(file => {
+          const cleanPath = file.path.startsWith('/') ? file.path.substring(1) : file.path;
+          const parts = cleanPath.split('/');
+          let current = this.tree;
+
+          // Navigate to parent folder
+          if (parts.length > 1) {
+            for (let i = 0; i < parts.length - 1; i++) {
+              const folderName = parts[i];
+              let folder = current.children.find(c => c.name === folderName && c.type === 'folder');
+              if (!folder) {
+                folder = {
+                  name: folderName,
+                  type: 'folder',
+                  path: '/' + parts.slice(0, i + 1).join('/'),
+                  children: [],
+                  size: 0,
+                  expanded: false
+                };
+                current.children.push(folder);
+                this.stats.folders++;
+              }
+              folder.size += file.size;
+              current = folder;
+            }
+          }
+
+          const fileName = parts[parts.length - 1];
+          if (fileName) {
+            current.children.push({
+              name: fileName,
+              type: 'file',
+              path: file.path,
+              size: file.size
+            });
+
+            this.stats.files++;
+            this.stats.totalSize += file.size;
+            this.tree.size += file.size;
+
+            if (file.size > this.stats.largestFile.size) {
+              this.stats.largestFile = { name: fileName, size: file.size };
+            }
+          }
+        });
+
+        this.sortChildren(this.tree);
+      }
+
+      sortChildren(node) {
+        if (node.children && node.children.length > 0) {
+          node.children.sort((a, b) => {
+            if (a.type !== b.type) {
+              return a.type === 'folder' ? -1 : 1;
+            }
+            return a.name.localeCompare(b.name);
+          });
+
+          node.children.forEach(child => {
+            if (child.type === 'folder') {
+              this.sortChildren(child);
+            }
+          });
+        }
+      }
+
+      render() {
+        this.container.innerHTML = '';
+
+        if (this.files.length === 0) {
+          this.showError('No files found in LittleFS');
+          return;
+        }
+
+        const ul = document.createElement('ul');
+        this.renderNode(this.tree, ul, 0, true);
+        this.container.appendChild(ul);
+
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      }
+
+      renderNode(node, parentElement, depth, isRoot = false) {
+        if (isRoot) {
+          node.children.forEach(child => {
+            this.renderNode(child, parentElement, depth, false);
+          });
+          return;
+        }
+
+        const li = document.createElement('li');
+        const item = document.createElement('div');
+        item.className = 'tree-item';
+        if (node.type === 'folder') {
+          item.classList.add('folder');
+        }
+
+        if (node.type === 'folder') {
+          const arrow = document.createElement('span');
+          arrow.className = 'tree-arrow';
+          if (node.children.length > 0) {
+            arrow.textContent = '▶';
+            if (node.expanded) {
+              arrow.classList.add('expanded');
+            }
+          } else {
+            arrow.classList.add('empty');
+          }
+          arrow.onclick = (e) => {
+            e.stopPropagation();
+            this.toggleFolder(node, arrow, li);
+          };
+          item.appendChild(arrow);
+        } else {
+          const spacer = document.createElement('span');
+          spacer.className = 'tree-arrow empty';
+          item.appendChild(spacer);
+        }
+
+        const icon = document.createElement('i');
+        icon.className = 'tree-icon';
+        if (node.type === 'folder') {
+          icon.setAttribute('data-lucide', node.expanded ? 'folder-open' : 'folder');
+        } else {
+          icon.setAttribute('data-lucide', this.getFileIcon(node.name));
+        }
+        item.appendChild(icon);
+
+        const label = document.createElement('span');
+        label.className = 'tree-label';
+        label.textContent = node.name;
+        item.appendChild(label);
+
+        const size = document.createElement('span');
+        size.className = 'tree-size';
+        size.textContent = this.formatSize(node.size);
+        item.appendChild(size);
+
+        if (node.type === 'file') {
+          const download = document.createElement('button');
+          download.className = 'tree-download';
+          download.textContent = 'Download';
+          download.onclick = (e) => {
+            e.stopPropagation();
+            this.downloadFile(node.path);
+          };
+          item.appendChild(download);
+        }
+
+        item.onclick = () => this.selectItem(node, item);
+
+        li.appendChild(item);
+
+        if (node.type === 'folder' && node.children.length > 0) {
+          const childrenContainer = document.createElement('ul');
+          childrenContainer.className = 'tree-folder-content';
+          if (node.expanded) {
+            childrenContainer.classList.add('expanded');
+          }
+
+          node.children.forEach(child => {
+            this.renderNode(child, childrenContainer, depth + 1, false);
+          });
+
+          li.appendChild(childrenContainer);
+        }
+
+        parentElement.appendChild(li);
+      }
+
+      toggleFolder(node, arrow, li) {
+        node.expanded = !node.expanded;
+
+        const icon = li.querySelector('.tree-icon');
+        const childrenContainer = li.querySelector('.tree-folder-content');
+
+        if (node.expanded) {
+          arrow.classList.add('expanded');
+          icon.setAttribute('data-lucide', 'folder-open');
+          if (childrenContainer) {
+            childrenContainer.classList.add('expanded');
+          }
+        } else {
+          arrow.classList.remove('expanded');
+          icon.setAttribute('data-lucide', 'folder');
+          if (childrenContainer) {
+            childrenContainer.classList.remove('expanded');
+          }
+        }
+
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      }
+
+      selectItem(node, element) {
+        const allItems = this.container.querySelectorAll('.tree-item.selected');
+        allItems.forEach(item => item.classList.remove('selected'));
+        element.classList.add('selected');
+        this.selectedItem = node;
+      }
+
+      getFileIcon(filename) {
+        const ext = filename.split('.').pop().toLowerCase();
+        const icons = {
+          'html': 'file-code',
+          'htm': 'file-code',
+          'css': 'palette',
+          'js': 'file-text',
+          'json': 'braces',
+          'txt': 'file-text',
+          'log': 'file-text',
+          'md': 'file-text',
+          'xml': 'file-code',
+          'cfg': 'settings',
+          'config': 'settings',
+          'ini': 'settings'
+        };
+        return icons[ext] || 'file';
+      }
+
+      formatSize(bytes) {
+        if (bytes === 0) return '0 B';
+        const units = ['B', 'KB', 'MB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(1024));
+        return (bytes / Math.pow(1024, i)).toFixed(i > 0 ? 1 : 0) + ' ' + units[i];
+      }
+
+      downloadFile(path) {
+        showToast('Downloading ' + path.split('/').pop(), 'info');
+        window.location.href = '/api/v1/file?path=' + encodeURIComponent(path);
+      }
+
+      expandAll() {
+        this.expandAllNodes(this.tree);
+        this.render();
+      }
+
+      expandAllNodes(node) {
+        if (node.type === 'folder') {
+          node.expanded = true;
+          if (node.children) {
+            node.children.forEach(child => this.expandAllNodes(child));
+          }
+        }
+      }
+
+      collapseAll() {
+        this.collapseAllNodes(this.tree);
+        this.tree.expanded = true;
+        this.render();
+      }
+
+      collapseAllNodes(node) {
+        if (node.type === 'folder') {
+          node.expanded = false;
+          if (node.children) {
+            node.children.forEach(child => this.collapseAllNodes(child));
+          }
+        }
+      }
+
+      async refresh() {
+        const btn = document.getElementById('refreshFilesBtn');
+        btn.disabled = true;
+        await this.loadFileSystem();
+        btn.disabled = false;
+        showToast('File system refreshed', 'success');
+      }
+
+      updateStatistics() {
+        document.getElementById('statFiles').textContent = this.stats.files;
+        document.getElementById('statFolders').textContent = this.stats.folders;
+        document.getElementById('statTotalSize').textContent = this.formatSize(this.stats.totalSize);
+        document.getElementById('statLargestFile').textContent =
+          this.stats.largestFile.name ?
+          `${this.formatSize(this.stats.largestFile.size)}` : '--';
+      }
+
+      showLoading() {
+        this.container.innerHTML = `
+          <div class="tree-loading">
+            <div class="loading-spinner"></div>
+            <span>Loading file system...</span>
+          </div>
+        `;
+      }
+
+      showError(message) {
+        this.container.innerHTML = `
+          <div style="text-align: center; padding: 30px; color: var(--text-muted);">
+            <div style="font-size: 24px; margin-bottom: 10px;">⚠️</div>
+            <div>${message}</div>
+          </div>
+        `;
+      }
+    }
+
+    // ===== PAGE INITIALIZATION =====
+    window.onload = () => {
+      // Initialize Lucide icons
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+
+      // Load initial system status
+      loadSystemStatus();
+
+      // Auto-refresh system status every 30 seconds
+      statusRefreshInterval = setInterval(loadSystemStatus, 30000);
+    };
+
+    // Clean up interval on page unload
+    window.onbeforeunload = () => {
+      if (statusRefreshInterval) {
+        clearInterval(statusRefreshInterval);
+      }
+    };
+  </script>
+</body>
+</html>
