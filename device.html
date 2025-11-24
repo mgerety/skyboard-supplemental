@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#1e293b">
+    <title>Skyboard - Device Settings</title>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="/css/sidebar.css">
+</head>
+<body>
+    <!-- Hamburger menu for mobile -->
+    <button class="hamburger" id="hamburger">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+    </button>
+
+    <!-- Sidebar navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+            </svg>
+            <span>Skyboard</span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/device.html" class="nav-item active">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                Device
+            </a>
+            <a href="/airports.html" class="nav-item">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7"/>
+                </svg>
+                Airports
+            </a>
+            <a href="/weather.html" class="nav-item">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/>
+                </svg>
+                Weather
+            </a>
+            <a href="/system.html" class="nav-item">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/>
+                </svg>
+                System
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Sidebar overlay for mobile -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- Main content -->
+    <main class="main">
+        <div class="page-header">
+            <h1>Device Settings</h1>
+            <p>Configure LED strip and network settings</p>
+        </div>
+
+        <!-- LED Strip Configuration Card -->
+        <div class="card">
+            <div class="card-header">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+                LED Strip Configuration
+            </div>
+            <div class="card-body">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="numLeds">Number of LEDs</label>
+                        <input type="number" id="numLeds" min="1" max="150" value="125">
+                    </div>
+                    <div class="form-group">
+                        <label for="brightnessValue">Brightness</label>
+                        <input type="number" id="brightnessValue" min="0" max="255" value="20">
+                        <span class="form-hint">0-255</span>
+                    </div>
+                </div>
+                <div class="quick-actions">
+                    <button class="btn btn-primary" id="launchWizardBtn">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                        Launch LED Setup Wizard
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Network Card -->
+        <div class="card">
+            <div class="card-header">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/>
+                </svg>
+                Network
+            </div>
+            <div class="card-body">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="hostname">Hostname</label>
+                        <input type="text" id="hostname" maxlength="32" value="skyboard">
+                        <span class="form-hint">Access at: http://<span id="hostname-preview">skyboard</span>.local</span>
+                    </div>
+                </div>
+
+                <div class="section-divider"></div>
+
+                <div class="toggle-row">
+                    <div class="toggle-label">
+                        <span>Enable mDNS</span>
+                        <small>Allow access via .local domain</small>
+                    </div>
+                    <div class="toggle" id="useMDNS"></div>
+                </div>
+
+                <div class="section-divider"></div>
+
+                <div style="display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap;">
+                    <div class="wifi-status" style="flex: 1; min-width: 240px;">
+                        <div class="wifi-row">
+                            <span>Status</span>
+                            <span id="wifi-status"><span class="status-dot success"></span> Connected</span>
+                        </div>
+                        <div class="wifi-row">
+                            <span>Network</span>
+                            <span id="wifi-network">--</span>
+                        </div>
+                        <div class="wifi-row">
+                            <span>IP Address</span>
+                            <span id="wifi-ip">--</span>
+                        </div>
+                        <div class="wifi-row">
+                            <span>Signal</span>
+                            <span id="wifi-signal">-- dBm</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" id="changeNetworkBtn">Change Network</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Save Changes Button -->
+        <div style="margin-top: 16px;">
+            <button class="btn btn-primary" id="saveChangesBtn">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                Save Changes
+            </button>
+        </div>
+    </main>
+
+    <!-- Toast notification container -->
+    <div id="toast-container"></div>
+
+    <script>
+        // ==================== STATE ====================
+        let config = null;
+
+        // ==================== INIT ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            initLucideIcons();
+            initEventListeners();
+            loadConfig();
+            loadSystemStatus();
+        });
+
+        // ==================== LUCIDE ICONS ====================
+        function initLucideIcons() {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        // ==================== EVENT LISTENERS ====================
+        function initEventListeners() {
+            // Hamburger menu
+            const hamburger = document.getElementById('hamburger');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+
+            hamburger.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+                overlay.classList.toggle('active');
+            });
+
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+            });
+
+            // Toggle switches
+            document.querySelectorAll('.toggle').forEach(toggle => {
+                toggle.addEventListener('click', () => {
+                    toggle.classList.toggle('active');
+                });
+            });
+
+            // Hostname preview
+            const hostnameInput = document.getElementById('hostname');
+            const hostnamePreview = document.getElementById('hostname-preview');
+            hostnameInput.addEventListener('input', (e) => {
+                hostnamePreview.textContent = e.target.value || 'skyboard';
+            });
+
+            // Save button
+            document.getElementById('saveChangesBtn').addEventListener('click', saveDeviceSettings);
+
+            // Launch wizard button
+            document.getElementById('launchWizardBtn').addEventListener('click', () => {
+                window.location.href = '/airports.html';
+            });
+
+            // Change network button (placeholder)
+            document.getElementById('changeNetworkBtn').addEventListener('click', () => {
+                showToast('WiFi network change not yet implemented', 'warning');
+            });
+        }
+
+        // ==================== API FUNCTIONS ====================
+        async function loadConfig() {
+            try {
+                const response = await fetch('/api/v1/config');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                config = await response.json();
+                updateFormFromConfig();
+            } catch (error) {
+                console.error('Failed to load config:', error);
+                showToast('Failed to load configuration', 'error');
+            }
+        }
+
+        async function loadSystemStatus() {
+            try {
+                const response = await fetch('/api/v1/system/status');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const status = await response.json();
+                updateWiFiStatus(status);
+            } catch (error) {
+                console.error('Failed to load system status:', error);
+                // Don't show toast for status load failure - it's non-critical
+            }
+        }
+
+        async function saveDeviceSettings() {
+            try {
+                // Collect only device settings (numLeds, brightness, hostname, useMDNS)
+                const deviceSettings = {
+                    numLeds: parseInt(document.getElementById('numLeds').value),
+                    brightness: parseInt(document.getElementById('brightnessValue').value),
+                    hostname: document.getElementById('hostname').value.trim(),
+                    useMDNS: document.getElementById('useMDNS').classList.contains('active')
+                };
+
+                // Validate
+                if (deviceSettings.numLeds < 1 || deviceSettings.numLeds > 150) {
+                    showToast('Number of LEDs must be between 1 and 150', 'error');
+                    return;
+                }
+
+                if (deviceSettings.brightness < 0 || deviceSettings.brightness > 255) {
+                    showToast('Brightness must be between 0 and 255', 'error');
+                    return;
+                }
+
+                if (!deviceSettings.hostname || deviceSettings.hostname.length > 32) {
+                    showToast('Hostname must be 1-32 characters', 'error');
+                    return;
+                }
+
+                // For now, use the existing /api/v1/config endpoint with full config
+                // (Phase 4 will add /api/v1/device endpoint)
+                const fullConfig = {
+                    ...config,
+                    ...deviceSettings
+                };
+
+                const response = await fetch('/api/v1/config', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(fullConfig)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                showToast('Device settings saved successfully', 'success');
+
+                // Reload config to get latest state
+                await loadConfig();
+            } catch (error) {
+                console.error('Failed to save device settings:', error);
+                showToast('Failed to save device settings', 'error');
+            }
+        }
+
+        // ==================== UI UPDATE FUNCTIONS ====================
+        function updateFormFromConfig() {
+            if (!config) return;
+
+            document.getElementById('numLeds').value = config.numLeds || 125;
+            document.getElementById('brightnessValue').value = config.brightness || 20;
+            document.getElementById('hostname').value = config.hostname || 'skyboard';
+            document.getElementById('hostname-preview').textContent = config.hostname || 'skyboard';
+
+            const mdnsToggle = document.getElementById('useMDNS');
+            if (config.useMDNS) {
+                mdnsToggle.classList.add('active');
+            } else {
+                mdnsToggle.classList.remove('active');
+            }
+        }
+
+        function updateWiFiStatus(status) {
+            if (!status) return;
+
+            // Update WiFi network info
+            if (status.wifi) {
+                document.getElementById('wifi-network').textContent = status.wifi.ssid || '--';
+                document.getElementById('wifi-ip').textContent = status.wifi.ip || '--';
+                document.getElementById('wifi-signal').textContent = status.wifi.rssi ? `${status.wifi.rssi} dBm` : '-- dBm';
+
+                // Update status indicator
+                const statusElement = document.getElementById('wifi-status');
+                if (status.wifi.connected) {
+                    statusElement.innerHTML = '<span class="status-dot success"></span> Connected';
+                } else {
+                    statusElement.innerHTML = '<span class="status-dot error"></span> Disconnected';
+                }
+            }
+        }
+
+        // ==================== TOAST NOTIFICATIONS ====================
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <span>${message}</span>
+                <span class="toast-close">×</span>
+            `;
+
+            container.appendChild(toast);
+
+            // Trigger animation
+            setTimeout(() => toast.classList.add('show'), 10);
+
+            // Auto-hide after 3 seconds
+            const hideTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+
+            // Close button
+            toast.querySelector('.toast-close').addEventListener('click', () => {
+                clearTimeout(hideTimeout);
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            });
+        }
+    </script>
+</body>
+</html>
