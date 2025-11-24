@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#1e293b">
+    <title>Skyboard - Weather Options</title>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="/css/sidebar.css">
+</head>
+<body>
+    <!-- Hamburger menu for mobile -->
+    <button class="hamburger" id="hamburger">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+    </button>
+
+    <!-- Sidebar navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+            </svg>
+            <span>Skyboard</span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/device.html" class="nav-item">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                Device
+            </a>
+            <a href="/airports.html" class="nav-item">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7"/>
+                </svg>
+                Airports
+            </a>
+            <a href="/weather.html" class="nav-item active">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/>
+                </svg>
+                Weather
+            </a>
+            <a href="/system.html" class="nav-item">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/>
+                </svg>
+                System
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Sidebar overlay for mobile -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- Main content -->
+    <main class="main">
+        <div class="page-header">
+            <h1>Weather Options</h1>
+            <p>Configure weather data update and display settings</p>
+        </div>
+
+        <!-- Update Settings Card -->
+        <div class="card">
+            <div class="card-header">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+                Update Settings
+            </div>
+            <div class="card-body">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="updateInterval">Update Interval (minutes)</label>
+                        <input type="number" id="updateInterval" min="5" max="1440" value="15">
+                        <span class="form-hint">5-1440 minutes (5 minutes to 24 hours)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Sources Card -->
+        <div class="card">
+            <div class="card-header">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Data Sources
+            </div>
+            <div class="card-body">
+                <div class="toggle-row">
+                    <div class="toggle-label">
+                        <span>Enable Estimated Weather</span>
+                        <small>Use backup sources for airports without METAR data</small>
+                    </div>
+                    <div class="toggle" id="useEstimatedWeather"></div>
+                </div>
+
+                <div class="section-divider"></div>
+
+                <div class="toggle-row">
+                    <div class="toggle-label">
+                        <span>Pulse Estimated Weather LEDs</span>
+                        <small>Gently pulse LEDs showing estimated data</small>
+                    </div>
+                    <div class="toggle" id="pulseEstimatedWeather"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weather Effects Card (Future/Placeholder) -->
+        <div class="card">
+            <div class="card-header">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+                Weather Effects
+            </div>
+            <div class="card-body">
+                <div style="text-align: center; padding: 8px 0; color: var(--text-muted); font-size: 12px; font-style: italic;">
+                    Coming Soon
+                </div>
+
+                <div class="toggle-row" style="opacity: 0.5; pointer-events: none;">
+                    <div class="toggle-label">
+                        <span>Flash white for lightning</span>
+                        <small>Flash LEDs white when thunderstorms are present</small>
+                    </div>
+                    <div class="toggle"></div>
+                </div>
+
+                <div class="section-divider"></div>
+
+                <div class="toggle-row" style="opacity: 0.5; pointer-events: none;">
+                    <div class="toggle-label">
+                        <span>Flash blue for rain</span>
+                        <small>Flash LEDs blue when rain is present</small>
+                    </div>
+                    <div class="toggle"></div>
+                </div>
+
+                <div class="section-divider"></div>
+
+                <div class="toggle-row" style="opacity: 0.5; pointer-events: none;">
+                    <div class="toggle-label">
+                        <span>Pulse purple for freezing rain</span>
+                        <small>Pulse LEDs purple when freezing rain is present</small>
+                    </div>
+                    <div class="toggle"></div>
+                </div>
+
+                <div class="section-divider"></div>
+
+                <div class="toggle-row" style="opacity: 0.5; pointer-events: none;">
+                    <div class="toggle-label">
+                        <span>Pulse white for snow</span>
+                        <small>Pulse LEDs white when snow is present</small>
+                    </div>
+                    <div class="toggle"></div>
+                </div>
+
+                <div class="section-divider"></div>
+
+                <div class="toggle-row" style="opacity: 0.5; pointer-events: none;">
+                    <div class="toggle-label">
+                        <span>Pulse brown for dust/sand/ash</span>
+                        <small>Pulse LEDs brown when dust, sand, or ash is present</small>
+                    </div>
+                    <div class="toggle"></div>
+                </div>
+
+                <div class="section-divider"></div>
+
+                <div class="toggle-row" style="opacity: 0.5; pointer-events: none;">
+                    <div class="toggle-label">
+                        <span>Pulse gray for fog/haze</span>
+                        <small>Pulse LEDs gray when fog or haze is present</small>
+                    </div>
+                    <div class="toggle"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Save Changes Button -->
+        <div style="margin-top: 16px;">
+            <button class="btn btn-primary" id="saveChangesBtn">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                Save Changes
+            </button>
+        </div>
+    </main>
+
+    <!-- Toast notification container -->
+    <div id="toast-container"></div>
+
+    <script>
+        // ==================== STATE ====================
+        let config = null;
+
+        // ==================== INIT ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            initLucideIcons();
+            initEventListeners();
+            loadConfig();
+        });
+
+        // ==================== LUCIDE ICONS ====================
+        function initLucideIcons() {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        // ==================== EVENT LISTENERS ====================
+        function initEventListeners() {
+            // Hamburger menu
+            const hamburger = document.getElementById('hamburger');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+
+            hamburger.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+                overlay.classList.toggle('active');
+            });
+
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+            });
+
+            // Toggle switches
+            const useEstimatedWeatherToggle = document.getElementById('useEstimatedWeather');
+            const pulseEstimatedWeatherToggle = document.getElementById('pulseEstimatedWeather');
+
+            // Main toggle
+            useEstimatedWeatherToggle.addEventListener('click', () => {
+                useEstimatedWeatherToggle.classList.toggle('active');
+                updateToggleDependencies();
+            });
+
+            // Pulse toggle (dependent on main toggle)
+            pulseEstimatedWeatherToggle.addEventListener('click', () => {
+                // Only allow toggle if useEstimatedWeather is enabled
+                if (useEstimatedWeatherToggle.classList.contains('active')) {
+                    pulseEstimatedWeatherToggle.classList.toggle('active');
+                }
+            });
+
+            // Save button
+            document.getElementById('saveChangesBtn').addEventListener('click', saveWeatherSettings);
+        }
+
+        // ==================== TOGGLE DEPENDENCY MANAGEMENT ====================
+        function updateToggleDependencies() {
+            const useEstimatedWeather = document.getElementById('useEstimatedWeather').classList.contains('active');
+            const pulseToggleRow = document.getElementById('pulseEstimatedWeather').closest('.toggle-row');
+
+            if (!useEstimatedWeather) {
+                // Disable pulse toggle when estimated weather is off
+                pulseToggleRow.style.opacity = '0.5';
+                pulseToggleRow.style.pointerEvents = 'none';
+                document.getElementById('pulseEstimatedWeather').classList.remove('active');
+            } else {
+                // Enable pulse toggle when estimated weather is on
+                pulseToggleRow.style.opacity = '1';
+                pulseToggleRow.style.pointerEvents = 'auto';
+            }
+        }
+
+        // ==================== API FUNCTIONS ====================
+        async function loadConfig() {
+            try {
+                const response = await fetch('/api/v1/config');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                config = await response.json();
+                updateFormFromConfig();
+            } catch (error) {
+                console.error('Failed to load config:', error);
+                showToast('Failed to load configuration', 'error');
+            }
+        }
+
+        async function saveWeatherSettings() {
+            try {
+                // Collect only weather settings
+                const weatherSettings = {
+                    updateIntervalMinutes: parseInt(document.getElementById('updateInterval').value),
+                    useEstimatedWeather: document.getElementById('useEstimatedWeather').classList.contains('active'),
+                    pulseEstimatedWeather: document.getElementById('pulseEstimatedWeather').classList.contains('active')
+                };
+
+                // Validate
+                if (weatherSettings.updateIntervalMinutes < 5 || weatherSettings.updateIntervalMinutes > 1440) {
+                    showToast('Update interval must be between 5 and 1440 minutes', 'error');
+                    return;
+                }
+
+                // For now, use the existing /api/v1/config endpoint with full config
+                // (Phase 4 will add /api/v1/weather endpoint)
+                const fullConfig = {
+                    ...config,
+                    ...weatherSettings
+                };
+
+                const response = await fetch('/api/v1/config', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(fullConfig)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                showToast('Weather settings saved successfully', 'success');
+
+                // Reload config to get latest state
+                await loadConfig();
+            } catch (error) {
+                console.error('Failed to save weather settings:', error);
+                showToast('Failed to save weather settings', 'error');
+            }
+        }
+
+        // ==================== UI UPDATE FUNCTIONS ====================
+        function updateFormFromConfig() {
+            if (!config) return;
+
+            // Update interval
+            document.getElementById('updateInterval').value = config.updateIntervalMinutes || 15;
+
+            // Estimated weather toggles
+            const useEstimatedWeatherToggle = document.getElementById('useEstimatedWeather');
+            const pulseEstimatedWeatherToggle = document.getElementById('pulseEstimatedWeather');
+
+            if (config.useEstimatedWeather) {
+                useEstimatedWeatherToggle.classList.add('active');
+            } else {
+                useEstimatedWeatherToggle.classList.remove('active');
+            }
+
+            if (config.pulseEstimatedWeather) {
+                pulseEstimatedWeatherToggle.classList.add('active');
+            } else {
+                pulseEstimatedWeatherToggle.classList.remove('active');
+            }
+
+            // Update dependencies
+            updateToggleDependencies();
+        }
+
+        // ==================== TOAST NOTIFICATIONS ====================
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <span>${message}</span>
+                <span class="toast-close">×</span>
+            `;
+
+            container.appendChild(toast);
+
+            // Trigger animation
+            setTimeout(() => toast.classList.add('show'), 10);
+
+            // Auto-hide after 3 seconds
+            const hideTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+
+            // Close button
+            toast.querySelector('.toast-close').addEventListener('click', () => {
+                clearTimeout(hideTimeout);
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            });
+        }
+    </script>
+</body>
+</html>
