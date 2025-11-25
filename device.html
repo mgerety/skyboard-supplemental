@@ -161,9 +161,9 @@
     <!-- Toast notification container -->
     <div id="toast-container"></div>
 
-    <!-- Loading overlay -->
+    <!-- Loading Modal -->
     <div class="loading-overlay" id="loadingOverlay">
-        <div style="text-align: center;">
+        <div class="loading-modal">
             <div class="loading-spinner"></div>
             <div class="loading-text">Loading device settings...</div>
         </div>
@@ -341,8 +341,10 @@
             document.getElementById('hostname').value = config.hostname || 'skyboard';
             document.getElementById('hostname-preview').textContent = config.hostname || 'skyboard';
 
+            // mDNS is always enabled on firmware - default to true if not specified
             const mdnsToggle = document.getElementById('useMDNS');
-            if (config.useMDNS) {
+            const mdnsEnabled = config.useMDNS !== false; // Default true
+            if (mdnsEnabled) {
                 mdnsToggle.classList.add('active');
             } else {
                 mdnsToggle.classList.remove('active');
