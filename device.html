@@ -105,22 +105,20 @@
                 Network
             </div>
             <div class="card-body">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="hostname">Hostname</label>
-                        <input type="text" id="hostname" maxlength="32" value="skyboard">
-                        <span class="form-hint">Access at: http://<span id="hostname-preview">skyboard</span>.local</span>
-                    </div>
-                </div>
-
-                <div class="section-divider"></div>
-
                 <div class="toggle-row">
                     <div class="toggle-label">
                         <span>Enable mDNS</span>
                         <small>Allow access via .local domain</small>
                     </div>
                     <div class="toggle" id="useMDNS"></div>
+                </div>
+
+                <div class="form-grid" id="hostname-section">
+                    <div class="form-group">
+                        <label for="hostname">Hostname</label>
+                        <input type="text" id="hostname" maxlength="32" value="skyboard">
+                        <span class="form-hint">Access at: http://<span id="hostname-preview">skyboard</span>.local</span>
+                    </div>
                 </div>
 
                 <div class="section-divider"></div>
@@ -336,7 +334,7 @@
             // Update WiFi network info
             if (status.wifi) {
                 document.getElementById('wifi-network').textContent = status.wifi.ssid || '--';
-                document.getElementById('wifi-ip').textContent = status.wifi.ip || '--';
+                document.getElementById('wifi-ip').textContent = status.wifi.localIP || '--';
                 document.getElementById('wifi-signal').textContent = status.wifi.rssi ? `${status.wifi.rssi} dBm` : '-- dBm';
 
                 // Update status indicator
