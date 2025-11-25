@@ -500,16 +500,27 @@
         let toastTimeoutId = null;
         let filterTerm = '';
 
-        // Load airports database
-        async function loadAirportsDatabase() {
+        // Load airports database with retry logic
+        // (File may not exist yet if download is in progress on boot)
+        async function loadAirportsDatabase(retryCount = 0, maxRetries = 3) {
             try {
                 const response = await fetch('/data/airports.json');
-                if (!response.ok) throw new Error('Failed to load airports database');
+                if (!response.ok) {
+                    if (response.status === 404 && retryCount < maxRetries) {
+                        // File may still be downloading, retry after delay
+                        console.log(`Airports database not ready, retry ${retryCount + 1}/${maxRetries}...`);
+                        await new Promise(resolve => setTimeout(resolve, 2000)); // 2 second delay
+                        return loadAirportsDatabase(retryCount + 1, maxRetries);
+                    }
+                    throw new Error('Failed to load airports database');
+                }
                 airportsDatabase = await response.json();
                 console.log(`Loaded ${airportsDatabase.length} airports`);
             } catch (error) {
                 console.error('Failed to load airports database:', error);
-                showToast('Failed to load airports database', 'error');
+                if (retryCount >= maxRetries) {
+                    showToast('Failed to load airports database - autocomplete unavailable', 'error');
+                }
             }
         }
 
