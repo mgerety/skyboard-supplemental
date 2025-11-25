@@ -214,6 +214,124 @@
       font-family: monospace;
       font-size: 11px;
     }
+
+    /* ===== DOWNLOAD PROGRESS MODAL ===== */
+    .download-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+
+    .download-modal.show {
+      display: flex;
+    }
+
+    .download-modal-content {
+      background: var(--bg-card);
+      border-radius: 12px;
+      padding: 32px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+      max-width: 480px;
+      width: 90%;
+      text-align: center;
+    }
+
+    .download-modal-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      margin-top: 0;
+    }
+
+    .download-modal-status {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .download-modal-filename {
+      font-family: 'SF Mono', Monaco, Consolas, 'Courier New', monospace;
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      min-height: 1.5em;
+    }
+
+    .download-spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 24px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .download-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .download-icon.success svg {
+      color: var(--success);
+    }
+
+    .download-icon.error svg {
+      color: var(--error);
+    }
+
+    .download-progress-bar {
+      width: 100%;
+      height: 8px;
+      background: var(--bg-input);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .download-progress-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 4px;
+      transition: width 250ms ease;
+    }
+
+    .download-progress-fill.success {
+      background: var(--success);
+    }
+
+    .download-error-message {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid var(--error);
+      color: var(--error);
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      font-size: 14px;
+    }
+
+    .download-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
   </style>
 </head>
 <body>
@@ -417,10 +535,47 @@
     </div>
   </div>
 
+  <!-- Download Progress Modal -->
+  <div id="downloadModal" class="download-modal">
+    <div class="download-modal-content" onclick="event.stopPropagation()">
+      <!-- Loading Spinner (shown during download) -->
+      <div class="download-spinner" id="downloadSpinner"></div>
+
+      <!-- Success/Error Icon (hidden during download) -->
+      <div class="download-icon" id="downloadIcon" style="display: none;"></div>
+
+      <!-- Title -->
+      <h2 class="download-modal-title" id="downloadTitle">Downloading Files</h2>
+
+      <!-- Status Text -->
+      <p class="download-modal-status" id="downloadStatus">Preparing download...</p>
+
+      <!-- Current Filename -->
+      <p class="download-modal-filename" id="downloadFilename">&nbsp;</p>
+
+      <!-- Progress Bar -->
+      <div class="download-progress-bar">
+        <div class="download-progress-fill" id="downloadProgressBar" style="width: 0%"></div>
+      </div>
+
+      <!-- Error Message (hidden by default) -->
+      <div class="download-error-message" id="downloadError" style="display: none;">
+        <span id="downloadErrorMessage"></span>
+      </div>
+
+      <!-- Action Buttons (hidden until error) -->
+      <div class="download-buttons" id="downloadButtons" style="display: none;">
+        <button class="btn btn-primary" onclick="retryDownload()">Retry</button>
+        <button class="btn btn-secondary" onclick="closeDownloadModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // ===== GLOBAL STATE =====
     let statusRefreshInterval;
     let fileExplorer = null;
+    let downloadPollInterval = null;
 
     // ===== SIDEBAR TOGGLE =====
     function toggleSidebar() {
@@ -522,15 +677,151 @@
       }
 
       try {
+        showDownloadModal();
         const response = await fetch('/api/v1/system/update-interface', { method: 'POST' });
         if (response.ok) {
-          showToast('Web files update started. Reload in 1 minute.', 'success');
+          startDownloadPolling();
         } else {
-          showToast('Failed to start update', 'error');
+          showDownloadError('Failed to start download');
         }
       } catch (error) {
-        showToast('Error: ' + error.message, 'error');
+        showDownloadError('Error: ' + error.message);
       }
+    }
+
+    // ===== DOWNLOAD PROGRESS MODAL FUNCTIONS =====
+    function showDownloadModal() {
+      const modal = document.getElementById('downloadModal');
+      const spinner = document.getElementById('downloadSpinner');
+      const icon = document.getElementById('downloadIcon');
+      const title = document.getElementById('downloadTitle');
+      const status = document.getElementById('downloadStatus');
+      const filename = document.getElementById('downloadFilename');
+      const progressBar = document.getElementById('downloadProgressBar');
+      const errorDiv = document.getElementById('downloadError');
+      const buttons = document.getElementById('downloadButtons');
+
+      // Reset to initial state
+      spinner.style.display = 'block';
+      icon.style.display = 'none';
+      title.textContent = 'Downloading Files';
+      status.textContent = 'Preparing download...';
+      filename.innerHTML = '&nbsp;';
+      progressBar.style.width = '0%';
+      progressBar.className = 'download-progress-fill';
+      errorDiv.style.display = 'none';
+      buttons.style.display = 'none';
+
+      modal.classList.add('show');
+    }
+
+    function startDownloadPolling() {
+      downloadPollInterval = setInterval(pollDownloadStatus, 1000);
+    }
+
+    function stopDownloadPolling() {
+      if (downloadPollInterval) {
+        clearInterval(downloadPollInterval);
+        downloadPollInterval = null;
+      }
+    }
+
+    async function pollDownloadStatus() {
+      try {
+        const res = await fetch('/api/v1/system/update-interface/status');
+        const data = await res.json();
+
+        updateDownloadProgress(data);
+
+        // Check if download finished
+        if (!data.isActive) {
+          stopDownloadPolling();
+
+          if (data.errorMessage) {
+            showDownloadError(data.errorMessage);
+          } else {
+            showDownloadSuccess();
+          }
+        }
+
+      } catch (error) {
+        console.error('Poll error:', error);
+        // Keep polling - download might still be active
+      }
+    }
+
+    function updateDownloadProgress(data) {
+      const status = document.getElementById('downloadStatus');
+      const filename = document.getElementById('downloadFilename');
+      const progressBar = document.getElementById('downloadProgressBar');
+
+      if (data.totalFiles > 0) {
+        const percentage = Math.round((data.currentFile / data.totalFiles) * 100);
+
+        status.textContent = `Downloading ${data.currentFile} of ${data.totalFiles} files...`;
+        filename.textContent = data.currentFilename || '';
+        progressBar.style.width = percentage + '%';
+      }
+    }
+
+    function showDownloadSuccess() {
+      const spinner = document.getElementById('downloadSpinner');
+      const icon = document.getElementById('downloadIcon');
+      const title = document.getElementById('downloadTitle');
+      const status = document.getElementById('downloadStatus');
+      const progressBar = document.getElementById('downloadProgressBar');
+
+      spinner.style.display = 'none';
+      icon.style.display = 'flex';
+      icon.className = 'download-icon success';
+      icon.innerHTML = '<i data-lucide="check-circle" style="width: 48px; height: 48px;"></i>';
+      lucide.createIcons();
+
+      title.textContent = 'Download Complete';
+      status.textContent = 'Reloading page...';
+
+      progressBar.style.width = '100%';
+      progressBar.classList.add('success');
+
+      // Reload page after 2 seconds
+      setTimeout(() => location.reload(), 2000);
+    }
+
+    function showDownloadError(errorMessage) {
+      const spinner = document.getElementById('downloadSpinner');
+      const icon = document.getElementById('downloadIcon');
+      const title = document.getElementById('downloadTitle');
+      const status = document.getElementById('downloadStatus');
+      const errorDiv = document.getElementById('downloadError');
+      const errorMsgSpan = document.getElementById('downloadErrorMessage');
+      const buttons = document.getElementById('downloadButtons');
+      const progressBar = document.getElementById('downloadProgressBar');
+
+      spinner.style.display = 'none';
+      icon.style.display = 'flex';
+      icon.className = 'download-icon error';
+      icon.innerHTML = '<i data-lucide="x-circle" style="width: 48px; height: 48px;"></i>';
+      lucide.createIcons();
+
+      title.textContent = 'Download Failed';
+      status.textContent = 'An error occurred during download';
+
+      errorDiv.style.display = 'block';
+      errorMsgSpan.textContent = errorMessage;
+
+      progressBar.classList.add('error');
+      buttons.style.display = 'flex';
+    }
+
+    function closeDownloadModal() {
+      const modal = document.getElementById('downloadModal');
+      modal.classList.remove('show');
+      stopDownloadPolling();
+    }
+
+    function retryDownload() {
+      closeDownloadModal();
+      forceWebFilesUpdate();
     }
 
     async function restartDevice() {
