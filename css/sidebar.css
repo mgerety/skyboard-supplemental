@@ -320,7 +320,7 @@ body {
   align-items: center;
   gap: 8px;
   padding: 12px 16px;
-  background: linear-gradient(135deg, var(--accent) 0%, #4f46e5 100%);
+  background: var(--accent);
   border: none;
   border-radius: 6px;
   color: white;
@@ -329,12 +329,10 @@ body {
   font-weight: 500;
   text-decoration: none;
   transition: all 0.2s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .action-btn:hover {
-  background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
-  transform: translateY(-1px);
+  background: var(--accent-hover);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
@@ -344,11 +342,11 @@ body {
 }
 
 .action-btn.danger {
-  background: linear-gradient(135deg, var(--error) 0%, #b91c1c 100%);
+  background: var(--error);
 }
 
 .action-btn.danger:hover {
-  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+  background: #dc2626;
 }
 
 .action-btn svg {
