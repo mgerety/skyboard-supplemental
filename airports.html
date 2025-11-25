@@ -15,10 +15,21 @@
             display: flex;
             gap: 16px;
             padding: 16px;
-            background: var(--input-bg);
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
             margin-bottom: 20px;
             flex-wrap: wrap;
+        }
+
+        .legend-title {
+            width: 100%;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
         }
 
         .legend-item {
@@ -89,32 +100,68 @@
         /* Airport table */
         .airport-table {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
             margin-top: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
         }
 
         .airport-table thead {
-            background: var(--input-bg);
+            background: #1e293b;
         }
 
         .airport-table th {
-            padding: 12px 16px;
+            padding: 14px 16px;
             text-align: left;
             font-weight: 600;
-            font-size: 13px;
+            font-size: 11px;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
             color: var(--text-muted);
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 2px solid var(--border-color);
         }
 
         .airport-table td {
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border-color);
+            padding: 10px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
             color: var(--text-primary);
         }
 
+        .airport-table tbody tr {
+            background: var(--card-bg);
+        }
+
+        .airport-table tbody tr:nth-child(odd) {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
         .airport-table tbody tr:hover {
-            background: var(--input-bg);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        /* Loading state */
+        .table-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+            gap: 12px;
+        }
+
+        .table-loading .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         .led-number {
@@ -132,20 +179,26 @@
             width: 100%;
             max-width: 200px;
             padding: 8px 12px;
-            background: var(--input-bg);
-            border: 1px solid var(--border-color);
+            background: #0f172a;
+            border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 6px;
             color: var(--text-primary);
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
             text-transform: uppercase;
             transition: all 0.2s;
         }
 
         .airport-input:focus {
             outline: none;
+            background: #1e293b;
             border-color: var(--accent-primary);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .airport-input::placeholder {
+            color: var(--text-muted);
+            font-weight: 400;
         }
 
         /* Autocomplete dropdown */
@@ -217,15 +270,20 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-width: 28px;
+            gap: 4px;
             height: 28px;
-            padding: 0 8px;
+            padding: 0 12px;
             background: var(--accent-primary);
             color: white;
             border-radius: 14px;
-            font-size: 13px;
-            font-weight: 600;
+            font-size: 12px;
+            font-weight: 500;
             margin-left: 8px;
+            white-space: nowrap;
+        }
+
+        .count-badge #airportCount {
+            font-weight: 700;
         }
 
         /* Hidden file input */
@@ -401,10 +459,12 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7"/>
                     </svg>
                     <span style="flex: 1;">Airport Assignments</span>
-                    <span class="count-badge" id="airportCountBadge">0</span>
+                    <span class="count-badge" id="airportCountBadge">
+                        <span id="airportCount">0</span> airports
+                    </span>
                 </div>
                 <button class="btn btn-primary" id="setupWizardBtn">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                     </svg>
                     Setup Wizard
@@ -414,6 +474,7 @@
             <div class="card-body">
                 <!-- Flight Category Legend -->
                 <div class="legend-bar">
+                    <div class="legend-title">Flight Category Legend</div>
                     <div class="legend-item">
                         <div class="legend-color" style="background: #FF00FF;"></div>
                         <div>
@@ -477,12 +538,16 @@
 
                 <!-- Airport Table -->
                 <div class="table-wrapper">
-                    <table class="airport-table">
+                    <div class="table-loading" id="tableLoading">
+                        <div class="spinner"></div>
+                        <span>Loading airports...</span>
+                    </div>
+                    <table class="airport-table" id="airportTable" style="display: none;">
                         <thead>
                             <tr>
-                                <th>LED #</th>
+                                <th style="width: 80px;">LED #</th>
                                 <th>Airport Code</th>
-                                <th>Status</th>
+                                <th style="width: 80px; text-align: center;">Status</th>
                             </tr>
                         </thead>
                         <tbody id="airportTableBody">
@@ -587,6 +652,10 @@
 
         // Render airport table
         function renderAirportTable() {
+            // Hide loading, show table
+            document.getElementById('tableLoading').style.display = 'none';
+            document.getElementById('airportTable').style.display = '';
+
             const tbody = document.getElementById('airportTableBody');
             tbody.innerHTML = '';
 
@@ -653,7 +722,7 @@
 
             // Update badge count
             const configuredCount = currentConfig.airports.filter(a => a && a !== 'NONE' && a !== '').length;
-            document.getElementById('airportCountBadge').textContent = configuredCount;
+            document.getElementById('airportCount').textContent = configuredCount;
         }
 
         // Handle input change (save to currentConfig)
