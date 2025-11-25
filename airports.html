@@ -15,8 +15,8 @@
             display: flex;
             gap: 16px;
             padding: 16px;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
             border-radius: 8px;
             margin-bottom: 20px;
             flex-wrap: wrap;
@@ -74,8 +74,8 @@
         .search-box input {
             width: 100%;
             padding: 10px 10px 10px 40px;
-            background: var(--input-bg);
-            border: 1px solid var(--border-color);
+            background: var(--bg-input);
+            border: 1px solid var(--border);
             border-radius: 8px;
             color: var(--text-primary);
             font-size: 14px;
@@ -103,7 +103,7 @@
             border-collapse: separate;
             border-spacing: 0;
             margin-top: 16px;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border);
             border-radius: 8px;
             overflow: hidden;
         }
@@ -120,7 +120,7 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
             color: var(--text-muted);
-            border-bottom: 2px solid var(--border-color);
+            border-bottom: 2px solid var(--border);
         }
 
         .airport-table td {
@@ -130,7 +130,7 @@
         }
 
         .airport-table tbody tr {
-            background: var(--card-bg);
+            background: var(--bg-card);
         }
 
         .airport-table tbody tr:nth-child(odd) {
@@ -154,8 +154,8 @@
         .table-loading .spinner {
             width: 24px;
             height: 24px;
-            border: 3px solid var(--border-color);
-            border-top-color: var(--accent-primary);
+            border: 3px solid var(--border);
+            border-top-color: var(--accent);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
@@ -192,7 +192,7 @@
         .airport-input:focus {
             outline: none;
             background: #1e293b;
-            border-color: var(--accent-primary);
+            border-color: var(--accent);
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
         }
 
@@ -211,8 +211,8 @@
             max-width: 400px;
             max-height: 300px;
             overflow-y: auto;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
             z-index: 1000;
@@ -234,13 +234,13 @@
 
         .autocomplete-item:hover,
         .autocomplete-item.selected {
-            background: var(--input-bg);
+            background: var(--bg-input);
         }
 
         .autocomplete-code {
             font-weight: 600;
             font-family: 'Monaco', 'Courier New', monospace;
-            color: var(--accent-primary);
+            color: var(--accent);
             min-width: 45px;
         }
 
@@ -273,7 +273,7 @@
             gap: 4px;
             height: 28px;
             padding: 0 12px;
-            background: var(--accent-primary);
+            background: var(--accent);
             color: white;
             border-radius: 14px;
             font-size: 12px;
@@ -299,8 +299,8 @@
             transform: translateX(-50%) translateY(-100px);
             max-width: 400px;
             width: calc(100% - 40px);
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
             border-radius: 12px;
             padding: 16px;
             padding-right: 48px;
@@ -324,7 +324,7 @@
         }
 
         .toast.info {
-            border-left: 4px solid var(--accent-primary);
+            border-left: 4px solid var(--accent);
         }
 
         .toast.warning {
@@ -357,7 +357,7 @@
 
         .toast-close:hover {
             color: var(--text-primary);
-            background: var(--border-color);
+            background: var(--border);
             border-radius: 4px;
         }
 

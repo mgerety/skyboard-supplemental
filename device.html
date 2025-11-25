@@ -161,17 +161,38 @@
     <!-- Toast notification container -->
     <div id="toast-container"></div>
 
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div style="text-align: center;">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Loading device settings...</div>
+        </div>
+    </div>
+
     <script>
         // ==================== STATE ====================
         let config = null;
 
         // ==================== INIT ====================
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             initLucideIcons();
             initEventListeners();
-            loadConfig();
-            loadSystemStatus();
+
+            // Load data and hide loading overlay when done
+            try {
+                await Promise.all([loadConfig(), loadSystemStatus()]);
+            } finally {
+                hideLoading();
+            }
         });
+
+        function hideLoading() {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) {
+                overlay.style.opacity = '0';
+                setTimeout(() => overlay.style.display = 'none', 300);
+            }
+        }
 
         // ==================== LUCIDE ICONS ====================
         function initLucideIcons() {

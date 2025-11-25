@@ -409,6 +409,14 @@
     <span class="toast-close" onclick="hideToast()">&times;</span>
   </div>
 
+  <!-- Loading overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div style="text-align: center;">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Loading system status...</div>
+    </div>
+  </div>
+
   <script>
     // ===== GLOBAL STATE =====
     let statusRefreshInterval;
@@ -959,18 +967,30 @@
     }
 
     // ===== PAGE INITIALIZATION =====
-    window.onload = () => {
+    window.onload = async () => {
       // Initialize Lucide icons
       if (typeof lucide !== 'undefined') {
         lucide.createIcons();
       }
 
-      // Load initial system status
-      loadSystemStatus();
+      // Load initial system status and hide loading overlay when done
+      try {
+        await loadSystemStatus();
+      } finally {
+        hideLoading();
+      }
 
       // Auto-refresh system status every 30 seconds
       statusRefreshInterval = setInterval(loadSystemStatus, 30000);
     };
+
+    function hideLoading() {
+      const overlay = document.getElementById('loadingOverlay');
+      if (overlay) {
+        overlay.style.opacity = '0';
+        setTimeout(() => overlay.style.display = 'none', 300);
+      }
+    }
 
     // Clean up interval on page unload
     window.onbeforeunload = () => {
