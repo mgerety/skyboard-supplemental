@@ -514,7 +514,14 @@
                     }
                     throw new Error('Failed to load airports database');
                 }
-                airportsDatabase = await response.json();
+                const rawData = await response.json();
+                // Convert array format [code, name, state] to objects for easier searching
+                airportsDatabase = rawData.map(a => ({
+                    code: a[0],
+                    name: a[1],
+                    city: '',  // Not in compact format
+                    state: a[2]
+                }));
                 console.log(`Loaded ${airportsDatabase.length} airports`);
             } catch (error) {
                 console.error('Failed to load airports database:', error);
@@ -683,10 +690,9 @@
         function searchAirports(query) {
             const q = query.toLowerCase();
             const matches = airportsDatabase.filter(a =>
-                a && a.code && a.name && a.city && a.state &&
+                a && a.code && a.name && a.state &&
                 (a.code.toLowerCase().includes(q) ||
                  a.name.toLowerCase().includes(q) ||
-                 a.city.toLowerCase().includes(q) ||
                  a.state.toLowerCase().includes(q))
             );
             return matches.slice(0, 10);
@@ -702,7 +708,7 @@
             }
 
             dropdown.innerHTML = matches.map((a, idx) => {
-                const displayText = `${a.name}, ${a.city}, ${a.state}`;
+                const displayText = `${a.name}, ${a.state}`;
                 const displayName = displayText.length > 50 ? displayText.substring(0, 47) + '...' : displayText;
                 return `<div class="autocomplete-item"
                              data-code="${a.code}"
