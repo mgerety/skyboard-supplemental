@@ -100,9 +100,6 @@
                     </div>
                     <div class="toggle" id="useEstimatedWeather"></div>
                 </div>
-
-                <div class="section-divider"></div>
-
                 <div class="toggle-row">
                     <div class="toggle-label">
                         <span>Pulse Estimated Weather LEDs</span>
@@ -133,9 +130,6 @@
                     </div>
                     <div class="toggle"></div>
                 </div>
-
-                <div class="section-divider"></div>
-
                 <div class="toggle-row" style="opacity: 0.5; pointer-events: none;">
                     <div class="toggle-label">
                         <span>Flash blue for rain</span>
@@ -143,9 +137,6 @@
                     </div>
                     <div class="toggle"></div>
                 </div>
-
-                <div class="section-divider"></div>
-
                 <div class="toggle-row" style="opacity: 0.5; pointer-events: none;">
                     <div class="toggle-label">
                         <span>Pulse purple for freezing rain</span>
@@ -341,17 +332,17 @@
             // Update interval
             document.getElementById('updateInterval').value = config.updateIntervalMinutes || 15;
 
-            // Estimated weather toggles
+            // Estimated weather toggles (firmware returns snake_case)
             const useEstimatedWeatherToggle = document.getElementById('useEstimatedWeather');
             const pulseEstimatedWeatherToggle = document.getElementById('pulseEstimatedWeather');
 
-            if (config.useEstimatedWeather) {
+            if (config.use_estimated_weather) {
                 useEstimatedWeatherToggle.classList.add('active');
             } else {
                 useEstimatedWeatherToggle.classList.remove('active');
             }
 
-            if (config.pulseEstimatedWeather) {
+            if (config.pulse_estimated_weather) {
                 pulseEstimatedWeatherToggle.classList.add('active');
             } else {
                 pulseEstimatedWeatherToggle.classList.remove('active');
