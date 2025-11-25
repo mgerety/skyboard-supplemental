@@ -141,28 +141,7 @@
             background: rgba(59, 130, 246, 0.1);
         }
 
-        /* Loading state */
-        .table-loading {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 60px 20px;
-            color: var(--text-muted);
-            gap: 12px;
-        }
-
-        .table-loading .spinner {
-            width: 24px;
-            height: 24px;
-            border: 3px solid var(--border);
-            border-top-color: var(--accent);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        /* Loading uses shared styles from sidebar.css */
 
         .led-number {
             font-weight: 600;
@@ -291,75 +270,7 @@
             display: none;
         }
 
-        /* Toast notification */
-        .toast {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%) translateY(-100px);
-            max-width: 400px;
-            width: calc(100% - 40px);
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 16px;
-            padding-right: 48px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-            opacity: 0;
-            transition: all 0.3s;
-            z-index: 2000;
-        }
-
-        .toast.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-        }
-
-        .toast.error {
-            border-left: 4px solid var(--error);
-        }
-
-        .toast.success {
-            border-left: 4px solid var(--success);
-        }
-
-        .toast.info {
-            border-left: 4px solid var(--accent);
-        }
-
-        .toast.warning {
-            border-left: 4px solid var(--warning);
-        }
-
-        .toast-message {
-            font-size: 14px;
-            color: var(--text-primary);
-        }
-
-        .toast-close {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            background: none;
-            border: none;
-            font-size: 24px;
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: 4px;
-            line-height: 1;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-
-        .toast-close:hover {
-            color: var(--text-primary);
-            background: var(--border);
-            border-radius: 4px;
-        }
+        /* Toast uses shared styles from sidebar.css */
 
         /* Responsive table wrapper */
         .table-wrapper {
@@ -538,11 +449,7 @@
 
                 <!-- Airport Table -->
                 <div class="table-wrapper">
-                    <div class="table-loading" id="tableLoading">
-                        <div class="spinner"></div>
-                        <span>Loading airports...</span>
-                    </div>
-                    <table class="airport-table" id="airportTable" style="display: none;">
+                    <table class="airport-table" id="airportTable">
                         <thead>
                             <tr>
                                 <th style="width: 80px;">LED #</th>
@@ -571,10 +478,18 @@
     <!-- Hidden file input for CSV import -->
     <input type="file" id="csvFileInput" accept=".csv">
 
-    <!-- Toast notification -->
+    <!-- Toast notification (uses shared styles from sidebar.css) -->
     <div id="toast" class="toast">
-        <div class="toast-message" id="toastMessage"></div>
-        <button class="toast-close" onclick="hideToast()">&times;</button>
+        <span id="toastMessage"></span>
+        <span class="toast-close" onclick="hideToast()">&times;</span>
+    </div>
+
+    <!-- Full-page loading overlay (uses shared styles from sidebar.css) -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div style="text-align: center;">
+            <div class="loading-spinner"></div>
+            <div class="loading-text" id="loadingText">Loading...</div>
+        </div>
     </div>
 
     <script>
@@ -652,10 +567,6 @@
 
         // Render airport table
         function renderAirportTable() {
-            // Hide loading, show table
-            document.getElementById('tableLoading').style.display = 'none';
-            document.getElementById('airportTable').style.display = '';
-
             const tbody = document.getElementById('airportTableBody');
             tbody.innerHTML = '';
 
@@ -983,6 +894,7 @@
 
         // Save configuration
         async function saveConfiguration() {
+            showLoading('Saving configuration...');
             try {
                 // Collect airport inputs
                 const inputs = document.querySelectorAll('.airport-input');
@@ -1039,6 +951,8 @@
             } catch (error) {
                 console.error('Save error:', error);
                 showToast('Failed to save: ' + error.message, 'error');
+            } finally {
+                hideLoading();
             }
         }
 
@@ -1077,6 +991,27 @@
             }
         }
 
+        // Loading overlay functions
+        function showLoading(message = 'Loading...') {
+            const overlay = document.getElementById('loadingOverlay');
+            const text = document.getElementById('loadingText');
+            if (overlay) {
+                if (text) text.textContent = message;
+                overlay.style.display = 'flex';
+            }
+        }
+
+        function hideLoading() {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) {
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    overlay.style.opacity = '1';
+                }, 300);
+            }
+        }
+
         // Sidebar toggle
         document.getElementById('hamburger').addEventListener('click', () => {
             document.getElementById('sidebar').classList.toggle('open');
@@ -1102,9 +1037,14 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', async () => {
-            await loadAirportsDatabase();
-            await loadConfig();
-            await loadStatus();
+            showLoading('Loading airport data...');
+            try {
+                await loadAirportsDatabase();
+                await loadConfig();
+                await loadStatus();
+            } finally {
+                hideLoading();
+            }
 
             // Refresh status every 30 seconds
             setInterval(loadStatus, 30000);
