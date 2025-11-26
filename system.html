@@ -46,6 +46,33 @@
       margin-left: 4px;
     }
 
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      transition: all 0.3s ease;
+      border-radius: 4px;
+    }
+
+    .progress-fill.good {
+      background: var(--success);
+    }
+
+    .progress-fill.warning {
+      background: var(--warning);
+    }
+
+    .progress-fill.danger {
+      background: var(--error);
+    }
+
     /* File Browser Tree Styles */
     .tree-view {
       background: var(--bg-input);
@@ -386,8 +413,18 @@
       <div class="card-body">
         <div class="metrics-grid">
           <div class="metric-card">
-            <div class="metric-label">Free Heap</div>
+            <div class="metric-label">Free Heap Memory</div>
             <div class="metric-value" id="freeHeap">--</div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="heapBar"></div>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Storage (LittleFS)</div>
+            <div class="metric-value" id="storageUsed">--</div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="storageBar"></div>
+            </div>
           </div>
           <div class="metric-card">
             <div class="metric-label">Uptime</div>
@@ -614,6 +651,8 @@
     }
 
     // ===== LOAD SYSTEM STATUS =====
+    const TOTAL_HEAP = 320000; // ESP32 has ~320KB total heap (vs ~35KB on ESP8266)
+
     async function loadSystemStatus() {
       try {
         const response = await fetch('/api/v1/system/status');
@@ -621,10 +660,36 @@
 
         const data = await response.json();
 
-        // System Health
+        // Heap Memory with percentage and progress bar
+        const freeHeap = data.system.freeHeap || 0;
+        const heapPercent = (freeHeap / TOTAL_HEAP) * 100;
+        const heapKB = (freeHeap / 1024).toFixed(1);
+        const totalKB = (TOTAL_HEAP / 1024).toFixed(0);
         document.getElementById('freeHeap').innerHTML =
-          (data.system.freeHeap / 1024).toFixed(1) + '<span class="metric-unit">KB</span>';
+          `${heapKB}<span class="metric-unit">KB</span> <span style="font-size: 12px; color: var(--text-muted);">(${Math.round(heapPercent)}%)</span>`;
+
+        const heapBar = document.getElementById('heapBar');
+        heapBar.style.width = heapPercent + '%';
+        heapBar.className = 'progress-fill ' + (heapPercent > 50 ? 'good' : heapPercent > 25 ? 'warning' : 'danger');
+
+        // Storage (LittleFS) with percentage and progress bar
+        const fsUsed = data.filesystem?.used || 0;
+        const fsTotal = data.filesystem?.total || 1; // Avoid division by zero
+        const fsPercent = (fsUsed / fsTotal) * 100;
+        const fsUsedKB = (fsUsed / 1024).toFixed(1);
+        const fsTotalKB = (fsTotal / 1024).toFixed(0);
+        document.getElementById('storageUsed').innerHTML =
+          `${fsUsedKB}<span class="metric-unit">KB</span> / ${fsTotalKB}<span class="metric-unit">KB</span> <span style="font-size: 12px; color: var(--text-muted);">(${Math.round(fsPercent)}%)</span>`;
+
+        const storageBar = document.getElementById('storageBar');
+        storageBar.style.width = fsPercent + '%';
+        // For storage, low usage is good (inverted from heap)
+        storageBar.className = 'progress-fill ' + (fsPercent < 70 ? 'good' : fsPercent < 90 ? 'warning' : 'danger');
+
+        // Uptime
         document.getElementById('uptime').textContent = formatUptime(data.system.uptime);
+
+        // Versions
         document.getElementById('firmwareVersion').textContent = data.system.firmwareVersion || '--';
         document.getElementById('webVersion').textContent = data.web?.version || '--';
 
