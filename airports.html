@@ -141,6 +141,28 @@
             background: rgba(59, 130, 246, 0.1);
         }
 
+        /* Airport name column - responsive with ellipsis */
+        .airport-name-col {
+            min-width: 100px;
+        }
+
+        .airport-name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 300px;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        /* Hide airport name column on narrow screens */
+        @media (max-width: 700px) {
+            .airport-name-col,
+            td.airport-name-cell {
+                display: none;
+            }
+        }
+
         /* Loading uses shared styles from sidebar.css */
 
         .led-number {
@@ -388,8 +410,8 @@
             flex-direction: column;
             gap: 12px;
             margin-bottom: 24px;
-            max-height: 50vh;
-            overflow-y: auto;
+            /* No max-height/overflow - let page scroll naturally */
+            /* This prevents autocomplete dropdown from being clipped */
         }
 
         .wizard-row {
@@ -669,8 +691,9 @@
                         <thead>
                             <tr>
                                 <th style="width: 80px;">LED #</th>
-                                <th>Airport Code</th>
-                                <th style="width: 80px; text-align: center;">Status</th>
+                                <th style="width: 140px;">Airport Code</th>
+                                <th class="airport-name-col">Airport Name</th>
+                                <th style="width: 60px; text-align: center;">Status</th>
                             </tr>
                         </thead>
                         <tbody id="airportTableBody">
@@ -919,7 +942,19 @@
                 `;
                 tr.appendChild(tdAirport);
 
+                // Airport name column (responsive - hidden on small screens via CSS)
+                const tdName = document.createElement('td');
+                tdName.className = 'airport-name-cell';
+                const airportInfo = getAirportInfo(displayValue);
+                if (airportInfo) {
+                    tdName.innerHTML = `<span class="airport-name">${airportInfo.name}, ${airportInfo.state}</span>`;
+                } else if (displayValue !== 'NONE' && displayValue !== 'BLACK') {
+                    tdName.innerHTML = `<span class="airport-name" style="color: var(--text-muted);">Unknown</span>`;
+                }
+                tr.appendChild(tdName);
+
                 const tdStatus = document.createElement('td');
+                tdStatus.style.textAlign = 'center';
                 const statusDot = document.createElement('span');
                 statusDot.className = 'status-dot';
                 statusDot.dataset.led = i;
@@ -979,7 +1014,14 @@
             showAutocomplete(ledIndex, matches, input);
         }
 
+        // Look up airport info by code
+        function getAirportInfo(code) {
+            if (!code || code === 'NONE' || code === 'BLACK') return null;
+            return airportsDatabase.find(a => a.code === code.toUpperCase());
+        }
+
         function searchAirports(query) {
+            console.log(`[Autocomplete] Searching for: "${query}", database has ${airportsDatabase.length} airports`);
             const q = query.toLowerCase();
             const matches = airportsDatabase.filter(a =>
                 a && a.code && a.name && a.state &&
@@ -987,6 +1029,7 @@
                  a.name.toLowerCase().includes(q) ||
                  a.state.toLowerCase().includes(q))
             );
+            console.log(`[Autocomplete] Found ${matches.length} matches`);
             return matches.slice(0, 10);
         }
 
@@ -1021,7 +1064,14 @@
         }
 
         function selectAirport(ledIndex, code) {
-            currentConfig.airports[ledIndex] = code;
+            // Update the appropriate state based on whether wizard is active
+            if (wizardActive && wizardState.airports) {
+                wizardState.airports[ledIndex] = code;
+                saveWizardStateToLocalStorage();
+            } else if (currentConfig && currentConfig.airports) {
+                currentConfig.airports[ledIndex] = code;
+            }
+
             const input = document.querySelector(`.airport-input[data-led="${ledIndex}"]`);
             if (input) {
                 input.value = code;
