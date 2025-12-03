@@ -523,22 +523,45 @@
 
     // ===== UPTIME REFRESH =====
     function startUptimeRefresh() {
+      // Update uptime locally every second (no API call)
+      let lastUptime = 0;
+      let lastFetchTime = 0;
+
+      // Initial fetch to get base uptime
+      fetch('/api/v1/system/reset-info')
+        .then(r => r.json())
+        .then(data => {
+          lastUptime = data.uptime;
+          lastFetchTime = Date.now();
+        })
+        .catch(() => {});
+
+      // Update display every second using local calculation
+      setInterval(() => {
+        if (lastFetchTime > 0) {
+          const elapsed = Date.now() - lastFetchTime;
+          const uptime = lastUptime + elapsed;
+          const hours = Math.floor(uptime / 3600000);
+          const minutes = Math.floor((uptime % 3600000) / 60000);
+          const seconds = Math.floor((uptime % 60000) / 1000);
+          document.getElementById('uptime').textContent =
+            `${hours}h ${minutes}m ${seconds}s`;
+        }
+      }, 1000);
+
+      // Re-sync with server every 30 seconds
       setInterval(async () => {
         try {
           const response = await fetch('/api/v1/system/reset-info');
           if (response.ok) {
             const data = await response.json();
-            const uptime = data.uptime;
-            const hours = Math.floor(uptime / 3600000);
-            const minutes = Math.floor((uptime % 3600000) / 60000);
-            const seconds = Math.floor((uptime % 60000) / 1000);
-            document.getElementById('uptime').textContent =
-              `${hours}h ${minutes}m ${seconds}s`;
+            lastUptime = data.uptime;
+            lastFetchTime = Date.now();
           }
         } catch (e) {
           // Ignore errors
         }
-      }, 1000);
+      }, 30000);
     }
 
     // ===== INITIALIZATION =====
