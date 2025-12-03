@@ -1,11 +1,12 @@
 {
-  "version": 150,
+  "version": 151,
   "files": [
     "index.html",
     "device.html",
     "airports.html",
     "weather.html",
     "system.html",
+    "diagnostics.html",
     "css/base.css",
     "css/components.css",
     "css/sidebar.css",

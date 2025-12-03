@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<!-- Skyboard Diagnostics Page Version: 1 -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0f172a">
+  <title>Skyboard Diagnostics</title>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="/css/sidebar.css">
+  <style>
+    /* Log viewer styles */
+    .log-viewer {
+      background: #0a0f14;
+      border-radius: 4px;
+      font-family: 'SF Mono', Monaco, Consolas, 'Courier New', monospace;
+      font-size: 11px;
+      line-height: 1.5;
+      height: 400px;
+      overflow-y: auto;
+      padding: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .log-entry {
+      padding: 2px 0;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .log-entry.debug { color: #6b7280; }
+    .log-entry.info { color: #22c55e; }
+    .log-entry.warn { color: #eab308; }
+    .log-entry.error { color: #ef4444; font-weight: 600; }
+
+    .log-controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .log-filter {
+      display: flex;
+      gap: 4px;
+    }
+
+    .filter-btn {
+      padding: 4px 10px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--bg-input);
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 11px;
+      transition: all 0.2s;
+    }
+
+    .filter-btn:hover {
+      border-color: var(--accent);
+    }
+
+    .filter-btn.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .connection-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      margin-left: auto;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #6b7280;
+    }
+
+    .status-dot.connected { background: #22c55e; }
+    .status-dot.disconnected { background: #ef4444; }
+    .status-dot.connecting { background: #eab308; animation: pulse 1s infinite; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Reset info styles */
+    .reset-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+    }
+
+    .reset-card {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .reset-card.crash {
+      border-color: var(--error);
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    .reset-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .reset-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .reset-value.crash {
+      color: var(--error);
+    }
+
+    /* Coredump styles */
+    .coredump-viewer {
+      background: #0a0f14;
+      border-radius: 4px;
+      font-family: 'SF Mono', Monaco, Consolas, 'Courier New', monospace;
+      font-size: 11px;
+      line-height: 1.5;
+      max-height: 300px;
+      overflow-y: auto;
+      padding: 12px;
+      border: 1px solid var(--border);
+      white-space: pre-wrap;
+      color: #f87171;
+    }
+
+    .no-crash {
+      color: var(--text-muted);
+      text-align: center;
+      padding: 20px;
+    }
+
+    /* Auto-scroll toggle */
+    .auto-scroll-toggle {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .auto-scroll-toggle input {
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <!-- Hamburger Menu Button -->
+  <button class="hamburger" onclick="toggleSidebar()">
+    <i data-lucide="menu"></i>
+  </button>
+
+  <!-- Sidebar Overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <i data-lucide="plane"></i>
+      <span>Skyboard</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/device.html" class="nav-item">
+        <i data-lucide="gauge"></i>
+        <span>Device</span>
+      </a>
+      <a href="/airports.html" class="nav-item">
+        <i data-lucide="map-pin"></i>
+        <span>Airports</span>
+      </a>
+      <a href="/weather.html" class="nav-item">
+        <i data-lucide="cloud"></i>
+        <span>Weather</span>
+      </a>
+      <a href="/system.html" class="nav-item">
+        <i data-lucide="settings"></i>
+        <span>System</span>
+      </a>
+      <a href="/diagnostics.html" class="nav-item active">
+        <i data-lucide="activity"></i>
+        <span>Diagnostics</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main">
+    <!-- Page Header -->
+    <div class="page-header">
+      <h1>Diagnostics</h1>
+      <p>Live logs, crash history, and system diagnostics</p>
+    </div>
+
+    <!-- Reset Info Card -->
+    <div class="card">
+      <div class="card-header">
+        <i data-lucide="power"></i>
+        <span>Last Reset</span>
+      </div>
+      <div class="card-body">
+        <div class="reset-info" id="resetInfo">
+          <div class="reset-card" id="resetReasonCard">
+            <div class="reset-label">Reset Reason</div>
+            <div class="reset-value" id="resetReason">--</div>
+          </div>
+          <div class="reset-card">
+            <div class="reset-label">Uptime</div>
+            <div class="reset-value" id="uptime">--</div>
+          </div>
+          <div class="reset-card">
+            <div class="reset-label">Coredump</div>
+            <div class="reset-value" id="coredumpStatus">--</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Crash Info Card (only shown if crash detected) -->
+    <div class="card" id="crashCard" style="display: none;">
+      <div class="card-header">
+        <i data-lucide="alert-triangle" style="color: var(--error);"></i>
+        <span>Crash Information</span>
+      </div>
+      <div class="card-body">
+        <div class="coredump-viewer" id="coredumpViewer">
+          Loading...
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Logs Card -->
+    <div class="card">
+      <div class="card-header">
+        <i data-lucide="terminal"></i>
+        <span>Live Logs</span>
+      </div>
+      <div class="card-body">
+        <div class="log-controls">
+          <div class="log-filter">
+            <button class="filter-btn active" data-level="all" onclick="setFilter('all')">All</button>
+            <button class="filter-btn" data-level="debug" onclick="setFilter('debug')">Debug</button>
+            <button class="filter-btn" data-level="info" onclick="setFilter('info')">Info</button>
+            <button class="filter-btn" data-level="warn" onclick="setFilter('warn')">Warn</button>
+            <button class="filter-btn" data-level="error" onclick="setFilter('error')">Error</button>
+          </div>
+          <label class="auto-scroll-toggle">
+            <input type="checkbox" id="autoScroll" checked>
+            Auto-scroll
+          </label>
+          <div class="connection-status">
+            <span class="status-dot" id="connectionDot"></span>
+            <span id="connectionText">Connecting...</span>
+          </div>
+        </div>
+        <div class="log-viewer" id="logViewer">
+          <!-- Logs will appear here -->
+        </div>
+        <div style="margin-top: 10px; display: flex; gap: 8px;">
+          <button class="btn btn-secondary" onclick="clearLogViewer()">
+            <i data-lucide="trash-2"></i>
+            Clear View
+          </button>
+          <button class="btn btn-secondary" onclick="clearAllLogs()">
+            <i data-lucide="trash"></i>
+            Clear All Logs
+          </button>
+          <button class="btn btn-secondary" onclick="reconnectSSE()">
+            <i data-lucide="refresh-cw"></i>
+            Reconnect
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">
+    <span id="toastMessage"></span>
+    <span class="toast-close" onclick="hideToast()">&times;</span>
+  </div>
+
+  <script>
+    // ===== GLOBAL STATE =====
+    let eventSource = null;
+    let currentFilter = 'all';
+    let logEntries = [];
+    const MAX_LOG_ENTRIES = 500;
+
+    // ===== SIDEBAR =====
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('active');
+    }
+
+    // ===== TOAST =====
+    function showToast(message, type = 'info') {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMessage').textContent = message;
+      toast.className = 'toast show ' + type;
+      setTimeout(() => hideToast(), 5000);
+    }
+
+    function hideToast() {
+      document.getElementById('toast').classList.remove('show');
+    }
+
+    // ===== SSE CONNECTION =====
+    function connectSSE() {
+      setConnectionStatus('connecting');
+
+      eventSource = new EventSource('/api/v1/logs/stream');
+
+      eventSource.onopen = function() {
+        console.log('SSE connected');
+        setConnectionStatus('connected');
+      };
+
+      eventSource.onmessage = function(event) {
+        addLogEntry(event.data);
+      };
+
+      eventSource.onerror = function(error) {
+        console.error('SSE error:', error);
+        setConnectionStatus('disconnected');
+
+        // Reconnect after 5 seconds
+        eventSource.close();
+        setTimeout(connectSSE, 5000);
+      };
+    }
+
+    function reconnectSSE() {
+      if (eventSource) {
+        eventSource.close();
+      }
+      connectSSE();
+    }
+
+    function setConnectionStatus(status) {
+      const dot = document.getElementById('connectionDot');
+      const text = document.getElementById('connectionText');
+
+      dot.className = 'status-dot ' + status;
+
+      switch (status) {
+        case 'connected':
+          text.textContent = 'Connected';
+          break;
+        case 'disconnected':
+          text.textContent = 'Disconnected';
+          break;
+        case 'connecting':
+          text.textContent = 'Connecting...';
+          break;
+      }
+    }
+
+    // ===== LOG HANDLING =====
+    function addLogEntry(logText) {
+      // Parse log level from text
+      let level = 'info';
+      if (logText.includes('[DEBUG]')) level = 'debug';
+      else if (logText.includes('[INFO')) level = 'info';
+      else if (logText.includes('[WARN')) level = 'warn';
+      else if (logText.includes('[ERROR]')) level = 'error';
+
+      // Store entry
+      logEntries.push({ text: logText, level: level });
+
+      // Trim if too many
+      if (logEntries.length > MAX_LOG_ENTRIES) {
+        logEntries = logEntries.slice(-MAX_LOG_ENTRIES);
+      }
+
+      // Render if matches filter
+      if (currentFilter === 'all' || currentFilter === level) {
+        appendLogToViewer(logText, level);
+      }
+    }
+
+    function appendLogToViewer(text, level) {
+      const viewer = document.getElementById('logViewer');
+      const entry = document.createElement('div');
+      entry.className = 'log-entry ' + level;
+      entry.textContent = text;
+      viewer.appendChild(entry);
+
+      // Auto-scroll if enabled
+      if (document.getElementById('autoScroll').checked) {
+        viewer.scrollTop = viewer.scrollHeight;
+      }
+    }
+
+    function setFilter(level) {
+      currentFilter = level;
+
+      // Update button states
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.level === level);
+      });
+
+      // Re-render logs
+      renderLogs();
+    }
+
+    function renderLogs() {
+      const viewer = document.getElementById('logViewer');
+      viewer.innerHTML = '';
+
+      logEntries.forEach(entry => {
+        if (currentFilter === 'all' || currentFilter === entry.level) {
+          appendLogToViewer(entry.text, entry.level);
+        }
+      });
+    }
+
+    function clearLogViewer() {
+      logEntries = [];
+      document.getElementById('logViewer').innerHTML = '';
+      showToast('Log view cleared', 'success');
+    }
+
+    async function clearAllLogs() {
+      if (!confirm('Clear all logs from device storage?')) return;
+
+      try {
+        const response = await fetch('/api/v1/logs/clear', { method: 'POST' });
+        if (response.ok) {
+          showToast('All logs cleared', 'success');
+          clearLogViewer();
+        } else {
+          showToast('Failed to clear logs', 'error');
+        }
+      } catch (error) {
+        showToast('Error: ' + error.message, 'error');
+      }
+    }
+
+    // ===== RESET INFO =====
+    async function loadResetInfo() {
+      try {
+        const response = await fetch('/api/v1/system/reset-info');
+        if (!response.ok) throw new Error('Failed to fetch reset info');
+
+        const data = await response.json();
+
+        // Update reset reason
+        document.getElementById('resetReason').textContent = data.reasonString;
+
+        // Highlight if crash
+        const card = document.getElementById('resetReasonCard');
+        const value = document.getElementById('resetReason');
+        if (data.wasCrash) {
+          card.classList.add('crash');
+          value.classList.add('crash');
+        }
+
+        // Update uptime
+        const uptime = data.uptime;
+        const hours = Math.floor(uptime / 3600000);
+        const minutes = Math.floor((uptime % 3600000) / 60000);
+        const seconds = Math.floor((uptime % 60000) / 1000);
+        document.getElementById('uptime').textContent =
+          `${hours}h ${minutes}m ${seconds}s`;
+
+        // Update coredump status
+        document.getElementById('coredumpStatus').textContent =
+          data.hasCoredump ? 'Available' : 'None';
+
+        // Show crash card if there was a crash
+        if (data.wasCrash || data.hasCoredump) {
+          document.getElementById('crashCard').style.display = 'block';
+          loadCoredump();
+        }
+
+      } catch (error) {
+        console.error('Error loading reset info:', error);
+      }
+    }
+
+    async function loadCoredump() {
+      try {
+        const response = await fetch('/api/v1/logs/coredump');
+        if (!response.ok) throw new Error('Failed to fetch coredump');
+
+        const data = await response.json();
+
+        const viewer = document.getElementById('coredumpViewer');
+        if (data.hasCoredump) {
+          viewer.textContent = data.summary;
+        } else {
+          viewer.innerHTML = '<div class="no-crash">No crash dump available</div>';
+        }
+
+      } catch (error) {
+        console.error('Error loading coredump:', error);
+        document.getElementById('coredumpViewer').textContent = 'Error loading coredump';
+      }
+    }
+
+    // ===== UPTIME REFRESH =====
+    function startUptimeRefresh() {
+      setInterval(async () => {
+        try {
+          const response = await fetch('/api/v1/system/reset-info');
+          if (response.ok) {
+            const data = await response.json();
+            const uptime = data.uptime;
+            const hours = Math.floor(uptime / 3600000);
+            const minutes = Math.floor((uptime % 3600000) / 60000);
+            const seconds = Math.floor((uptime % 60000) / 1000);
+            document.getElementById('uptime').textContent =
+              `${hours}h ${minutes}m ${seconds}s`;
+          }
+        } catch (e) {
+          // Ignore errors
+        }
+      }, 1000);
+    }
+
+    // ===== INITIALIZATION =====
+    window.onload = async () => {
+      // Initialize Lucide icons
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+
+      // Load reset info
+      await loadResetInfo();
+
+      // Start uptime refresh
+      startUptimeRefresh();
+
+      // Connect to SSE stream
+      connectSSE();
+    };
+
+    // Cleanup on page unload
+    window.onbeforeunload = () => {
+      if (eventSource) {
+        eventSource.close();
+      }
+    };
+  </script>
+</body>
+</html>
