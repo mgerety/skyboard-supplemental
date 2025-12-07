@@ -1,5 +1,5 @@
 {
-  "version": 153,
+  "version": 154,
   "files": [
     "index.html",
     "device.html",
@@ -12,6 +12,8 @@
     "css/sidebar.css",
     "js/components.js",
     "js/icons.js",
+    "js/api.js",
+    "js/file-browser.js",
     "data/airports.json"
   ]
 }

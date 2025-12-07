@@ -36,7 +36,7 @@
           await this.loadStats();
 
           // Load file list
-          const response = await fetch('/api/files/list');
+          const response = await fetch('/api/v1/files');
           if (!response.ok) throw new Error('Failed to load files');
 
           const data = await response.json();
@@ -60,14 +60,15 @@
       // Load file system stats
       async loadStats() {
         try {
-          const response = await fetch('/api/system/info');
-          if (!response.ok) throw new Error('Failed to fetch system info');
+          const response = await fetch('/api/v1/system/status');
+          if (!response.ok) throw new Error('Failed to fetch system status');
 
           const data = await response.json();
-          const totalMB = (data.fsTotal / 1024 / 1024).toFixed(2);
-          const usedMB = (data.fsUsed / 1024 / 1024).toFixed(2);
-          const freeMB = ((data.fsTotal - data.fsUsed) / 1024 / 1024).toFixed(2);
-          const usagePercent = ((data.fsUsed / data.fsTotal) * 100).toFixed(1);
+          const fs = data.filesystem || {};
+          const totalMB = (fs.total / 1024 / 1024).toFixed(2);
+          const usedMB = (fs.used / 1024 / 1024).toFixed(2);
+          const freeMB = (fs.free / 1024 / 1024).toFixed(2);
+          const usagePercent = fs.percentUsed?.toFixed(1) || '0';
 
           // Update overview
           document.getElementById('fsTotal').textContent = totalMB + ' MB';
@@ -441,7 +442,7 @@
       // Download file
       downloadFile(path) {
         showToast('Downloading: ' + path.split('/').pop(), 'info');
-        window.location.href = '/api/files/download?path=' + encodeURIComponent(path);
+        window.location.href = '/api/v1/file?path=' + encodeURIComponent(path);
       }
 
       // Expand all folders

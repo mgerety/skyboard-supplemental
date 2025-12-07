@@ -1,7 +1,7 @@
 /**
  * Skyboard API Client
- * Version: 1.0
- * Wrapper for ESP8266 API endpoints
+ * Version: 2.0
+ * Wrapper for ESP32 API v1 endpoints
  */
 
 const API = {
@@ -11,7 +11,7 @@ const API = {
    */
   async getConfig() {
     try {
-      const res = await fetch('/config', {
+      const res = await fetch('/api/v1/config', {
         method: 'GET',
         cache: 'no-cache'
       });
@@ -35,7 +35,7 @@ const API = {
    */
   async saveConfig(config) {
     try {
-      const res = await fetch('/save', {
+      const res = await fetch('/api/v1/config', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -62,7 +62,7 @@ const API = {
    */
   async getStatus() {
     try {
-      const res = await fetch('/api/status', {
+      const res = await fetch('/api/v1/status', {
         method: 'GET',
         cache: 'no-cache'
       });
@@ -85,7 +85,7 @@ const API = {
    */
   async forceRefresh() {
     try {
-      const res = await fetch('/api/refresh', {
+      const res = await fetch('/api/v1/weather/refresh', {
         method: 'POST',
         cache: 'no-cache'
       });
@@ -108,7 +108,7 @@ const API = {
    */
   async getLogs(type = 'all') {
     try {
-      const url = type === 'all' ? '/api/logs' : `/api/logs?type=${encodeURIComponent(type)}`;
+      const url = type === 'all' ? '/api/v1/logs/recent' : `/api/v1/logs/recent?type=${encodeURIComponent(type)}`;
       const res = await fetch(url, {
         method: 'GET',
         cache: 'no-cache'
@@ -127,12 +127,12 @@ const API = {
   },
 
   /**
-   * Reboot device (if endpoint exists)
+   * Reboot device
    * @returns {Promise<{success: boolean, error?: string}>}
    */
   async reboot() {
     try {
-      const res = await fetch('/api/reboot', {
+      const res = await fetch('/api/v1/system/restart', {
         method: 'POST',
         cache: 'no-cache'
       });
