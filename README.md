@@ -149,16 +149,48 @@ To test changes locally before pushing:
 
 ### Making Changes
 
+⚠️ **CRITICAL: You MUST regenerate the manifest after ANY file changes!**
+
 1. **Edit files** in your local clone
 2. **Test thoroughly** with local web server
-3. **Commit and push** to GitHub:
+3. **Regenerate manifest.json** (computes file hashes for ESP32):
    ```bash
-   git add .
+   ./generate-manifest.sh
+   ```
+4. **Commit and push** to GitHub:
+   ```bash
+   git add -A
    git commit -m "Description of changes"
    git push origin main
    ```
-4. **Clear cache on ESP8266** (via diagnostics page or power cycle)
-5. **Verify changes** load on device
+5. **Power cycle ESP32** to download new files
+6. **Verify changes** load on device
+
+### ⚠️ MANDATORY: Hash Manifest System
+
+The ESP32 uses file hashes to determine which files have changed. **If you don't regenerate the manifest, the ESP32 will not download your changes!**
+
+**How it works:**
+- `manifest.json` contains version number and MD5 hash for each file
+- ESP32 compares local file hashes against remote manifest
+- Only files with different hashes are downloaded
+- This saves bandwidth and time (skips unchanged files like `airports.json`)
+
+**After ANY file change:**
+```bash
+./generate-manifest.sh    # Regenerates hashes for all files
+git add -A                # Stage manifest.json and changed files
+git commit -m "..."       # Commit everything
+git push                  # Push to GitHub
+```
+
+**If you forget to regenerate the manifest:**
+- ESP32 will see matching hashes for unchanged manifest
+- Your new code will NOT be downloaded
+- You'll wonder why your changes aren't working
+- You'll waste hours debugging the wrong thing
+
+**DON'T FORGET: `./generate-manifest.sh` EVERY TIME!**
 
 ### Design Guidelines
 
