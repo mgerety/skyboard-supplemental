@@ -169,6 +169,83 @@ const API = {
       console.error('API getAirports error:', error);
       return { success: false, error: error.message };
     }
+  },
+
+  /**
+   * Get display status
+   * @returns {Promise<{success: boolean, data?: object, error?: string}>}
+   */
+  async getDisplay() {
+    try {
+      const res = await fetch('/api/v1/display', {
+        method: 'GET',
+        cache: 'no-cache'
+      });
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+
+      const data = await res.json();
+      return { success: true, data };
+    } catch (error) {
+      console.error('API getDisplay error:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  /**
+   * Set display state (on/off, brightness)
+   * @param {object} settings - Display settings
+   * @returns {Promise<{success: boolean, error?: string}>}
+   */
+  async setDisplay(settings) {
+    try {
+      const res = await fetch('/api/v1/display', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(settings),
+        cache: 'no-cache'
+      });
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('API setDisplay error:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  /**
+   * Save display settings
+   * @param {object} settings - Display configuration
+   * @returns {Promise<{success: boolean, error?: string}>}
+   */
+  async saveDisplaySettings(settings) {
+    try {
+      const res = await fetch('/api/v1/display-settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(settings),
+        cache: 'no-cache'
+      });
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('API saveDisplaySettings error:', error);
+      return { success: false, error: error.message };
+    }
   }
 };
 

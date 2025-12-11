@@ -102,6 +102,98 @@
             </div>
         </div>
 
+        <!-- Display Settings Card -->
+        <div class="card">
+            <div class="card-header">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                </svg>
+                Display Settings
+            </div>
+            <div class="card-body">
+                <!-- Master On/Off Toggle -->
+                <div class="toggle-row">
+                    <div class="toggle-label">
+                        <span>LEDs Enabled</span>
+                        <small>Master on/off control for all LEDs</small>
+                    </div>
+                    <div class="toggle" id="ledsEnabled"></div>
+                </div>
+
+                <div class="section-divider"></div>
+
+                <!-- Auto-Brightness Section -->
+                <div class="toggle-row">
+                    <div class="toggle-label">
+                        <span>Auto-Brightness</span>
+                        <small>Adjust brightness based on ambient light (requires BH1750 sensor)</small>
+                    </div>
+                    <div class="toggle" id="autoBrightnessEnabled"></div>
+                </div>
+
+                <div id="autoBrightnessSettings" style="margin-top: 12px;">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="brightnessMin">Minimum Brightness</label>
+                            <input type="number" id="brightnessMin" min="1" max="255" value="10">
+                            <span class="form-hint">Darkest setting (1-255)</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="brightnessMax">Maximum Brightness</label>
+                            <input type="number" id="brightnessMax" min="1" max="255" value="255">
+                            <span class="form-hint">Brightest setting (1-255)</span>
+                        </div>
+                    </div>
+                    <div id="sensorStatus" class="wifi-status" style="margin-top: 12px;">
+                        <div class="wifi-row">
+                            <span>Sensor Status</span>
+                            <span id="sensorAvailable">--</span>
+                        </div>
+                        <div class="wifi-row">
+                            <span>Current Lux</span>
+                            <span id="currentLux">--</span>
+                        </div>
+                        <div class="wifi-row">
+                            <span>Target Brightness</span>
+                            <span id="targetBrightness">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-divider"></div>
+
+                <!-- Quiet Hours Section -->
+                <div class="toggle-row">
+                    <div class="toggle-label">
+                        <span>Quiet Hours</span>
+                        <small>Automatically turn off LEDs during scheduled times</small>
+                    </div>
+                    <div class="toggle" id="quietHoursEnabled"></div>
+                </div>
+
+                <div id="quietHoursSettings" style="margin-top: 12px;">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="quietStartTime">Start Time</label>
+                            <input type="time" id="quietStartTime" value="23:00">
+                            <span class="form-hint">When to turn off</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="quietEndTime">End Time</label>
+                            <input type="time" id="quietEndTime" value="06:00">
+                            <span class="form-hint">When to turn back on</span>
+                        </div>
+                    </div>
+                    <div id="quietHoursStatus" class="wifi-status" style="margin-top: 12px;">
+                        <div class="wifi-row">
+                            <span>Currently Active</span>
+                            <span id="quietHoursActive">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Network Card -->
         <div class="card">
             <div class="card-header">
@@ -186,7 +278,7 @@
 
             // Load data and hide loading overlay when done
             try {
-                await Promise.all([loadConfig(), loadSystemStatus()]);
+                await Promise.all([loadConfig(), loadSystemStatus(), loadDisplayStatus()]);
             } finally {
                 hideLoading();
             }
@@ -250,6 +342,40 @@
             document.getElementById('changeNetworkBtn').addEventListener('click', () => {
                 showToast('WiFi network change not yet implemented', 'warning');
             });
+
+            // Display settings toggles
+            const ledsEnabledToggle = document.getElementById('ledsEnabled');
+            const autoBrightnessToggle = document.getElementById('autoBrightnessEnabled');
+            const quietHoursToggle = document.getElementById('quietHoursEnabled');
+
+            ledsEnabledToggle.addEventListener('click', () => {
+                ledsEnabledToggle.classList.toggle('active');
+            });
+
+            autoBrightnessToggle.addEventListener('click', () => {
+                autoBrightnessToggle.classList.toggle('active');
+                updateAutoBrightnessVisibility();
+            });
+
+            quietHoursToggle.addEventListener('click', () => {
+                quietHoursToggle.classList.toggle('active');
+                updateQuietHoursVisibility();
+            });
+        }
+
+        // ==================== DISPLAY SETTINGS HELPERS ====================
+        function updateAutoBrightnessVisibility() {
+            const enabled = document.getElementById('autoBrightnessEnabled').classList.contains('active');
+            const settings = document.getElementById('autoBrightnessSettings');
+            settings.style.opacity = enabled ? '1' : '0.5';
+            settings.style.pointerEvents = enabled ? 'auto' : 'none';
+        }
+
+        function updateQuietHoursVisibility() {
+            const enabled = document.getElementById('quietHoursEnabled').classList.contains('active');
+            const settings = document.getElementById('quietHoursSettings');
+            settings.style.opacity = enabled ? '1' : '0.5';
+            settings.style.pointerEvents = enabled ? 'auto' : 'none';
         }
 
         // ==================== API FUNCTIONS ====================
@@ -281,60 +407,111 @@
             }
         }
 
+        async function loadDisplayStatus() {
+            try {
+                const response = await fetch('/api/v1/display');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const display = await response.json();
+                updateDisplayStatus(display);
+            } catch (error) {
+                console.error('Failed to load display status:', error);
+                // Non-critical, don't show toast
+            }
+        }
+
+        function updateDisplayStatus(display) {
+            if (!display) return;
+
+            // Auto-brightness sensor info
+            if (display.autoBrightness) {
+                const ab = display.autoBrightness;
+                document.getElementById('sensorAvailable').innerHTML = ab.sensorAvailable
+                    ? '<span class="status-dot success"></span> Connected'
+                    : '<span class="status-dot error"></span> Not detected';
+
+                if (ab.sensorAvailable) {
+                    document.getElementById('currentLux').textContent =
+                        ab.currentLux !== undefined ? `${ab.currentLux.toFixed(1)} lux` : '--';
+                    document.getElementById('targetBrightness').textContent =
+                        ab.targetBrightness !== undefined ? ab.targetBrightness : '--';
+                } else {
+                    document.getElementById('currentLux').textContent = '--';
+                    document.getElementById('targetBrightness').textContent = '--';
+                }
+            }
+
+            // Quiet hours status
+            if (display.quietHours) {
+                document.getElementById('quietHoursActive').innerHTML = display.quietHours.currentlyActive
+                    ? '<span class="status-dot warning"></span> Active (LEDs off)'
+                    : '<span class="status-dot success"></span> Inactive';
+            }
+        }
+
         async function saveDeviceSettings() {
             try {
-                // Collect only device settings (numLeds, brightness, hostname, useMDNS)
-                const deviceSettings = {
+                // Collect device settings
+                const devicePayload = {
                     numLeds: parseInt(document.getElementById('numLeds').value),
                     brightness: parseInt(document.getElementById('brightnessValue').value),
-                    hostname: document.getElementById('hostname').value.trim(),
-                    useMDNS: document.getElementById('useMDNS').classList.contains('active')
+                    mdns_name: document.getElementById('hostname').value.trim()
                 };
 
-                // Validate
-                if (deviceSettings.numLeds < 1 || deviceSettings.numLeds > 150) {
+                // Validate device settings
+                if (devicePayload.numLeds < 1 || devicePayload.numLeds > 150) {
                     showToast('Number of LEDs must be between 1 and 150', 'error');
                     return;
                 }
-
-                if (deviceSettings.brightness < 0 || deviceSettings.brightness > 255) {
+                if (devicePayload.brightness < 0 || devicePayload.brightness > 255) {
                     showToast('Brightness must be between 0 and 255', 'error');
                     return;
                 }
 
-                if (!deviceSettings.hostname || deviceSettings.hostname.length > 32) {
-                    showToast('Hostname must be 1-32 characters', 'error');
-                    return;
-                }
-
-                // Use dedicated device endpoint (no weather refresh)
-                const devicePayload = {
-                    numLeds: deviceSettings.numLeds,
-                    brightness: deviceSettings.brightness,
-                    mdns_name: deviceSettings.hostname
-                    // Note: useMDNS not currently supported by firmware
-                };
-
-                const response = await fetch('/api/v1/device', {
+                // Save device settings
+                const deviceResponse = await fetch('/api/v1/device', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(devicePayload)
                 });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                if (!deviceResponse.ok) {
+                    throw new Error(`Device settings failed: ${deviceResponse.status}`);
                 }
 
-                const result = await response.json();
-                showToast('Device settings saved successfully', 'success');
+                // Collect display settings
+                const quietStart = document.getElementById('quietStartTime').value.split(':');
+                const quietEnd = document.getElementById('quietEndTime').value.split(':');
 
-                // Reload config to get latest state
-                await loadConfig();
+                const displayPayload = {
+                    leds_enabled: document.getElementById('ledsEnabled').classList.contains('active'),
+                    auto_brightness_enabled: document.getElementById('autoBrightnessEnabled').classList.contains('active'),
+                    brightness_min: parseInt(document.getElementById('brightnessMin').value),
+                    brightness_max: parseInt(document.getElementById('brightnessMax').value),
+                    quiet_hours_enabled: document.getElementById('quietHoursEnabled').classList.contains('active'),
+                    quiet_start_hour: parseInt(quietStart[0]),
+                    quiet_start_minute: parseInt(quietStart[1]),
+                    quiet_end_hour: parseInt(quietEnd[0]),
+                    quiet_end_minute: parseInt(quietEnd[1])
+                };
+
+                // Save display settings
+                const displayResponse = await fetch('/api/v1/display-settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(displayPayload)
+                });
+                if (!displayResponse.ok) {
+                    throw new Error(`Display settings failed: ${displayResponse.status}`);
+                }
+
+                showToast('Settings saved successfully', 'success');
+
+                // Reload to get latest state
+                await Promise.all([loadConfig(), loadDisplayStatus()]);
             } catch (error) {
-                console.error('Failed to save device settings:', error);
-                showToast('Failed to save device settings', 'error');
+                console.error('Failed to save settings:', error);
+                showToast('Failed to save settings: ' + error.message, 'error');
             }
         }
 
@@ -344,8 +521,8 @@
 
             document.getElementById('numLeds').value = config.numLeds || 125;
             document.getElementById('brightnessValue').value = config.brightness || 20;
-            document.getElementById('hostname').value = config.hostname || 'skyboard';
-            document.getElementById('hostname-preview').textContent = config.hostname || 'skyboard';
+            document.getElementById('hostname').value = config.mdns_name || config.hostname || 'skyboard';
+            document.getElementById('hostname-preview').textContent = config.mdns_name || config.hostname || 'skyboard';
 
             // mDNS is always enabled on firmware - default to true if not specified
             const mdnsToggle = document.getElementById('useMDNS');
@@ -355,6 +532,42 @@
             } else {
                 mdnsToggle.classList.remove('active');
             }
+
+            // Display settings
+            const ledsEnabledToggle = document.getElementById('ledsEnabled');
+            if (config.leds_enabled !== false) {
+                ledsEnabledToggle.classList.add('active');
+            } else {
+                ledsEnabledToggle.classList.remove('active');
+            }
+
+            const autoBrightnessToggle = document.getElementById('autoBrightnessEnabled');
+            if (config.auto_brightness_enabled) {
+                autoBrightnessToggle.classList.add('active');
+            } else {
+                autoBrightnessToggle.classList.remove('active');
+            }
+            document.getElementById('brightnessMin').value = config.brightness_min || 10;
+            document.getElementById('brightnessMax').value = config.brightness_max || 255;
+
+            const quietHoursToggle = document.getElementById('quietHoursEnabled');
+            if (config.quiet_hours_enabled) {
+                quietHoursToggle.classList.add('active');
+            } else {
+                quietHoursToggle.classList.remove('active');
+            }
+
+            // Format time values for input[type="time"]
+            const startHour = String(config.quiet_start_hour || 23).padStart(2, '0');
+            const startMin = String(config.quiet_start_minute || 0).padStart(2, '0');
+            const endHour = String(config.quiet_end_hour || 6).padStart(2, '0');
+            const endMin = String(config.quiet_end_minute || 0).padStart(2, '0');
+            document.getElementById('quietStartTime').value = `${startHour}:${startMin}`;
+            document.getElementById('quietEndTime').value = `${endHour}:${endMin}`;
+
+            // Update visibility based on toggle states
+            updateAutoBrightnessVisibility();
+            updateQuietHoursVisibility();
         }
 
         function updateWiFiStatus(status) {

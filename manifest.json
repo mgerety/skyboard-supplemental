@@ -1,8 +1,8 @@
 {
-  "version": 156,
+  "version": 157,
   "files": {
     "index.html": "ccb5f2b640193e9cd443dd7b736de662",
-    "device.html": "10e18574d23b9f8e1e1eb9b5f9980122",
+    "device.html": "406774ea002326883898ce0d01904c1c",
     "airports.html": "ec65d38d14115df95fd005b51f84dcfc",
     "weather.html": "6fe3d37e3b756bfdfb41589c0102ead9",
     "system.html": "62a27a60299de7a657438d96975cb344",
@@ -12,7 +12,7 @@
     "css/sidebar.css": "41dcfc95cb632cc3c52e976ea8b7d5dc",
     "js/components.js": "1e4415e5c12a73296e667d83e33198a7",
     "js/icons.js": "2d7f57031b13c42a1041e1c45bc67c34",
-    "js/api.js": "e29a1f14b5649bf01ea8cb2429325558",
+    "js/api.js": "b8fd7f9f93062766b2c70bc7553ad479",
     "js/file-browser.js": "7a2c19bd27394f5c9858c87853bf3a16",
     "data/airports.json": "210b5c636e81ec6887253347fdaaa36f"
   }
