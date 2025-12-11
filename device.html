@@ -343,24 +343,10 @@
                 showToast('WiFi network change not yet implemented', 'warning');
             });
 
-            // Display settings toggles
-            const ledsEnabledToggle = document.getElementById('ledsEnabled');
-            const autoBrightnessToggle = document.getElementById('autoBrightnessEnabled');
-            const quietHoursToggle = document.getElementById('quietHoursEnabled');
-
-            ledsEnabledToggle.addEventListener('click', () => {
-                ledsEnabledToggle.classList.toggle('active');
-            });
-
-            autoBrightnessToggle.addEventListener('click', () => {
-                autoBrightnessToggle.classList.toggle('active');
-                updateAutoBrightnessVisibility();
-            });
-
-            quietHoursToggle.addEventListener('click', () => {
-                quietHoursToggle.classList.toggle('active');
-                updateQuietHoursVisibility();
-            });
+            // Display settings toggles - visibility updates only
+            // (generic toggle handler above already handles classList.toggle('active'))
+            document.getElementById('autoBrightnessEnabled').addEventListener('click', updateAutoBrightnessVisibility);
+            document.getElementById('quietHoursEnabled').addEventListener('click', updateQuietHoursVisibility);
         }
 
         // ==================== DISPLAY SETTINGS HELPERS ====================
