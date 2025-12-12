@@ -144,19 +144,27 @@
                             <span class="form-hint">Brightest setting (1-255)</span>
                         </div>
                     </div>
-                    <div id="sensorStatus" class="wifi-status" style="margin-top: 12px;">
-                        <div class="wifi-row">
-                            <span>Sensor Status</span>
-                            <span id="sensorAvailable">--</span>
+                    <div style="display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; margin-top: 12px;">
+                        <div id="sensorStatus" class="wifi-status" style="flex: 1; min-width: 200px;">
+                            <div class="wifi-row">
+                                <span>Sensor Status</span>
+                                <span id="sensorAvailable">--</span>
+                            </div>
+                            <div class="wifi-row">
+                                <span>Current Lux</span>
+                                <span id="currentLux">--</span>
+                            </div>
+                            <div class="wifi-row">
+                                <span>Target Brightness</span>
+                                <span id="targetBrightness">--</span>
+                            </div>
                         </div>
-                        <div class="wifi-row">
-                            <span>Current Lux</span>
-                            <span id="currentLux">--</span>
-                        </div>
-                        <div class="wifi-row">
-                            <span>Target Brightness</span>
-                            <span id="targetBrightness">--</span>
-                        </div>
+                        <button class="btn btn-secondary" id="testSensorBtn">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 16px; height: 16px;">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                            </svg>
+                            Test Sensor
+                        </button>
                     </div>
                 </div>
 
@@ -347,6 +355,9 @@
             // (generic toggle handler above already handles classList.toggle('active'))
             document.getElementById('autoBrightnessEnabled').addEventListener('click', updateAutoBrightnessVisibility);
             document.getElementById('quietHoursEnabled').addEventListener('click', updateQuietHoursVisibility);
+
+            // Test sensor button
+            document.getElementById('testSensorBtn').addEventListener('click', testLightSensor);
         }
 
         // ==================== DISPLAY SETTINGS HELPERS ====================
@@ -362,6 +373,38 @@
             const settings = document.getElementById('quietHoursSettings');
             settings.style.opacity = enabled ? '1' : '0.5';
             settings.style.pointerEvents = enabled ? 'auto' : 'none';
+        }
+
+        async function testLightSensor() {
+            const btn = document.getElementById('testSensorBtn');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading-spinner" style="width: 16px; height: 16px;"></span> Testing...';
+
+            try {
+                const response = await fetch('/api/v1/light-sensor/test');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+
+                if (data.detected) {
+                    document.getElementById('sensorAvailable').innerHTML = '<span class="status-dot success"></span> Detected';
+                    document.getElementById('currentLux').textContent = data.lux.toFixed(1) + ' lux';
+                    showToast(`Sensor detected: ${data.lux.toFixed(1)} lux`, 'success');
+                } else {
+                    document.getElementById('sensorAvailable').innerHTML = '<span class="status-dot error"></span> Not Detected';
+                    document.getElementById('currentLux').textContent = '--';
+                    showToast('Light sensor not detected. Check wiring.', 'warning');
+                }
+            } catch (error) {
+                console.error('Failed to test sensor:', error);
+                document.getElementById('sensorAvailable').innerHTML = '<span class="status-dot error"></span> Error';
+                showToast('Failed to test light sensor', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
         }
 
         // ==================== API FUNCTIONS ====================
