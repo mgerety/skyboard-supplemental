@@ -2001,6 +2001,25 @@
 
                 // Check for crashed wizard session after data is loaded
                 checkForCrashedWizardSession();
+
+                // NEW: Check for wizard URL parameter (from Device page link)
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('wizard') === '1') {
+                    // Remove param from URL to prevent re-triggering on refresh
+                    window.history.replaceState({}, '', '/airports.html');
+                    // Auto-open wizard modal after short delay for UI to settle
+                    setTimeout(async () => {
+                        try {
+                            const response = await fetch('/api/v1/config');
+                            if (response.ok) {
+                                cachedConfigForWizard = await response.json();
+                                showWizardStartModal();
+                            }
+                        } catch (err) {
+                            console.error('Failed to auto-open wizard:', err);
+                        }
+                    }, 300);
+                }
             } finally {
                 hideLoading();
             }
