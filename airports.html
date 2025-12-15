@@ -1159,6 +1159,7 @@
 
                 let imported = 0;
                 let errors = [];
+                let highestIndex = -1;  // Track highest LED index for numLeds
                 const newAirports = [...currentConfig.airports];
 
                 for (let i = 0; i < lines.length; i++) {
@@ -1192,6 +1193,11 @@
 
                     newAirports[index] = code;
                     imported++;
+
+                    // Track highest index to set numLeds
+                    if (index > highestIndex) {
+                        highestIndex = index;
+                    }
                 }
 
                 if (imported === 0) {
@@ -1203,13 +1209,21 @@
                 }
 
                 currentConfig.airports = newAirports;
+
+                // Update numLeds to include all imported LEDs
+                const newNumLeds = highestIndex + 1;
+                if (newNumLeds > currentConfig.numLeds) {
+                    currentConfig.numLeds = newNumLeds;
+                    console.log(`CSV Import: Updated numLeds to ${newNumLeds}`);
+                }
+
                 renderAirportTable();
 
                 if (errors.length > 0) {
-                    showToast(`Imported ${imported} LEDs with ${errors.length} errors (check console)`, 'warning', 8000);
+                    showToast(`Imported ${imported} LEDs (total: ${currentConfig.numLeds}) with ${errors.length} errors`, 'warning', 8000);
                     console.error('CSV Import Errors:', errors);
                 } else {
-                    showToast(`Successfully imported ${imported} LED assignments`, 'success');
+                    showToast(`Imported ${imported} LEDs. Total LEDs: ${currentConfig.numLeds}`, 'success');
                 }
 
             } catch (error) {
