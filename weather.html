@@ -106,7 +106,7 @@
                     </div>
                     <div class="toggle" id="useEstimatedWeather"></div>
                 </div>
-                <div class="toggle-row">
+                <div class="toggle-row" id="pulseToggleRow" style="margin-left: 24px; padding-left: 16px; border-left: 2px solid var(--border);">
                     <div class="toggle-label">
                         <span>Pulse Estimated Weather LEDs</span>
                         <small>Gently pulse LEDs showing estimated data</small>
@@ -269,17 +269,22 @@
         // ==================== TOGGLE DEPENDENCY MANAGEMENT ====================
         function updateToggleDependencies() {
             const useEstimatedWeather = document.getElementById('useEstimatedWeather').classList.contains('active');
-            const pulseToggleRow = document.getElementById('pulseEstimatedWeather').closest('.toggle-row');
+            const pulseToggleRow = document.getElementById('pulseToggleRow');
+            const pulseToggle = document.getElementById('pulseEstimatedWeather');
 
             if (!useEstimatedWeather) {
                 // Disable pulse toggle when estimated weather is off
                 pulseToggleRow.style.opacity = '0.5';
                 pulseToggleRow.style.pointerEvents = 'none';
-                document.getElementById('pulseEstimatedWeather').classList.remove('active');
+                pulseToggle.classList.remove('active');
             } else {
                 // Enable pulse toggle when estimated weather is on
                 pulseToggleRow.style.opacity = '1';
                 pulseToggleRow.style.pointerEvents = 'auto';
+                // Auto-enable pulse when parent is enabled (if not already set)
+                if (!pulseToggle.classList.contains('active')) {
+                    pulseToggle.classList.add('active');
+                }
             }
         }
 
