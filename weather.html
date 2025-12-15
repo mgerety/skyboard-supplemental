@@ -173,8 +173,9 @@
             </div>
         </div>
 
-        <!-- Save Changes Button -->
-        <div style="margin-top: 16px;">
+        <!-- Floating Save Bar -->
+        <div class="save-bar" id="saveBar">
+            <span class="save-bar-text">You have unsaved changes</span>
             <button class="btn btn-primary" id="saveChangesBtn">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
@@ -198,6 +199,52 @@
     <script>
         // ==================== STATE ====================
         let config = null;
+
+        // ==================== DIRTY STATE TRACKING ====================
+        let hasUnsavedChanges = false;
+        let initialFormState = null;
+
+        function captureInitialState() {
+            initialFormState = {
+                updateInterval: document.getElementById('updateInterval').value,
+                useEstimatedWeather: document.getElementById('useEstimatedWeather').classList.contains('active'),
+                pulseEstimatedWeather: document.getElementById('pulseEstimatedWeather').classList.contains('active')
+            };
+        }
+
+        function checkForChanges() {
+            if (!initialFormState) return;
+
+            const current = {
+                updateInterval: document.getElementById('updateInterval').value,
+                useEstimatedWeather: document.getElementById('useEstimatedWeather').classList.contains('active'),
+                pulseEstimatedWeather: document.getElementById('pulseEstimatedWeather').classList.contains('active')
+            };
+
+            const changed = JSON.stringify(current) !== JSON.stringify(initialFormState);
+
+            if (changed !== hasUnsavedChanges) {
+                hasUnsavedChanges = changed;
+                const saveBar = document.getElementById('saveBar');
+                const main = document.querySelector('.main');
+
+                if (hasUnsavedChanges) {
+                    saveBar.classList.add('visible');
+                    main.classList.add('has-save-bar');
+                } else {
+                    saveBar.classList.remove('visible');
+                    main.classList.remove('has-save-bar');
+                }
+            }
+        }
+
+        // Warn on page leave with unsaved changes
+        window.addEventListener('beforeunload', (e) => {
+            if (hasUnsavedChanges) {
+                e.preventDefault();
+                e.returnValue = 'You have unsaved changes.';
+            }
+        });
 
         // ==================== INIT ====================
         document.addEventListener('DOMContentLoaded', async () => {
@@ -264,6 +311,21 @@
 
             // Save button
             document.getElementById('saveChangesBtn').addEventListener('click', saveWeatherSettings);
+
+            // Track changes on all inputs
+            document.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', checkForChanges);
+                input.addEventListener('change', checkForChanges);
+            });
+
+            // Track changes on toggles
+            useEstimatedWeatherToggle.addEventListener('click', () => {
+                setTimeout(checkForChanges, 50); // Small delay for class to update
+            });
+
+            pulseEstimatedWeatherToggle.addEventListener('click', () => {
+                setTimeout(checkForChanges, 50); // Small delay for class to update
+            });
         }
 
         // ==================== TOGGLE DEPENDENCY MANAGEMENT ====================
@@ -342,6 +404,10 @@
 
                 // Reload config to get latest state
                 await loadConfig();
+
+                // Reset dirty state tracking
+                captureInitialState();
+                checkForChanges(); // This will hide the save bar
             } catch (error) {
                 console.error('Failed to save weather settings:', error);
                 showToast('Failed to save weather settings', 'error');
@@ -373,6 +439,9 @@
 
             // Update dependencies
             updateToggleDependencies();
+
+            // Capture initial state for dirty tracking
+            captureInitialState();
         }
 
         // ==================== TOAST NOTIFICATIONS ====================
