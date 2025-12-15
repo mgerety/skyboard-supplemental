@@ -462,6 +462,10 @@
             <i data-lucide="download"></i>
             <span>Download Weather Data</span>
           </a>
+          <button class="action-btn" onclick="showLogDownloadModal()">
+            <i data-lucide="file-text"></i>
+            <span>Download Logs</span>
+          </button>
           <button class="action-btn" onclick="forceWebFilesUpdate()">
             <i data-lucide="download-cloud"></i>
             <span>Force Web Files Update</span>
@@ -582,6 +586,24 @@
       <div class="download-buttons" id="downloadButtons" style="display: none;">
         <button class="btn btn-primary" onclick="retryDownload()">Retry</button>
         <button class="btn btn-secondary" onclick="closeDownloadModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Log Download Modal -->
+  <div id="logDownloadModal" class="download-modal">
+    <div class="download-modal-content" onclick="event.stopPropagation()">
+      <h2 class="download-modal-title">Download Logs</h2>
+      <p class="download-modal-status">Select a log file to download:</p>
+
+      <div id="logFileList" style="max-height: 300px; overflow-y: auto; margin: 16px 0;">
+        <div style="text-align: center; padding: 20px; color: var(--text-muted);">
+          Loading log files...
+        </div>
+      </div>
+
+      <div class="download-buttons">
+        <button class="btn btn-secondary" onclick="closeLogDownloadModal()">Close</button>
       </div>
     </div>
   </div>
@@ -1293,6 +1315,68 @@
         `;
       }
     }
+
+    // ===== LOG DOWNLOAD MODAL FUNCTIONS =====
+    // Show log download modal
+    async function showLogDownloadModal() {
+      const modal = document.getElementById('logDownloadModal');
+      const listContainer = document.getElementById('logFileList');
+
+      modal.classList.add('show');
+      listContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-muted);">Loading log files...</div>';
+
+      try {
+        const response = await fetch('/api/v1/logs/list');
+        if (!response.ok) throw new Error('Failed to fetch log list');
+
+        const data = await response.json();
+
+        if (!data.files || data.files.length === 0) {
+          listContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-muted);">No log files available</div>';
+          return;
+        }
+
+        // Sort files newest first (dates sort alphabetically in YYYY-MM-DD format)
+        data.files.sort().reverse();
+
+        listContainer.innerHTML = data.files.map(file => `
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid var(--border);">
+            <span style="font-family: monospace;">${file}</span>
+            <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="downloadLogFile('${file}')">
+              <i data-lucide="download" style="width: 14px; height: 14px;"></i>
+              Download
+            </button>
+          </div>
+        `).join('');
+
+        // Re-initialize Lucide icons for the new buttons
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+
+      } catch (error) {
+        console.error('Failed to load log files:', error);
+        listContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--error);">Failed to load log files</div>';
+      }
+    }
+
+    // Close log download modal
+    function closeLogDownloadModal() {
+      document.getElementById('logDownloadModal').classList.remove('show');
+    }
+
+    // Download a specific log file
+    function downloadLogFile(filename) {
+      window.location.href = `/api/v1/logs/download?file=${encodeURIComponent(filename)}`;
+      showToast(`Downloading ${filename}`, 'info');
+    }
+
+    // Close modal on background click
+    document.getElementById('logDownloadModal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'logDownloadModal') {
+        closeLogDownloadModal();
+      }
+    });
 
     // ===== PAGE INITIALIZATION =====
     window.onload = async () => {
