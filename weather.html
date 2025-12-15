@@ -116,7 +116,7 @@
             </div>
         </div>
 
-        <!-- Weather Effects Card (Future/Placeholder) -->
+        <!-- Weather Effects Card -->
         <div class="card">
             <div class="card-header">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -125,50 +125,50 @@
                 Weather Effects
             </div>
             <div class="card-body">
-                <div style="text-align: center; padding: 8px 0; color: var(--text-muted); font-size: 12px; font-style: italic;">
-                    Coming Soon
-                </div>
-                <div class="toggle-row" style="opacity: 0.5; pointer-events: none;">
+                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">
+                    When enabled, LEDs will briefly flash a secondary color to indicate weather phenomena, then return to the flight category color.
+                </p>
+                <div class="toggle-row">
                     <div class="toggle-label">
                         <span>Flash white for lightning</span>
                         <small>Flash LEDs white when thunderstorms are present</small>
                     </div>
-                    <div class="toggle"></div>
+                    <div class="toggle" id="effectLightning"></div>
                 </div>
-                <div class="toggle-row" style="opacity: 0.5; pointer-events: none;">
+                <div class="toggle-row">
                     <div class="toggle-label">
                         <span>Flash blue for rain</span>
                         <small>Flash LEDs blue when rain is present</small>
                     </div>
-                    <div class="toggle"></div>
+                    <div class="toggle" id="effectRain"></div>
                 </div>
-                <div class="toggle-row" style="opacity: 0.5; pointer-events: none;">
+                <div class="toggle-row">
                     <div class="toggle-label">
                         <span>Pulse purple for freezing rain</span>
                         <small>Pulse LEDs purple when freezing rain is present</small>
                     </div>
-                    <div class="toggle"></div>
+                    <div class="toggle" id="effectFreezingRain"></div>
                 </div>
-                <div class="toggle-row" style="opacity: 0.5; pointer-events: none;">
+                <div class="toggle-row">
                     <div class="toggle-label">
                         <span>Pulse white for snow</span>
                         <small>Pulse LEDs white when snow is present</small>
                     </div>
-                    <div class="toggle"></div>
+                    <div class="toggle" id="effectSnow"></div>
                 </div>
-                <div class="toggle-row" style="opacity: 0.5; pointer-events: none;">
+                <div class="toggle-row">
                     <div class="toggle-label">
                         <span>Pulse brown for dust/sand/ash</span>
                         <small>Pulse LEDs brown when dust, sand, or ash is present</small>
                     </div>
-                    <div class="toggle"></div>
+                    <div class="toggle" id="effectDust"></div>
                 </div>
-                <div class="toggle-row" style="opacity: 0.5; pointer-events: none;">
+                <div class="toggle-row">
                     <div class="toggle-label">
                         <span>Pulse gray for fog/haze</span>
                         <small>Pulse LEDs gray when fog or haze is present</small>
                     </div>
-                    <div class="toggle"></div>
+                    <div class="toggle" id="effectFog"></div>
                 </div>
             </div>
         </div>
@@ -208,7 +208,14 @@
             initialFormState = {
                 updateInterval: document.getElementById('updateInterval').value,
                 useEstimatedWeather: document.getElementById('useEstimatedWeather').classList.contains('active'),
-                pulseEstimatedWeather: document.getElementById('pulseEstimatedWeather').classList.contains('active')
+                pulseEstimatedWeather: document.getElementById('pulseEstimatedWeather').classList.contains('active'),
+                // Weather effects
+                effectLightning: document.getElementById('effectLightning').classList.contains('active'),
+                effectRain: document.getElementById('effectRain').classList.contains('active'),
+                effectFreezingRain: document.getElementById('effectFreezingRain').classList.contains('active'),
+                effectSnow: document.getElementById('effectSnow').classList.contains('active'),
+                effectDust: document.getElementById('effectDust').classList.contains('active'),
+                effectFog: document.getElementById('effectFog').classList.contains('active')
             };
         }
 
@@ -218,7 +225,14 @@
             const current = {
                 updateInterval: document.getElementById('updateInterval').value,
                 useEstimatedWeather: document.getElementById('useEstimatedWeather').classList.contains('active'),
-                pulseEstimatedWeather: document.getElementById('pulseEstimatedWeather').classList.contains('active')
+                pulseEstimatedWeather: document.getElementById('pulseEstimatedWeather').classList.contains('active'),
+                // Weather effects
+                effectLightning: document.getElementById('effectLightning').classList.contains('active'),
+                effectRain: document.getElementById('effectRain').classList.contains('active'),
+                effectFreezingRain: document.getElementById('effectFreezingRain').classList.contains('active'),
+                effectSnow: document.getElementById('effectSnow').classList.contains('active'),
+                effectDust: document.getElementById('effectDust').classList.contains('active'),
+                effectFog: document.getElementById('effectFog').classList.contains('active')
             };
 
             const changed = JSON.stringify(current) !== JSON.stringify(initialFormState);
@@ -326,6 +340,14 @@
             pulseEstimatedWeatherToggle.addEventListener('click', () => {
                 setTimeout(checkForChanges, 50); // Small delay for class to update
             });
+
+            // Weather effect toggles
+            ['effectLightning', 'effectRain', 'effectFreezingRain', 'effectSnow', 'effectDust', 'effectFog'].forEach(id => {
+                document.getElementById(id).addEventListener('click', () => {
+                    document.getElementById(id).classList.toggle('active');
+                    setTimeout(checkForChanges, 50);
+                });
+            });
         }
 
         // ==================== TOGGLE DEPENDENCY MANAGEMENT ====================
@@ -384,7 +406,14 @@
                 const weatherPayload = {
                     updateIntervalMinutes: weatherSettings.updateIntervalMinutes,
                     use_estimated_weather: weatherSettings.useEstimatedWeather,
-                    pulse_estimated_weather: weatherSettings.pulseEstimatedWeather
+                    pulse_estimated_weather: weatherSettings.pulseEstimatedWeather,
+                    // Weather effects
+                    effect_lightning: document.getElementById('effectLightning').classList.contains('active'),
+                    effect_rain: document.getElementById('effectRain').classList.contains('active'),
+                    effect_freezing_rain: document.getElementById('effectFreezingRain').classList.contains('active'),
+                    effect_snow: document.getElementById('effectSnow').classList.contains('active'),
+                    effect_dust: document.getElementById('effectDust').classList.contains('active'),
+                    effect_fog: document.getElementById('effectFog').classList.contains('active')
                 };
 
                 const response = await fetch('/api/v1/weather-settings', {
@@ -436,6 +465,19 @@
             } else {
                 pulseEstimatedWeatherToggle.classList.remove('active');
             }
+
+            // Weather effects (default to enabled if not present in config)
+            const effectIds = ['effectLightning', 'effectRain', 'effectFreezingRain', 'effectSnow', 'effectDust', 'effectFog'];
+            const effectKeys = ['effect_lightning', 'effect_rain', 'effect_freezing_rain', 'effect_snow', 'effect_dust', 'effect_fog'];
+
+            effectIds.forEach((id, i) => {
+                const toggle = document.getElementById(id);
+                if (config[effectKeys[i]] !== false) {
+                    toggle.classList.add('active');
+                } else {
+                    toggle.classList.remove('active');
+                }
+            });
 
             // Update dependencies
             updateToggleDependencies();
