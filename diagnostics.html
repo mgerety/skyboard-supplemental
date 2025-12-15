@@ -233,18 +233,27 @@
             <div class="reset-value" id="coredumpStatus">--</div>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Crash Info Card (only shown if crash detected) -->
-    <div class="card" id="crashCard" style="display: none;">
-      <div class="card-header">
-        <i data-lucide="alert-triangle" style="color: var(--error);"></i>
-        <span>Crash Information</span>
-      </div>
-      <div class="card-body">
-        <div class="coredump-viewer" id="coredumpViewer">
-          Loading...
+        <!-- Collapsible crash details (hidden by default, shown if crash detected) -->
+        <div id="crashDetails" style="display: none; margin-top: 16px;">
+          <div class="collapsible-header" onclick="toggleCrashDetails()" style="cursor: pointer; padding: 12px; background: rgba(239, 68, 68, 0.1); border: 1px solid var(--error); border-radius: 8px; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <i data-lucide="alert-triangle" style="color: var(--error); width: 18px; height: 18px;"></i>
+              <span style="color: var(--error); font-weight: 600;">Crash Information Available</span>
+            </div>
+            <i data-lucide="chevron-down" id="crashChevron" style="width: 18px; height: 18px; transition: transform 0.2s;"></i>
+          </div>
+          <div id="crashContent" style="display: none; margin-top: 12px;">
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 8px;">
+              <button class="btn btn-secondary" onclick="copyCoredump()" style="font-size: 12px; padding: 6px 12px;">
+                <i data-lucide="copy" style="width: 14px; height: 14px;"></i>
+                Copy for LLM Analysis
+              </button>
+            </div>
+            <div class="coredump-viewer" id="coredumpViewer" style="max-height: 200px;">
+              Loading...
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -490,9 +499,9 @@
         document.getElementById('coredumpStatus').textContent =
           data.hasCoredump ? 'Available' : 'None';
 
-        // Show crash card if there was a crash
+        // Show crash details section if there was a crash
         if (data.wasCrash || data.hasCoredump) {
-          document.getElementById('crashCard').style.display = 'block';
+          document.getElementById('crashDetails').style.display = 'block';
           loadCoredump();
         }
 
@@ -519,6 +528,27 @@
         console.error('Error loading coredump:', error);
         document.getElementById('coredumpViewer').textContent = 'Error loading coredump';
       }
+    }
+
+    // ===== CRASH DETAILS =====
+    function toggleCrashDetails() {
+      const content = document.getElementById('crashContent');
+      const chevron = document.getElementById('crashChevron');
+      const isHidden = content.style.display === 'none';
+
+      content.style.display = isHidden ? 'block' : 'none';
+      chevron.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+    }
+
+    function copyCoredump() {
+      const viewer = document.getElementById('coredumpViewer');
+      const text = viewer.textContent || viewer.innerText;
+
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Coredump copied to clipboard', 'success');
+      }).catch(err => {
+        showToast('Failed to copy: ' + err.message, 'error');
+      });
     }
 
     // ===== UPTIME REFRESH =====
