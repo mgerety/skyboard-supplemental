@@ -446,32 +446,6 @@
       </div>
     </div>
 
-    <!-- Network Info Card -->
-    <div class="card">
-      <div class="card-header">
-        <i data-lucide="wifi"></i>
-        <span>Network Info</span>
-      </div>
-      <div class="card-body">
-        <div class="info-row">
-          <span class="info-label">WiFi Signal</span>
-          <span class="info-value" id="wifiSignal">--</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">IP Address</span>
-          <span class="info-value" id="ipAddress">--</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">Hostname</span>
-          <span class="info-value" id="hostname">--</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">MAC Address</span>
-          <span class="info-value" id="macAddress">--</span>
-        </div>
-      </div>
-    </div>
-
     <!-- Actions Card -->
     <div class="card">
       <div class="card-header">
@@ -696,12 +670,6 @@
         // Versions
         document.getElementById('firmwareVersion').textContent = data.system.firmwareVersion || '--';
         document.getElementById('webVersion').textContent = data.web?.version || '--';
-
-        // Network Info
-        document.getElementById('wifiSignal').textContent = data.wifi.rssi ? data.wifi.rssi + ' dBm' : '--';
-        document.getElementById('ipAddress').textContent = data.wifi.localIP || '--';
-        document.getElementById('hostname').textContent = data.system.hostname || '--';
-        document.getElementById('macAddress').textContent = data.system.chipId || '--';
 
       } catch (error) {
         console.error('Error loading system status:', error);
