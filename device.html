@@ -253,8 +253,9 @@
             </div>
         </div>
 
-        <!-- Save Changes Button -->
-        <div style="margin-top: 16px;">
+        <!-- Floating Save Bar -->
+        <div class="save-bar" id="saveBar">
+            <span class="save-bar-text">You have unsaved changes</span>
             <button class="btn btn-primary" id="saveChangesBtn">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
@@ -278,6 +279,68 @@
     <script>
         // ==================== STATE ====================
         let config = null;
+
+        // ==================== DIRTY STATE TRACKING ====================
+        let hasUnsavedChanges = false;
+        let initialFormState = null;
+
+        function captureInitialState() {
+            initialFormState = {
+                numLeds: document.getElementById('numLeds').value,
+                brightness: document.getElementById('brightnessValue').value,
+                hostname: document.getElementById('hostname').value,
+                useMDNS: document.getElementById('useMDNS').classList.contains('active'),
+                ledsEnabled: document.getElementById('ledsEnabled').classList.contains('active'),
+                autoBrightnessEnabled: document.getElementById('autoBrightnessEnabled').classList.contains('active'),
+                brightnessMin: document.getElementById('brightnessMin').value,
+                brightnessMax: document.getElementById('brightnessMax').value,
+                quietHoursEnabled: document.getElementById('quietHoursEnabled').classList.contains('active'),
+                quietStartTime: document.getElementById('quietStartTime').value,
+                quietEndTime: document.getElementById('quietEndTime').value
+            };
+        }
+
+        function checkForChanges() {
+            if (!initialFormState) return;
+
+            const current = {
+                numLeds: document.getElementById('numLeds').value,
+                brightness: document.getElementById('brightnessValue').value,
+                hostname: document.getElementById('hostname').value,
+                useMDNS: document.getElementById('useMDNS').classList.contains('active'),
+                ledsEnabled: document.getElementById('ledsEnabled').classList.contains('active'),
+                autoBrightnessEnabled: document.getElementById('autoBrightnessEnabled').classList.contains('active'),
+                brightnessMin: document.getElementById('brightnessMin').value,
+                brightnessMax: document.getElementById('brightnessMax').value,
+                quietHoursEnabled: document.getElementById('quietHoursEnabled').classList.contains('active'),
+                quietStartTime: document.getElementById('quietStartTime').value,
+                quietEndTime: document.getElementById('quietEndTime').value
+            };
+
+            const changed = JSON.stringify(current) !== JSON.stringify(initialFormState);
+
+            if (changed !== hasUnsavedChanges) {
+                hasUnsavedChanges = changed;
+                const saveBar = document.getElementById('saveBar');
+                const main = document.querySelector('.main');
+
+                if (hasUnsavedChanges) {
+                    saveBar.classList.add('visible');
+                    main.classList.add('has-save-bar');
+                } else {
+                    saveBar.classList.remove('visible');
+                    main.classList.remove('has-save-bar');
+                }
+            }
+        }
+
+        // Warn on page leave with unsaved changes
+        window.addEventListener('beforeunload', (e) => {
+            if (hasUnsavedChanges) {
+                e.preventDefault();
+                e.returnValue = 'You have unsaved changes.';
+            }
+        });
 
         // ==================== INIT ====================
         document.addEventListener('DOMContentLoaded', async () => {
@@ -358,6 +421,19 @@
 
             // Test sensor button
             document.getElementById('testSensorBtn').addEventListener('click', testLightSensor);
+
+            // Track changes on all inputs
+            document.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', checkForChanges);
+                input.addEventListener('change', checkForChanges);
+            });
+
+            // Track changes on toggles
+            document.querySelectorAll('.toggle').forEach(toggle => {
+                toggle.addEventListener('click', () => {
+                    setTimeout(checkForChanges, 50); // Small delay for class to update
+                });
+            });
         }
 
         // ==================== DISPLAY SETTINGS HELPERS ====================
@@ -538,6 +614,10 @@
 
                 // Reload to get latest state
                 await Promise.all([loadConfig(), loadDisplayStatus()]);
+
+                // Reset dirty state tracking
+                captureInitialState();
+                checkForChanges(); // This will hide the save bar
             } catch (error) {
                 console.error('Failed to save settings:', error);
                 showToast('Failed to save settings: ' + error.message, 'error');
@@ -597,6 +677,9 @@
             // Update visibility based on toggle states
             updateAutoBrightnessVisibility();
             updateQuietHoursVisibility();
+
+            // Capture initial state for dirty tracking
+            captureInitialState();
         }
 
         function updateWiFiStatus(status) {
