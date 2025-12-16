@@ -709,15 +709,17 @@
                 </div>
                 </div> <!-- End normalConfigContainer -->
             </div>
+        </div>
 
-            <div class="card-footer">
-                <button class="btn btn-primary btn-large" id="saveBtn">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                    </svg>
-                    Save Changes
-                </button>
-            </div>
+        <!-- Floating Save Bar -->
+        <div class="save-bar" id="saveBar">
+            <span class="save-bar-text">You have unsaved changes</span>
+            <button class="btn btn-primary" id="saveBtn">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                Save Changes
+            </button>
         </div>
     </main>
 
@@ -809,6 +811,10 @@
         let toastTimeoutId = null;
         let filterTerm = '';
 
+        // Dirty state tracking for floating save bar
+        let hasUnsavedChanges = false;
+        let initialAirportsState = null;
+
         // Wizard state
         let wizardActive = false;
         let wizardState = {
@@ -820,6 +826,36 @@
         let cachedConfigForWizard = null;
         const WIZARD_STATE_KEY = 'skyboard_wizard_state';
         const WIZARD_STATE_TIMESTAMP_KEY = 'skyboard_wizard_timestamp';
+
+        // ==================== DIRTY STATE TRACKING ====================
+        function captureInitialState() {
+            if (!currentConfig || !currentConfig.airports) return;
+            // Deep copy the airports array
+            initialAirportsState = [...currentConfig.airports];
+        }
+
+        function checkForChanges() {
+            if (!initialAirportsState || !currentConfig || wizardActive) return;
+
+            // Compare current airports to initial state
+            const changed = currentConfig.airports.some((code, index) => {
+                return code !== initialAirportsState[index];
+            });
+
+            if (changed !== hasUnsavedChanges) {
+                hasUnsavedChanges = changed;
+                const saveBar = document.getElementById('saveBar');
+                const main = document.querySelector('.main');
+
+                if (hasUnsavedChanges) {
+                    saveBar.classList.add('visible');
+                    main.classList.add('has-save-bar');
+                } else {
+                    saveBar.classList.remove('visible');
+                    main.classList.remove('has-save-bar');
+                }
+            }
+        }
 
         // Load airports database with retry logic
         // (File may not exist yet if download is in progress on boot)
@@ -882,6 +918,7 @@
                 };
 
                 renderAirportTable();
+                captureInitialState();
             } catch (error) {
                 showToast('Error loading configuration: ' + error.message, 'error');
             }
@@ -993,6 +1030,7 @@
             const ledIndex = parseInt(input.dataset.led);
             const value = input.value.trim().toUpperCase();
             currentConfig.airports[ledIndex] = value || 'NONE';
+            checkForChanges();
         }
 
         // Update status indicators
@@ -1076,6 +1114,7 @@
                 saveWizardStateToLocalStorage();
             } else if (currentConfig && currentConfig.airports) {
                 currentConfig.airports[ledIndex] = code;
+                checkForChanges();
             }
 
             const input = document.querySelector(`.airport-input[data-led="${ledIndex}"]`);
@@ -1313,6 +1352,10 @@
 
                 showToast('Airport assignments saved successfully!', 'success');
 
+                // Reset dirty state tracking
+                captureInitialState();
+                checkForChanges();
+
                 // Trigger weather refresh after save
                 setTimeout(async () => {
                     try {
@@ -1473,7 +1516,6 @@
                 document.getElementById('wizardContainer').style.display = 'block';
                 document.getElementById('normalConfigContainer').style.display = 'none';
                 document.getElementById('setupWizardBtn').style.display = 'none';
-                document.querySelector('.card-footer').style.display = 'none';
 
                 renderWizardRows();
 
@@ -1788,7 +1830,6 @@
             document.getElementById('wizardContainer').style.display = 'none';
             document.getElementById('normalConfigContainer').style.display = 'block';
             document.getElementById('setupWizardBtn').style.display = 'inline-flex';
-            document.querySelector('.card-footer').style.display = 'flex';
 
             document.getElementById('wizardRows').innerHTML = '';
 
@@ -1897,7 +1938,6 @@
                 document.getElementById('wizardContainer').style.display = 'block';
                 document.getElementById('normalConfigContainer').style.display = 'none';
                 document.getElementById('setupWizardBtn').style.display = 'none';
-                document.querySelector('.card-footer').style.display = 'none';
 
                 renderWizardRows();
 
@@ -1910,11 +1950,16 @@
             }
         }
 
-        // Warn before leaving page during active wizard
+        // Warn before leaving page with unsaved changes
         window.addEventListener('beforeunload', (e) => {
             if (wizardActive) {
                 e.preventDefault();
                 e.returnValue = 'You have an active wizard session. Progress will be lost if you leave.';
+                return e.returnValue;
+            }
+            if (hasUnsavedChanges) {
+                e.preventDefault();
+                e.returnValue = 'You have unsaved changes.';
                 return e.returnValue;
             }
         });
