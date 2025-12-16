@@ -1,10 +1,10 @@
 {
-  "version": 166,
+  "version": 167,
   "files": {
     "index.html": "ccb5f2b640193e9cd443dd7b736de662",
     "device.html": "b05a34abb35c2b8bed2ed6d422bd7b51",
     "airports.html": "5541a652559b5fc8da39c6de7449a23f",
-    "weather.html": "8768a0d49109b51306d8be4382d59544",
+    "weather.html": "e0867669b4f744c5947929e78807a4d5",
     "system.html": "bdc044ff48b4511fea381bca4bbd2b00",
     "diagnostics.html": "46fc919803df73b63fe15c9d6e13dcd7",
     "css/base.css": "453f0dc299bf0cc854344980cc8fd966",

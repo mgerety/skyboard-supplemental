@@ -148,40 +148,40 @@
                     <small style="color: var(--text-muted); display: block; margin-top: 4px;">Winds above this speed show yellow (WVFR)</small>
                 </div>
 
-                <!-- Not Yet Implemented Section -->
+                <!-- Additional Weather Effects -->
                 <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border);">
                     <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
-                        Coming Soon
+                        Additional Weather Effects
                     </p>
-                    <div class="toggle-row" style="opacity: 0.5; pointer-events: none;">
+                    <div class="toggle-row">
                         <div class="toggle-label">
                             <span>Rain Effect</span>
-                            <small>Flash LEDs blue when rain is present</small>
+                            <small>Pulse LEDs cyan when rain is present</small>
                         </div>
                         <div class="toggle" id="effectRain"></div>
                     </div>
-                    <div class="toggle-row" style="opacity: 0.5; pointer-events: none;">
+                    <div class="toggle-row">
                         <div class="toggle-label">
                             <span>Freezing Rain Effect</span>
-                            <small>Pulse LEDs purple when freezing rain is present</small>
+                            <small>Pulse LEDs icy pink when freezing rain is present</small>
                         </div>
                         <div class="toggle" id="effectFreezingRain"></div>
                     </div>
-                    <div class="toggle-row" style="opacity: 0.5; pointer-events: none;">
+                    <div class="toggle-row">
                         <div class="toggle-label">
                             <span>Snow Effect</span>
                             <small>Pulse LEDs white when snow is present</small>
                         </div>
                         <div class="toggle" id="effectSnow"></div>
                     </div>
-                    <div class="toggle-row" style="opacity: 0.5; pointer-events: none;">
+                    <div class="toggle-row">
                         <div class="toggle-label">
                             <span>Dust/Sand/Ash Effect</span>
-                            <small>Pulse LEDs brown when dust, sand, or ash is present</small>
+                            <small>Pulse LEDs orange-brown when dust, sand, or ash is present</small>
                         </div>
                         <div class="toggle" id="effectDust"></div>
                     </div>
-                    <div class="toggle-row" style="opacity: 0.5; pointer-events: none;">
+                    <div class="toggle-row">
                         <div class="toggle-label">
                             <span>Fog/Haze Effect</span>
                             <small>Pulse LEDs gray when fog or haze is present</small>
@@ -231,7 +231,13 @@
                 // Weather effects
                 lightningEffect: document.getElementById('lightningEffect').classList.contains('active'),
                 windEffect: document.getElementById('windEffect').classList.contains('active'),
-                windSpeedThreshold: document.getElementById('windSpeedThreshold').value
+                windSpeedThreshold: document.getElementById('windSpeedThreshold').value,
+                // Additional weather effects
+                effectRain: document.getElementById('effectRain').classList.contains('active'),
+                effectFreezingRain: document.getElementById('effectFreezingRain').classList.contains('active'),
+                effectSnow: document.getElementById('effectSnow').classList.contains('active'),
+                effectDust: document.getElementById('effectDust').classList.contains('active'),
+                effectFog: document.getElementById('effectFog').classList.contains('active')
             };
         }
 
@@ -245,7 +251,13 @@
                 // Weather effects
                 lightningEffect: document.getElementById('lightningEffect').classList.contains('active'),
                 windEffect: document.getElementById('windEffect').classList.contains('active'),
-                windSpeedThreshold: document.getElementById('windSpeedThreshold').value
+                windSpeedThreshold: document.getElementById('windSpeedThreshold').value,
+                // Additional weather effects
+                effectRain: document.getElementById('effectRain').classList.contains('active'),
+                effectFreezingRain: document.getElementById('effectFreezingRain').classList.contains('active'),
+                effectSnow: document.getElementById('effectSnow').classList.contains('active'),
+                effectDust: document.getElementById('effectDust').classList.contains('active'),
+                effectFog: document.getElementById('effectFog').classList.contains('active')
             };
 
             const changed = JSON.stringify(current) !== JSON.stringify(initialFormState);
@@ -361,6 +373,14 @@
                     setTimeout(checkForChanges, 50);
                 });
             });
+
+            // Additional weather effect toggles
+            ['effectRain', 'effectFreezingRain', 'effectSnow', 'effectDust', 'effectFog'].forEach(id => {
+                document.getElementById(id).addEventListener('click', () => {
+                    document.getElementById(id).classList.toggle('active');
+                    setTimeout(checkForChanges, 50);
+                });
+            });
         }
 
         // ==================== TOGGLE DEPENDENCY MANAGEMENT ====================
@@ -423,7 +443,13 @@
                     // Weather effects
                     lightning_effect_enabled: document.getElementById('lightningEffect').classList.contains('active'),
                     wind_effect_enabled: document.getElementById('windEffect').classList.contains('active'),
-                    wind_speed_threshold: parseInt(document.getElementById('windSpeedThreshold').value)
+                    wind_speed_threshold: parseInt(document.getElementById('windSpeedThreshold').value),
+                    // Additional weather effects
+                    effect_rain_enabled: document.getElementById('effectRain').classList.contains('active'),
+                    effect_freezing_rain_enabled: document.getElementById('effectFreezingRain').classList.contains('active'),
+                    effect_snow_enabled: document.getElementById('effectSnow').classList.contains('active'),
+                    effect_dust_enabled: document.getElementById('effectDust').classList.contains('active'),
+                    effect_fog_enabled: document.getElementById('effectFog').classList.contains('active')
                 };
 
                 const response = await fetch('/api/v1/weather-settings', {
@@ -494,6 +520,17 @@
             }
 
             windThreshold.value = config.wind_speed_threshold || 25;
+
+            // Additional weather effects (default to enabled if not present in config)
+            ['effectRain', 'effectFreezingRain', 'effectSnow', 'effectDust', 'effectFog'].forEach(id => {
+                const toggle = document.getElementById(id);
+                const configKey = 'effect_' + id.replace('effect', '').replace(/([A-Z])/g, '_$1').toLowerCase().substring(1) + '_enabled';
+                if (config[configKey] !== false) {
+                    toggle.classList.add('active');
+                } else {
+                    toggle.classList.remove('active');
+                }
+            });
 
             // Update dependencies
             updateToggleDependencies();
