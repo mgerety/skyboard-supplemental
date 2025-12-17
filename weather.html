@@ -138,13 +138,6 @@
                 </p>
                 <div class="toggle-row">
                     <div class="toggle-label">
-                        <span>Lightning Effect</span>
-                        <small>Flash LEDs white when thunderstorms are present</small>
-                    </div>
-                    <div class="toggle" id="lightningEffect"></div>
-                </div>
-                <div class="toggle-row">
-                    <div class="toggle-label">
                         <span>Wind Effect (WVFR)</span>
                         <small>Show yellow for windy VFR conditions</small>
                     </div>
@@ -161,40 +154,101 @@
                     <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
                         Additional Weather Effects
                     </p>
-                    <div class="toggle-row">
-                        <div class="toggle-label">
+                    <div class="toggle-row" style="flex-wrap: wrap; gap: 8px;">
+                        <div class="toggle-label" style="flex: 1; min-width: 200px;">
                             <span>Rain Effect</span>
-                            <small>Pulse LEDs cyan when rain is present</small>
+                            <small>Color shifts when rain is present</small>
                         </div>
-                        <div class="toggle" id="effectRain"></div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="color" id="effectRainColor" value="#00FFFF" style="width: 40px; height: 32px; border: none; cursor: pointer;">
+                            <select id="effectRainAnim" class="form-control" style="width: 120px; padding: 6px;">
+                                <option value="0">Smooth Fade</option>
+                                <option value="1" selected>Twinkle</option>
+                                <option value="2">Strobe</option>
+                                <option value="3">Pulse</option>
+                            </select>
+                            <div class="toggle" id="effectRain"></div>
+                        </div>
                     </div>
-                    <div class="toggle-row">
-                        <div class="toggle-label">
+                    <div class="toggle-row" style="flex-wrap: wrap; gap: 8px;">
+                        <div class="toggle-label" style="flex: 1; min-width: 200px;">
                             <span>Freezing Rain Effect</span>
-                            <small>Pulse LEDs icy pink when freezing rain is present</small>
+                            <small>Color shifts when freezing rain is present</small>
                         </div>
-                        <div class="toggle" id="effectFreezingRain"></div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="color" id="effectFzraColor" value="#FFC8DC" style="width: 40px; height: 32px; border: none; cursor: pointer;">
+                            <select id="effectFzraAnim" class="form-control" style="width: 120px; padding: 6px;">
+                                <option value="0">Smooth Fade</option>
+                                <option value="1" selected>Twinkle</option>
+                                <option value="2">Strobe</option>
+                                <option value="3">Pulse</option>
+                            </select>
+                            <div class="toggle" id="effectFreezingRain"></div>
+                        </div>
                     </div>
-                    <div class="toggle-row">
-                        <div class="toggle-label">
+                    <div class="toggle-row" style="flex-wrap: wrap; gap: 8px;">
+                        <div class="toggle-label" style="flex: 1; min-width: 200px;">
                             <span>Snow Effect</span>
-                            <small>Pulse LEDs white when snow is present</small>
+                            <small>Color shifts when snow is present</small>
                         </div>
-                        <div class="toggle" id="effectSnow"></div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="color" id="effectSnowColor" value="#FFFFFF" style="width: 40px; height: 32px; border: none; cursor: pointer;">
+                            <select id="effectSnowAnim" class="form-control" style="width: 120px; padding: 6px;">
+                                <option value="0">Smooth Fade</option>
+                                <option value="1" selected>Twinkle</option>
+                                <option value="2">Strobe</option>
+                                <option value="3">Pulse</option>
+                            </select>
+                            <div class="toggle" id="effectSnow"></div>
+                        </div>
                     </div>
-                    <div class="toggle-row">
-                        <div class="toggle-label">
+                    <div class="toggle-row" style="flex-wrap: wrap; gap: 8px;">
+                        <div class="toggle-label" style="flex: 1; min-width: 200px;">
                             <span>Dust/Sand/Ash Effect</span>
-                            <small>Pulse LEDs orange-brown when dust, sand, or ash is present</small>
+                            <small>Color shifts when dust, sand, or ash is present</small>
                         </div>
-                        <div class="toggle" id="effectDust"></div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="color" id="effectDustColor" value="#B45000" style="width: 40px; height: 32px; border: none; cursor: pointer;">
+                            <select id="effectDustAnim" class="form-control" style="width: 120px; padding: 6px;">
+                                <option value="0" selected>Smooth Fade</option>
+                                <option value="1">Twinkle</option>
+                                <option value="2">Strobe</option>
+                                <option value="3">Pulse</option>
+                            </select>
+                            <div class="toggle" id="effectDust"></div>
+                        </div>
                     </div>
-                    <div class="toggle-row">
-                        <div class="toggle-label">
+                    <div class="toggle-row" style="flex-wrap: wrap; gap: 8px;">
+                        <div class="toggle-label" style="flex: 1; min-width: 200px;">
                             <span>Fog/Haze Effect</span>
-                            <small>Pulse LEDs gray when fog or haze is present</small>
+                            <small>Color shifts when fog or haze is present</small>
                         </div>
-                        <div class="toggle" id="effectFog"></div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="color" id="effectFogColor" value="#808080" style="width: 40px; height: 32px; border: none; cursor: pointer;">
+                            <select id="effectFogAnim" class="form-control" style="width: 120px; padding: 6px;">
+                                <option value="0" selected>Smooth Fade</option>
+                                <option value="1">Twinkle</option>
+                                <option value="2">Strobe</option>
+                                <option value="3">Pulse</option>
+                            </select>
+                            <div class="toggle" id="effectFog"></div>
+                        </div>
+                    </div>
+                    <div class="toggle-row" style="flex-wrap: wrap; gap: 8px;">
+                        <div class="toggle-label" style="flex: 1; min-width: 200px;">
+                            <span>Lightning Effect</span>
+                            <small>Flash color when thunderstorms are present</small>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="color" id="effectLightningColor" value="#FFFFFF" style="width: 40px; height: 32px; border: none; cursor: pointer;">
+                            <select id="effectLightningAnim" class="form-control" style="width: 120px; padding: 6px;">
+                                <option value="0">Smooth Fade</option>
+                                <option value="1">Twinkle</option>
+                                <option value="2" selected>Strobe</option>
+                                <option value="3">Pulse</option>
+                            </select>
+                            <div class="toggle" id="effectLightning"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -273,15 +327,27 @@
                 useEstimatedWeather: document.getElementById('useEstimatedWeather').classList.contains('active'),
                 pulseEstimatedWeather: document.getElementById('pulseEstimatedWeather').classList.contains('active'),
                 // Weather effects
-                lightningEffect: document.getElementById('lightningEffect').classList.contains('active'),
                 windEffect: document.getElementById('windEffect').classList.contains('active'),
                 windSpeedThreshold: document.getElementById('windSpeedThreshold').value,
-                // Additional weather effects
+                // Additional weather effects - toggles
                 effectRain: document.getElementById('effectRain').classList.contains('active'),
                 effectFreezingRain: document.getElementById('effectFreezingRain').classList.contains('active'),
                 effectSnow: document.getElementById('effectSnow').classList.contains('active'),
                 effectDust: document.getElementById('effectDust').classList.contains('active'),
-                effectFog: document.getElementById('effectFog').classList.contains('active')
+                effectFog: document.getElementById('effectFog').classList.contains('active'),
+                // Additional weather effects - colors and animations
+                effectRainColor: document.getElementById('effectRainColor').value,
+                effectRainAnim: document.getElementById('effectRainAnim').value,
+                effectFzraColor: document.getElementById('effectFzraColor').value,
+                effectFzraAnim: document.getElementById('effectFzraAnim').value,
+                effectSnowColor: document.getElementById('effectSnowColor').value,
+                effectSnowAnim: document.getElementById('effectSnowAnim').value,
+                effectDustColor: document.getElementById('effectDustColor').value,
+                effectDustAnim: document.getElementById('effectDustAnim').value,
+                effectFogColor: document.getElementById('effectFogColor').value,
+                effectFogAnim: document.getElementById('effectFogAnim').value,
+                effectLightningColor: document.getElementById('effectLightningColor').value,
+                effectLightningAnim: document.getElementById('effectLightningAnim').value
             };
         }
 
@@ -293,15 +359,27 @@
                 useEstimatedWeather: document.getElementById('useEstimatedWeather').classList.contains('active'),
                 pulseEstimatedWeather: document.getElementById('pulseEstimatedWeather').classList.contains('active'),
                 // Weather effects
-                lightningEffect: document.getElementById('lightningEffect').classList.contains('active'),
                 windEffect: document.getElementById('windEffect').classList.contains('active'),
                 windSpeedThreshold: document.getElementById('windSpeedThreshold').value,
-                // Additional weather effects
+                // Additional weather effects - toggles
                 effectRain: document.getElementById('effectRain').classList.contains('active'),
                 effectFreezingRain: document.getElementById('effectFreezingRain').classList.contains('active'),
                 effectSnow: document.getElementById('effectSnow').classList.contains('active'),
                 effectDust: document.getElementById('effectDust').classList.contains('active'),
-                effectFog: document.getElementById('effectFog').classList.contains('active')
+                effectFog: document.getElementById('effectFog').classList.contains('active'),
+                // Additional weather effects - colors and animations
+                effectRainColor: document.getElementById('effectRainColor').value,
+                effectRainAnim: document.getElementById('effectRainAnim').value,
+                effectFzraColor: document.getElementById('effectFzraColor').value,
+                effectFzraAnim: document.getElementById('effectFzraAnim').value,
+                effectSnowColor: document.getElementById('effectSnowColor').value,
+                effectSnowAnim: document.getElementById('effectSnowAnim').value,
+                effectDustColor: document.getElementById('effectDustColor').value,
+                effectDustAnim: document.getElementById('effectDustAnim').value,
+                effectFogColor: document.getElementById('effectFogColor').value,
+                effectFogAnim: document.getElementById('effectFogAnim').value,
+                effectLightningColor: document.getElementById('effectLightningColor').value,
+                effectLightningAnim: document.getElementById('effectLightningAnim').value
             };
 
             const changed = JSON.stringify(current) !== JSON.stringify(initialFormState);
@@ -411,7 +489,7 @@
             });
 
             // Weather effect toggles
-            ['lightningEffect', 'windEffect'].forEach(id => {
+            ['windEffect'].forEach(id => {
                 document.getElementById(id).addEventListener('click', () => {
                     document.getElementById(id).classList.toggle('active');
                     setTimeout(checkForChanges, 50);
@@ -419,11 +497,23 @@
             });
 
             // Additional weather effect toggles
-            ['effectRain', 'effectFreezingRain', 'effectSnow', 'effectDust', 'effectFog'].forEach(id => {
+            ['effectRain', 'effectFreezingRain', 'effectSnow', 'effectDust', 'effectFog', 'effectLightning'].forEach(id => {
                 document.getElementById(id).addEventListener('click', () => {
                     document.getElementById(id).classList.toggle('active');
                     setTimeout(checkForChanges, 50);
                 });
+            });
+
+            // Track changes on color pickers and animation selectors
+            ['effectRainColor', 'effectRainAnim',
+             'effectFzraColor', 'effectFzraAnim',
+             'effectSnowColor', 'effectSnowAnim',
+             'effectDustColor', 'effectDustAnim',
+             'effectFogColor', 'effectFogAnim',
+             'effectLightningColor', 'effectLightningAnim'].forEach(id => {
+                const element = document.getElementById(id);
+                element.addEventListener('input', checkForChanges);
+                element.addEventListener('change', checkForChanges);
             });
 
             // Test Effects button and modal
@@ -535,6 +625,20 @@
             }
         }
 
+        // ==================== HELPER FUNCTIONS ====================
+        function rgbToHex(r, g, b) {
+            return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+        }
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
         // ==================== API FUNCTIONS ====================
         async function loadConfig() {
             try {
@@ -565,21 +669,59 @@
                     return;
                 }
 
+                // Get color picker values and convert to RGB
+                const rainColor = hexToRgb(document.getElementById('effectRainColor').value);
+                const fzraColor = hexToRgb(document.getElementById('effectFzraColor').value);
+                const snowColor = hexToRgb(document.getElementById('effectSnowColor').value);
+                const dustColor = hexToRgb(document.getElementById('effectDustColor').value);
+                const fogColor = hexToRgb(document.getElementById('effectFogColor').value);
+                const lightningColor = hexToRgb(document.getElementById('effectLightningColor').value);
+
                 // Use dedicated weather settings endpoint (no weather refresh)
                 const weatherPayload = {
                     updateIntervalMinutes: weatherSettings.updateIntervalMinutes,
                     use_estimated_weather: weatherSettings.useEstimatedWeather,
                     pulse_estimated_weather: weatherSettings.pulseEstimatedWeather,
                     // Weather effects
-                    lightning_effect_enabled: document.getElementById('lightningEffect').classList.contains('active'),
+                    lightning_effect_enabled: document.getElementById('effectLightning').classList.contains('active'),
                     wind_effect_enabled: document.getElementById('windEffect').classList.contains('active'),
                     wind_speed_threshold: parseInt(document.getElementById('windSpeedThreshold').value),
-                    // Additional weather effects
+                    // Additional weather effects - toggles
                     effect_rain_enabled: document.getElementById('effectRain').classList.contains('active'),
                     effect_freezing_rain_enabled: document.getElementById('effectFreezingRain').classList.contains('active'),
                     effect_snow_enabled: document.getElementById('effectSnow').classList.contains('active'),
                     effect_dust_enabled: document.getElementById('effectDust').classList.contains('active'),
-                    effect_fog_enabled: document.getElementById('effectFog').classList.contains('active')
+                    effect_fog_enabled: document.getElementById('effectFog').classList.contains('active'),
+                    // Rain effect customization
+                    effect_rain_r: rainColor.r,
+                    effect_rain_g: rainColor.g,
+                    effect_rain_b: rainColor.b,
+                    effect_rain_anim: parseInt(document.getElementById('effectRainAnim').value),
+                    // Freezing Rain effect customization
+                    effect_fzra_r: fzraColor.r,
+                    effect_fzra_g: fzraColor.g,
+                    effect_fzra_b: fzraColor.b,
+                    effect_fzra_anim: parseInt(document.getElementById('effectFzraAnim').value),
+                    // Snow effect customization
+                    effect_snow_r: snowColor.r,
+                    effect_snow_g: snowColor.g,
+                    effect_snow_b: snowColor.b,
+                    effect_snow_anim: parseInt(document.getElementById('effectSnowAnim').value),
+                    // Dust effect customization
+                    effect_dust_r: dustColor.r,
+                    effect_dust_g: dustColor.g,
+                    effect_dust_b: dustColor.b,
+                    effect_dust_anim: parseInt(document.getElementById('effectDustAnim').value),
+                    // Fog effect customization
+                    effect_fog_r: fogColor.r,
+                    effect_fog_g: fogColor.g,
+                    effect_fog_b: fogColor.b,
+                    effect_fog_anim: parseInt(document.getElementById('effectFogAnim').value),
+                    // Lightning effect customization
+                    effect_lightning_r: lightningColor.r,
+                    effect_lightning_g: lightningColor.g,
+                    effect_lightning_b: lightningColor.b,
+                    effect_lightning_anim: parseInt(document.getElementById('effectLightningAnim').value)
                 };
 
                 const response = await fetch('/api/v1/weather-settings', {
@@ -633,15 +775,8 @@
             }
 
             // Weather effects (default to enabled if not present in config)
-            const lightningToggle = document.getElementById('lightningEffect');
             const windToggle = document.getElementById('windEffect');
             const windThreshold = document.getElementById('windSpeedThreshold');
-
-            if (config.lightning_effect_enabled !== false) {
-                lightningToggle.classList.add('active');
-            } else {
-                lightningToggle.classList.remove('active');
-            }
 
             if (config.wind_effect_enabled !== false) {
                 windToggle.classList.add('active');
@@ -652,7 +787,7 @@
             windThreshold.value = config.wind_speed_threshold || 25;
 
             // Additional weather effects (default to enabled if not present in config)
-            ['effectRain', 'effectFreezingRain', 'effectSnow', 'effectDust', 'effectFog'].forEach(id => {
+            ['effectRain', 'effectFreezingRain', 'effectSnow', 'effectDust', 'effectFog', 'effectLightning'].forEach(id => {
                 const toggle = document.getElementById(id);
                 const configKey = 'effect_' + id.replace('effect', '').replace(/([A-Z])/g, '_$1').toLowerCase().substring(1) + '_enabled';
                 if (config[configKey] !== false) {
@@ -661,6 +796,55 @@
                     toggle.classList.remove('active');
                 }
             });
+
+            // Load effect colors and animations
+            // Rain: default Cyan #00FFFF, Twinkle
+            document.getElementById('effectRainColor').value = rgbToHex(
+                config.effect_rain_r ?? 0,
+                config.effect_rain_g ?? 255,
+                config.effect_rain_b ?? 255
+            );
+            document.getElementById('effectRainAnim').value = config.effect_rain_anim ?? 1;
+
+            // Freezing Rain: default Pale Pink #FFC8DC, Twinkle
+            document.getElementById('effectFzraColor').value = rgbToHex(
+                config.effect_fzra_r ?? 255,
+                config.effect_fzra_g ?? 200,
+                config.effect_fzra_b ?? 220
+            );
+            document.getElementById('effectFzraAnim').value = config.effect_fzra_anim ?? 1;
+
+            // Snow: default White #FFFFFF, Twinkle
+            document.getElementById('effectSnowColor').value = rgbToHex(
+                config.effect_snow_r ?? 255,
+                config.effect_snow_g ?? 255,
+                config.effect_snow_b ?? 255
+            );
+            document.getElementById('effectSnowAnim').value = config.effect_snow_anim ?? 1;
+
+            // Dust: default Orange-Brown #B45000, Smooth Fade
+            document.getElementById('effectDustColor').value = rgbToHex(
+                config.effect_dust_r ?? 180,
+                config.effect_dust_g ?? 80,
+                config.effect_dust_b ?? 0
+            );
+            document.getElementById('effectDustAnim').value = config.effect_dust_anim ?? 0;
+
+            // Fog: default Gray #808080, Smooth Fade
+            document.getElementById('effectFogColor').value = rgbToHex(
+                config.effect_fog_r ?? 128,
+                config.effect_fog_g ?? 128,
+                config.effect_fog_b ?? 128
+            );
+            document.getElementById('effectFogAnim').value = config.effect_fog_anim ?? 0;
+
+            // Lightning: default White #FFFFFF, Strobe
+            document.getElementById('effectLightningColor').value = rgbToHex(
+                config.effect_lightning_r ?? 255,
+                config.effect_lightning_g ?? 255,
+                config.effect_lightning_b ?? 255
+            );
+            document.getElementById('effectLightningAnim').value = config.effect_lightning_anim ?? 2;
 
             // Update dependencies
             updateToggleDependencies();
