@@ -90,6 +90,31 @@
                         <input type="number" id="brightnessValue" min="0" max="255" value="20">
                         <span class="form-hint">0-255</span>
                     </div>
+                    <div class="form-group">
+                        <label for="ledDataPin">Data Pin (GPIO)</label>
+                        <select id="ledDataPin">
+                            <option value="2">GPIO 2</option>
+                            <option value="4">GPIO 4</option>
+                            <option value="5">GPIO 5</option>
+                            <option value="12">GPIO 12</option>
+                            <option value="13">GPIO 13</option>
+                            <option value="14">GPIO 14</option>
+                            <option value="15">GPIO 15</option>
+                            <option value="16" selected>GPIO 16</option>
+                            <option value="17">GPIO 17</option>
+                            <option value="18">GPIO 18</option>
+                            <option value="19">GPIO 19</option>
+                            <option value="21">GPIO 21</option>
+                            <option value="22">GPIO 22</option>
+                            <option value="23">GPIO 23</option>
+                            <option value="25">GPIO 25</option>
+                            <option value="26">GPIO 26</option>
+                            <option value="27">GPIO 27</option>
+                            <option value="32">GPIO 32</option>
+                            <option value="33">GPIO 33</option>
+                        </select>
+                        <span class="form-hint">Reboot required after change</span>
+                    </div>
                 </div>
                 <div class="quick-actions">
                     <button class="btn btn-primary" id="launchWizardBtn">
@@ -288,6 +313,7 @@
             initialFormState = {
                 numLeds: document.getElementById('numLeds').value,
                 brightness: document.getElementById('brightnessValue').value,
+                ledDataPin: document.getElementById('ledDataPin').value,
                 hostname: document.getElementById('hostname').value,
                 useMDNS: document.getElementById('useMDNS').classList.contains('active'),
                 ledsEnabled: document.getElementById('ledsEnabled').classList.contains('active'),
@@ -306,6 +332,7 @@
             const current = {
                 numLeds: document.getElementById('numLeds').value,
                 brightness: document.getElementById('brightnessValue').value,
+                ledDataPin: document.getElementById('ledDataPin').value,
                 hostname: document.getElementById('hostname').value,
                 useMDNS: document.getElementById('useMDNS').classList.contains('active'),
                 ledsEnabled: document.getElementById('ledsEnabled').classList.contains('active'),
@@ -557,10 +584,15 @@
 
         async function saveDeviceSettings() {
             try {
+                // Check if pin changed (requires reboot)
+                const newPin = parseInt(document.getElementById('ledDataPin').value);
+                const pinChanged = initialFormState && initialFormState.ledDataPin !== String(newPin);
+
                 // Collect device settings
                 const devicePayload = {
                     numLeds: parseInt(document.getElementById('numLeds').value),
                     brightness: parseInt(document.getElementById('brightnessValue').value),
+                    led_data_pin: newPin,
                     mdns_name: document.getElementById('hostname').value.trim()
                 };
 
@@ -610,7 +642,11 @@
                     throw new Error(`Display settings failed: ${displayResponse.status}`);
                 }
 
-                showToast('Settings saved successfully', 'success');
+                if (pinChanged) {
+                    showToast('Settings saved. Reboot required for pin change.', 'warning');
+                } else {
+                    showToast('Settings saved successfully', 'success');
+                }
 
                 // Reload to get latest state
                 await Promise.all([loadConfig(), loadDisplayStatus()]);
@@ -630,6 +666,7 @@
 
             document.getElementById('numLeds').value = config.numLeds || 125;
             document.getElementById('brightnessValue').value = config.brightness || 20;
+            document.getElementById('ledDataPin').value = config.led_data_pin || 16;
             document.getElementById('hostname').value = config.mdns_name || config.hostname || 'skyboard';
             document.getElementById('hostname-preview').textContent = config.mdns_name || config.hostname || 'skyboard';
 
