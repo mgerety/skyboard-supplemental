@@ -1257,6 +1257,7 @@
                 }
 
                 renderAirportTable();
+                checkForChanges();  // Show save bar after import
 
                 if (errors.length > 0) {
                     showToast(`Imported ${imported} LEDs (total: ${currentConfig.numLeds}) with ${errors.length} errors`, 'warning', 8000);
