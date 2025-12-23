@@ -317,6 +317,39 @@
         </div>
     </div>
 
+    <!-- WiFi Change Modal -->
+    <div class="modal-overlay" id="wifiModal" style="display: none;">
+        <div class="modal" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>Change WiFi Network</h3>
+                <button class="modal-close" id="wifiModalClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="wifiSsidSelect">WiFi Network</label>
+                    <select id="wifiSsidSelect" style="width: 100%; padding: 10px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary);">
+                        <option value="">Scanning...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="wifiSsidManual">Or enter manually</label>
+                    <input type="text" id="wifiSsidManual" placeholder="Network name (SSID)">
+                </div>
+                <div class="form-group">
+                    <label for="wifiPassword">Password</label>
+                    <input type="password" id="wifiPassword" placeholder="WiFi password">
+                </div>
+                <p style="color: var(--text-muted); font-size: 12px; margin-top: 8px;">
+                    Warning: Device will restart after saving. If credentials are wrong, you'll need to connect to the Skyboard-Setup AP.
+                </p>
+            </div>
+            <div class="modal-footer" style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button class="btn btn-secondary" id="wifiModalCancel">Cancel</button>
+                <button class="btn btn-primary" id="wifiModalSave">Save & Restart</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ==================== STATE ====================
         let config = null;
@@ -452,9 +485,13 @@
                 window.location.href = '/airports.html?wizard=1';
             });
 
-            // Change network button (placeholder)
-            document.getElementById('changeNetworkBtn').addEventListener('click', () => {
-                showToast('WiFi network change not yet implemented', 'warning');
+            // Change network button - show modal
+            document.getElementById('changeNetworkBtn').addEventListener('click', showWifiModal);
+            document.getElementById('wifiModalClose').addEventListener('click', hideWifiModal);
+            document.getElementById('wifiModalCancel').addEventListener('click', hideWifiModal);
+            document.getElementById('wifiModalSave').addEventListener('click', saveWifiConfig);
+            document.getElementById('wifiModal').addEventListener('click', (e) => {
+                if (e.target.id === 'wifiModal') hideWifiModal();
             });
 
             // Display settings toggles - visibility updates only
@@ -523,6 +560,86 @@
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = originalText;
+            }
+        }
+
+        // ==================== WIFI MODAL FUNCTIONS ====================
+        async function showWifiModal() {
+            document.getElementById('wifiModal').style.display = 'flex';
+            document.getElementById('wifiSsidManual').value = '';
+            document.getElementById('wifiPassword').value = '';
+
+            // Scan for networks
+            const select = document.getElementById('wifiSsidSelect');
+            select.innerHTML = '<option value="">Scanning...</option>';
+
+            try {
+                const response = await fetch('/api/v1/wifi/networks');
+                if (!response.ok) throw new Error('Scan failed');
+                const data = await response.json();
+
+                select.innerHTML = '<option value="">-- Select a network --</option>';
+                if (data.networks && data.networks.length > 0) {
+                    data.networks.forEach(net => {
+                        const option = document.createElement('option');
+                        option.value = net.ssid;
+                        option.textContent = `${net.ssid} (${net.rssi} dBm)`;
+                        select.appendChild(option);
+                    });
+                } else {
+                    select.innerHTML = '<option value="">No networks found</option>';
+                }
+            } catch (error) {
+                console.error('WiFi scan error:', error);
+                select.innerHTML = '<option value="">Scan failed - enter manually</option>';
+            }
+        }
+
+        function hideWifiModal() {
+            document.getElementById('wifiModal').style.display = 'none';
+        }
+
+        async function saveWifiConfig() {
+            const ssidSelect = document.getElementById('wifiSsidSelect').value;
+            const ssidManual = document.getElementById('wifiSsidManual').value.trim();
+            const password = document.getElementById('wifiPassword').value;
+
+            const ssid = ssidManual || ssidSelect;
+
+            if (!ssid) {
+                showToast('Please select or enter a WiFi network', 'error');
+                return;
+            }
+
+            if (!confirm(`Connect to "${ssid}"? Device will restart.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/v1/config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        wifi_ssid: ssid,
+                        wifi_pass: password
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to save WiFi config');
+                }
+
+                hideWifiModal();
+                showToast('WiFi config saved. Device restarting...', 'success');
+
+                // Device will restart, show reconnect message
+                setTimeout(() => {
+                    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0f172a;color:#fff;font-family:system-ui;"><div style="text-align:center;"><h2>Device Restarting...</h2><p>Reconnect to your WiFi network and navigate to skyboard.local</p></div></div>';
+                }, 1000);
+
+            } catch (error) {
+                console.error('WiFi save error:', error);
+                showToast('Failed to save WiFi config: ' + error.message, 'error');
             }
         }
 
