@@ -471,8 +471,8 @@
             // Test sensor button
             document.getElementById('testSensorBtn').addEventListener('click', testLightSensor);
 
-            // Track changes on all inputs
-            document.querySelectorAll('input').forEach(input => {
+            // Track changes on all inputs and selects
+            document.querySelectorAll('input, select').forEach(input => {
                 input.addEventListener('input', checkForChanges);
                 input.addEventListener('change', checkForChanges);
             });
