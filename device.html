@@ -393,6 +393,8 @@
             // Load data and hide loading overlay when done
             try {
                 await Promise.all([loadConfig(), loadSystemStatus(), loadDisplayStatus()]);
+                // Capture initial state AFTER all data loaded (config + dropdown populated)
+                captureInitialState();
             } finally {
                 hideLoading();
             }
@@ -840,8 +842,8 @@
             updateAutoBrightnessVisibility();
             updateQuietHoursVisibility();
 
-            // Capture initial state for dirty tracking
-            captureInitialState();
+            // Note: captureInitialState() is called after ALL data loads (config + status)
+            // to ensure dropdown is populated before capturing initial values
         }
 
         function updateWiFiStatus(status) {
