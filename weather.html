@@ -90,6 +90,43 @@
             </div>
         </div>
 
+        <!-- Animation Settings Card -->
+        <div class="card">
+            <div class="card-header">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Animation Settings
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label for="animationPeriod">Effect Cycle Period (seconds)</label>
+                    <input type="number" id="animationPeriod" min="5" max="120" value="16">
+                    <span class="form-hint">How often weather effects animate (5-120 seconds, default 16)</span>
+                </div>
+                <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
+                    <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
+                        Weather Loading Animation
+                    </p>
+                    <div class="toggle-row">
+                        <div class="toggle-label">
+                            <span>Play Animation During Weather Updates</span>
+                            <small>Show animation while fetching weather data</small>
+                        </div>
+                        <div class="toggle" id="loadingAnimationEnabled"></div>
+                    </div>
+                    <div class="form-group" id="loadingAnimationTypeGroup" style="margin-top: 12px; padding-left: 24px;">
+                        <label class="form-label">Animation Type</label>
+                        <select id="loadingAnimationType" class="form-control" style="width: 200px;">
+                            <option value="0">White Twinkle</option>
+                            <option value="1">Rainbow Chase</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Data Sources Card -->
         <div class="card">
             <div class="card-header">
@@ -324,6 +361,11 @@
         function captureInitialState() {
             initialFormState = {
                 updateInterval: document.getElementById('updateInterval').value,
+                // Animation settings
+                animationPeriod: document.getElementById('animationPeriod').value,
+                loadingAnimationEnabled: document.getElementById('loadingAnimationEnabled').classList.contains('active'),
+                loadingAnimationType: document.getElementById('loadingAnimationType').value,
+                // Data sources
                 useEstimatedWeather: document.getElementById('useEstimatedWeather').classList.contains('active'),
                 pulseEstimatedWeather: document.getElementById('pulseEstimatedWeather').classList.contains('active'),
                 // Weather effects
@@ -356,6 +398,11 @@
 
             const current = {
                 updateInterval: document.getElementById('updateInterval').value,
+                // Animation settings
+                animationPeriod: document.getElementById('animationPeriod').value,
+                loadingAnimationEnabled: document.getElementById('loadingAnimationEnabled').classList.contains('active'),
+                loadingAnimationType: document.getElementById('loadingAnimationType').value,
+                // Data sources
                 useEstimatedWeather: document.getElementById('useEstimatedWeather').classList.contains('active'),
                 pulseEstimatedWeather: document.getElementById('pulseEstimatedWeather').classList.contains('active'),
                 // Weather effects
@@ -487,6 +534,16 @@
             pulseEstimatedWeatherToggle.addEventListener('click', () => {
                 setTimeout(checkForChanges, 50); // Small delay for class to update
             });
+
+            // Loading animation toggle
+            document.getElementById('loadingAnimationEnabled').addEventListener('click', () => {
+                document.getElementById('loadingAnimationEnabled').classList.toggle('active');
+                updateLoadingAnimationDependencies();
+                setTimeout(checkForChanges, 50);
+            });
+
+            // Loading animation type change
+            document.getElementById('loadingAnimationType').addEventListener('change', checkForChanges);
 
             // Weather effect toggles
             ['windEffect'].forEach(id => {
@@ -625,6 +682,19 @@
             }
         }
 
+        function updateLoadingAnimationDependencies() {
+            const enabled = document.getElementById('loadingAnimationEnabled').classList.contains('active');
+            const typeGroup = document.getElementById('loadingAnimationTypeGroup');
+
+            if (!enabled) {
+                typeGroup.style.opacity = '0.5';
+                typeGroup.style.pointerEvents = 'none';
+            } else {
+                typeGroup.style.opacity = '1';
+                typeGroup.style.pointerEvents = 'auto';
+            }
+        }
+
         // ==================== HELPER FUNCTIONS ====================
         function rgbToHex(r, g, b) {
             return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
@@ -682,6 +752,10 @@
                     updateIntervalMinutes: weatherSettings.updateIntervalMinutes,
                     use_estimated_weather: weatherSettings.useEstimatedWeather,
                     pulse_estimated_weather: weatherSettings.pulseEstimatedWeather,
+                    // Animation settings
+                    animation_period_seconds: parseInt(document.getElementById('animationPeriod').value),
+                    loading_animation_enabled: document.getElementById('loadingAnimationEnabled').classList.contains('active'),
+                    loading_animation_type: parseInt(document.getElementById('loadingAnimationType').value),
                     // Weather effects
                     lightning_effect_enabled: document.getElementById('effectLightning').classList.contains('active'),
                     wind_effect_enabled: document.getElementById('windEffect').classList.contains('active'),
@@ -757,6 +831,21 @@
 
             // Update interval
             document.getElementById('updateInterval').value = config.updateIntervalMinutes || 15;
+
+            // Animation settings
+            document.getElementById('animationPeriod').value = config.animation_period_seconds || 16;
+
+            const loadingAnimToggle = document.getElementById('loadingAnimationEnabled');
+            if (config.loading_animation_enabled !== false) {
+                loadingAnimToggle.classList.add('active');
+            } else {
+                loadingAnimToggle.classList.remove('active');
+            }
+
+            document.getElementById('loadingAnimationType').value = config.loading_animation_type || 0;
+
+            // Update loading animation dependencies
+            updateLoadingAnimationDependencies();
 
             // Estimated weather toggles (firmware returns snake_case)
             const useEstimatedWeatherToggle = document.getElementById('useEstimatedWeather');
