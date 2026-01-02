@@ -1,12 +1,12 @@
 {
-  "version": 179,
+  "version": 180,
   "files": {
     "index.html": "ccb5f2b640193e9cd443dd7b736de662",
-    "device.html": "1fe69f87c0949a5e8a8f3185e372272e",
-    "airports.html": "da061bf53b654a252ff7a47a28e58027",
-    "weather.html": "a73933d8836d5af86ead17cc447bf2d5",
-    "system.html": "bdc044ff48b4511fea381bca4bbd2b00",
-    "diagnostics.html": "46fc919803df73b63fe15c9d6e13dcd7",
+    "device.html": "65376e0137103c48d6016572f90a8914",
+    "airports.html": "0c8c465eb9083be6a40700273f22e1ad",
+    "weather.html": "1c7f623bffd48a2a5c73aa28890fdd0b",
+    "system.html": "5feacba26d9270422145b05e03c126bc",
+    "diagnostics.html": "65bbb6566b0b57fce3568bf1fdcf3f97",
     "css/base.css": "453f0dc299bf0cc854344980cc8fd966",
     "css/components.css": "25f6f4f10fe26aec6eae1cea0ae78a7b",
     "css/sidebar.css": "7229b0d2faf535a4bdb5a9d494e599a2",
