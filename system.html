@@ -1551,6 +1551,10 @@
         return;
       }
 
+      // Save original version and reset flags for reboot detection
+      originalVersion = otaState.current_version;
+      deviceWentOffline = false;
+
       showFirmwareModal();
 
       try {
@@ -1605,13 +1609,16 @@
       }
     }
 
+    let deviceWentOffline = false;
+    let originalVersion = null;
+
     async function pollFirmwareStatus() {
       try {
         const response = await fetch('/api/v1/firmware/status');
 
         // If device is rebooting, we'll get a network error
         if (!response.ok) {
-          // Could be rebooting
+          deviceWentOffline = true;
           return;
         }
 
@@ -1622,14 +1629,22 @@
         if (data.state_name === 'error') {
           stopFirmwarePoll();
           showFirmwareError(data.error || 'Update failed');
-        } else if (data.state_name === 'idle' && otaState.state_name !== 'idle') {
-          // Back to idle = update complete, device rebooted
-          stopFirmwarePoll();
-          showFirmwareSuccess();
+        } else if (deviceWentOffline && data.state_name === 'idle') {
+          // Device came back online after going offline - update complete!
+          // Verify version changed
+          if (originalVersion && data.current_version !== originalVersion) {
+            stopFirmwarePoll();
+            showFirmwareSuccess(data.current_version);
+          } else if (!originalVersion) {
+            // No original version saved, assume success if device is back
+            stopFirmwarePoll();
+            showFirmwareSuccess(data.current_version);
+          }
         }
 
       } catch (error) {
-        // Network error could mean device is rebooting
+        // Network error means device is rebooting
+        deviceWentOffline = true;
         document.getElementById('firmwareStatus').textContent = 'Device rebooting...';
         document.getElementById('firmwareDetail').textContent = 'Waiting for device...';
       }
@@ -1662,7 +1677,7 @@
       }
     }
 
-    function showFirmwareSuccess() {
+    function showFirmwareSuccess(newVersion) {
       const spinner = document.getElementById('firmwareSpinner');
       const icon = document.getElementById('firmwareIcon');
       const title = document.getElementById('firmwareTitle');
@@ -1677,7 +1692,7 @@
       lucide.createIcons();
 
       title.textContent = 'Update Complete!';
-      status.textContent = 'Firmware updated successfully';
+      status.textContent = newVersion ? `Now running v${newVersion}` : 'Firmware updated successfully';
       detail.textContent = 'Reloading page...';
 
       progressBar.style.width = '100%';
