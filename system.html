@@ -242,6 +242,45 @@
       font-size: 11px;
     }
 
+    /* ===== ACTION GROUPS ===== */
+    .action-group {
+      margin-bottom: 8px;
+    }
+
+    .action-group-header {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .action-group-header.danger {
+      color: var(--error);
+    }
+
+    .action-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 16px 0;
+    }
+
+    .update-badge {
+      background: var(--success);
+      color: white;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: 8px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
     /* ===== DOWNLOAD PROGRESS MODAL ===== */
     .download-modal {
       position: fixed;
@@ -453,33 +492,67 @@
         <span>Actions</span>
       </div>
       <div class="card-body">
-        <div class="actions-grid">
-          <button class="action-btn" onclick="forceWeatherRefresh()">
-            <i data-lucide="refresh-cw"></i>
-            <span>Force Weather Refresh</span>
-          </button>
-          <a href="/api/v1/weather/raw" class="action-btn" style="text-decoration: none;">
-            <i data-lucide="download"></i>
-            <span>Download Weather Data</span>
-          </a>
-          <button class="action-btn" onclick="showLogDownloadModal()">
-            <i data-lucide="file-text"></i>
-            <span>Download Logs</span>
-          </button>
-          <button class="action-btn" onclick="forceWebFilesUpdate()">
-            <i data-lucide="download-cloud"></i>
-            <span>Force Web Files Update</span>
-          </button>
-          <button class="action-btn" onclick="restartDevice()">
-            <i data-lucide="power"></i>
-            <span>Restart Device</span>
-          </button>
+        <!-- System Updates -->
+        <div class="action-group">
+          <div class="action-group-header">System Updates</div>
+          <div class="actions-grid">
+            <button class="action-btn" id="updateFirmwareBtn" onclick="updateFirmware()" disabled>
+              <i data-lucide="cpu"></i>
+              <span>Update Firmware</span>
+              <span class="update-badge" id="firmwareUpdateBadge" style="display: none;"></span>
+            </button>
+            <button class="action-btn" onclick="forceWebFilesUpdate()">
+              <i data-lucide="download-cloud"></i>
+              <span>Update Web Interface</span>
+            </button>
+          </div>
         </div>
-        <div class="danger-zone">
-          <button class="action-btn danger" onclick="deleteAllFiles()">
-            <i data-lucide="trash-2"></i>
-            <span>Delete All Files</span>
-          </button>
+
+        <div class="action-divider"></div>
+
+        <!-- Weather -->
+        <div class="action-group">
+          <div class="action-group-header">Weather</div>
+          <div class="actions-grid">
+            <button class="action-btn" onclick="forceWeatherRefresh()">
+              <i data-lucide="refresh-cw"></i>
+              <span>Force Weather Refresh</span>
+            </button>
+            <a href="/api/v1/weather/raw" class="action-btn" style="text-decoration: none;">
+              <i data-lucide="download"></i>
+              <span>Download Weather Data</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="action-divider"></div>
+
+        <!-- Utility -->
+        <div class="action-group">
+          <div class="action-group-header">Utility</div>
+          <div class="actions-grid">
+            <button class="action-btn" onclick="showLogDownloadModal()">
+              <i data-lucide="file-text"></i>
+              <span>Download Logs</span>
+            </button>
+            <button class="action-btn" onclick="restartDevice()">
+              <i data-lucide="power"></i>
+              <span>Restart Device</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="action-divider"></div>
+
+        <!-- Danger Zone -->
+        <div class="action-group">
+          <div class="action-group-header danger">Danger Zone</div>
+          <div class="danger-zone">
+            <button class="action-btn danger" onclick="factoryReset()">
+              <i data-lucide="alert-triangle"></i>
+              <span>Factory Reset</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -604,6 +677,48 @@
 
       <div class="download-buttons">
         <button class="btn btn-secondary" onclick="closeLogDownloadModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firmware Update Modal -->
+  <div id="firmwareModal" class="download-modal">
+    <div class="download-modal-content" onclick="event.stopPropagation()">
+      <!-- Loading Spinner (shown during download) -->
+      <div class="download-spinner" id="firmwareSpinner"></div>
+
+      <!-- Success/Error Icon (hidden during download) -->
+      <div class="download-icon" id="firmwareIcon" style="display: none;"></div>
+
+      <!-- Title -->
+      <h2 class="download-modal-title" id="firmwareTitle">Updating Firmware</h2>
+
+      <!-- Status Text -->
+      <p class="download-modal-status" id="firmwareStatus">Preparing update...</p>
+
+      <!-- Current progress detail -->
+      <p class="download-modal-filename" id="firmwareDetail">&nbsp;</p>
+
+      <!-- Progress Bar -->
+      <div class="download-progress-bar">
+        <div class="download-progress-fill" id="firmwareProgressBar" style="width: 0%"></div>
+      </div>
+
+      <!-- Warning -->
+      <p style="color: var(--warning); font-size: 12px; margin-top: 16px;">
+        <i data-lucide="alert-triangle" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle;"></i>
+        Do not power off the device during update
+      </p>
+
+      <!-- Error Message (hidden by default) -->
+      <div class="download-error-message" id="firmwareError" style="display: none;">
+        <span id="firmwareErrorMessage"></span>
+      </div>
+
+      <!-- Action Buttons (hidden until error) -->
+      <div class="download-buttons" id="firmwareButtons" style="display: none;">
+        <button class="btn btn-primary" onclick="retryFirmwareUpdate()">Retry</button>
+        <button class="btn btn-secondary" onclick="closeFirmwareModal()">Close</button>
       </div>
     </div>
   </div>
@@ -915,27 +1030,6 @@
       }
     }
 
-    async function deleteAllFiles() {
-      if (!confirm('Delete ALL files from LittleFS? This will reset to factory defaults!')) {
-        return;
-      }
-
-      if (!confirm('Are you ABSOLUTELY SURE? This cannot be undone!')) {
-        return;
-      }
-
-      try {
-        const response = await fetch('/api/v1/system/reset', { method: 'POST' });
-        if (response.ok) {
-          showToast('All files deleted. Reloading...', 'success');
-          setTimeout(() => window.location.reload(), 2000);
-        } else {
-          showToast('Failed to delete files', 'error');
-        }
-      } catch (error) {
-        showToast('Error: ' + error.message, 'error');
-      }
-    }
 
     // ===== FILE EXPLORER CLASS (Ported from files.html) =====
     class FileExplorer {
@@ -1393,6 +1487,265 @@
       }
     });
 
+    // ===== OTA FIRMWARE UPDATE FUNCTIONS =====
+    let otaState = null;
+    let otaPollInterval = null;
+
+    // Check for firmware updates on page load
+    async function checkFirmwareUpdate() {
+      try {
+        const response = await fetch('/api/v1/firmware/check', { method: 'POST' });
+        if (!response.ok) return;
+
+        const data = await response.json();
+        otaState = data;
+        updateFirmwareUI(data);
+      } catch (error) {
+        console.warn('Failed to check firmware:', error);
+      }
+    }
+
+    function updateFirmwareUI(data) {
+      const btn = document.getElementById('updateFirmwareBtn');
+      const badge = document.getElementById('firmwareUpdateBadge');
+
+      if (!data.ota_supported) {
+        btn.disabled = true;
+        btn.title = data.reason || 'OTA not supported';
+        badge.style.display = 'none';
+        return;
+      }
+
+      if (data.state_name === 'available') {
+        btn.disabled = false;
+        badge.style.display = 'inline';
+        badge.textContent = `v${data.available_version}`;
+        btn.title = `Update to v${data.available_version}`;
+      } else {
+        btn.disabled = true;
+        badge.style.display = 'none';
+        btn.title = 'No update available';
+      }
+    }
+
+    async function updateFirmware() {
+      if (!otaState || otaState.state_name !== 'available') {
+        showToast('No update available', 'warning');
+        return;
+      }
+
+      const version = otaState.available_version;
+      if (!confirm(`Update firmware to v${version}?\n\nThe device will restart after the update.`)) {
+        return;
+      }
+
+      showFirmwareModal();
+
+      try {
+        const response = await fetch('/api/v1/firmware/update', { method: 'POST' });
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.error || 'Failed to start update');
+        }
+
+        // Start polling for progress
+        startFirmwarePoll();
+
+      } catch (error) {
+        showFirmwareError(error.message);
+      }
+    }
+
+    function showFirmwareModal() {
+      const modal = document.getElementById('firmwareModal');
+      const spinner = document.getElementById('firmwareSpinner');
+      const icon = document.getElementById('firmwareIcon');
+      const title = document.getElementById('firmwareTitle');
+      const status = document.getElementById('firmwareStatus');
+      const detail = document.getElementById('firmwareDetail');
+      const progressBar = document.getElementById('firmwareProgressBar');
+      const errorDiv = document.getElementById('firmwareError');
+      const buttons = document.getElementById('firmwareButtons');
+
+      // Reset to initial state
+      spinner.style.display = 'block';
+      icon.style.display = 'none';
+      title.textContent = 'Updating Firmware';
+      status.textContent = 'Starting update...';
+      detail.innerHTML = '&nbsp;';
+      progressBar.style.width = '0%';
+      progressBar.className = 'download-progress-fill';
+      errorDiv.style.display = 'none';
+      buttons.style.display = 'none';
+
+      modal.classList.add('show');
+      lucide.createIcons();
+    }
+
+    function startFirmwarePoll() {
+      otaPollInterval = setInterval(pollFirmwareStatus, 1000);
+    }
+
+    function stopFirmwarePoll() {
+      if (otaPollInterval) {
+        clearInterval(otaPollInterval);
+        otaPollInterval = null;
+      }
+    }
+
+    async function pollFirmwareStatus() {
+      try {
+        const response = await fetch('/api/v1/firmware/status');
+
+        // If device is rebooting, we'll get a network error
+        if (!response.ok) {
+          // Could be rebooting
+          return;
+        }
+
+        const data = await response.json();
+        updateFirmwareProgress(data);
+
+        // Check terminal states
+        if (data.state_name === 'error') {
+          stopFirmwarePoll();
+          showFirmwareError(data.error || 'Update failed');
+        } else if (data.state_name === 'idle' && otaState.state_name !== 'idle') {
+          // Back to idle = update complete, device rebooted
+          stopFirmwarePoll();
+          showFirmwareSuccess();
+        }
+
+      } catch (error) {
+        // Network error could mean device is rebooting
+        document.getElementById('firmwareStatus').textContent = 'Device rebooting...';
+        document.getElementById('firmwareDetail').textContent = 'Waiting for device...';
+      }
+    }
+
+    function updateFirmwareProgress(data) {
+      const status = document.getElementById('firmwareStatus');
+      const detail = document.getElementById('firmwareDetail');
+      const progressBar = document.getElementById('firmwareProgressBar');
+
+      switch (data.state_name) {
+        case 'checking':
+          status.textContent = 'Checking for updates...';
+          detail.textContent = '';
+          break;
+        case 'downloading':
+          status.textContent = 'Downloading firmware...';
+          detail.textContent = `${data.progress}%`;
+          progressBar.style.width = data.progress + '%';
+          break;
+        case 'installing':
+          status.textContent = 'Installing firmware...';
+          detail.textContent = 'Do not power off';
+          progressBar.style.width = '100%';
+          break;
+        case 'rebooting':
+          status.textContent = 'Rebooting device...';
+          detail.textContent = 'Please wait...';
+          break;
+      }
+    }
+
+    function showFirmwareSuccess() {
+      const spinner = document.getElementById('firmwareSpinner');
+      const icon = document.getElementById('firmwareIcon');
+      const title = document.getElementById('firmwareTitle');
+      const status = document.getElementById('firmwareStatus');
+      const detail = document.getElementById('firmwareDetail');
+      const progressBar = document.getElementById('firmwareProgressBar');
+
+      spinner.style.display = 'none';
+      icon.style.display = 'flex';
+      icon.className = 'download-icon success';
+      icon.innerHTML = '<i data-lucide="check-circle" style="width: 48px; height: 48px;"></i>';
+      lucide.createIcons();
+
+      title.textContent = 'Update Complete!';
+      status.textContent = 'Firmware updated successfully';
+      detail.textContent = 'Reloading page...';
+
+      progressBar.style.width = '100%';
+      progressBar.classList.add('success');
+
+      // Reload page after 2 seconds
+      setTimeout(() => location.reload(), 2000);
+    }
+
+    function showFirmwareError(errorMessage) {
+      const spinner = document.getElementById('firmwareSpinner');
+      const icon = document.getElementById('firmwareIcon');
+      const title = document.getElementById('firmwareTitle');
+      const status = document.getElementById('firmwareStatus');
+      const errorDiv = document.getElementById('firmwareError');
+      const errorMsgSpan = document.getElementById('firmwareErrorMessage');
+      const buttons = document.getElementById('firmwareButtons');
+
+      spinner.style.display = 'none';
+      icon.style.display = 'flex';
+      icon.className = 'download-icon error';
+      icon.innerHTML = '<i data-lucide="x-circle" style="width: 48px; height: 48px;"></i>';
+      lucide.createIcons();
+
+      title.textContent = 'Update Failed';
+      status.textContent = 'An error occurred';
+
+      errorDiv.style.display = 'block';
+      errorMsgSpan.textContent = errorMessage;
+
+      buttons.style.display = 'flex';
+    }
+
+    function closeFirmwareModal() {
+      document.getElementById('firmwareModal').classList.remove('show');
+      stopFirmwarePoll();
+    }
+
+    function retryFirmwareUpdate() {
+      closeFirmwareModal();
+      // Re-check for updates first
+      checkFirmwareUpdate().then(() => {
+        if (otaState && otaState.state_name === 'available') {
+          updateFirmware();
+        }
+      });
+    }
+
+    // Close modal on background click
+    document.getElementById('firmwareModal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'firmwareModal') {
+        closeFirmwareModal();
+      }
+    });
+
+    // ===== FACTORY RESET =====
+    async function factoryReset() {
+      if (!confirm('Factory Reset will:\n\n• Delete all configuration\n• Delete WiFi credentials\n• Delete all downloaded files\n\nThe device will return to initial setup mode.\n\nAre you sure?')) {
+        return;
+      }
+
+      if (!confirm('This cannot be undone. Are you ABSOLUTELY SURE?')) {
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/v1/system/reset', { method: 'POST' });
+        if (response.ok) {
+          showToast('Factory reset complete. Device restarting...', 'success');
+          setTimeout(() => {
+            document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0f172a;color:#fff;font-family:system-ui;"><div style="text-align:center;"><h2>Device Resetting...</h2><p>Connect to the Skyboard-Setup WiFi network to reconfigure.</p></div></div>';
+          }, 2000);
+        } else {
+          showToast('Failed to factory reset', 'error');
+        }
+      } catch (error) {
+        showToast('Error: ' + error.message, 'error');
+      }
+    }
+
     // ===== PAGE INITIALIZATION =====
     window.onload = async () => {
       // Initialize Lucide icons
@@ -1403,6 +1756,8 @@
       // Load initial system status and hide loading overlay when done
       try {
         await loadSystemStatus();
+        // Check for firmware updates (runs in background, don't block)
+        checkFirmwareUpdate();
       } finally {
         hideLoading();
       }
