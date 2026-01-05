@@ -1494,12 +1494,24 @@
     // Check for firmware updates on page load
     async function checkFirmwareUpdate() {
       try {
-        const response = await fetch('/api/v1/firmware/check', { method: 'POST' });
-        if (!response.ok) return;
+        // Trigger the check
+        await fetch('/api/v1/firmware/check', { method: 'POST' });
 
-        const data = await response.json();
-        otaState = data;
-        updateFirmwareUI(data);
+        // Poll for result (check is async on device)
+        for (let i = 0; i < 10; i++) {
+          await new Promise(r => setTimeout(r, 500)); // Wait 500ms
+          const response = await fetch('/api/v1/firmware/status');
+          if (!response.ok) continue;
+
+          const data = await response.json();
+          otaState = data;
+          updateFirmwareUI(data);
+
+          // Stop polling once we're not in "checking" state
+          if (data.state_name !== 'checking') {
+            break;
+          }
+        }
       } catch (error) {
         console.warn('Failed to check firmware:', error);
       }
