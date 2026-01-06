@@ -1,5 +1,5 @@
 {
-  "version": 193,
+  "version": 194,
   "firmware": {
     "version": "2.34.2",
     "url": "https://raw.githubusercontent.com/mgerety/skyboard-supplemental/main/firmware/skyboard-esp32s3.bin",
@@ -20,7 +20,7 @@
     "js/icons.js": "2d7f57031b13c42a1041e1c45bc67c34",
     "js/api.js": "b8fd7f9f93062766b2c70bc7553ad479",
     "js/file-browser.js": "7a2c19bd27394f5c9858c87853bf3a16",
-    "js/update-banner.js": "e035e79bfb3bb001b28015b5c9937dfc",
+    "js/update-banner.js": "47322baf17a0b94349d86e52ab3a7d98",
     "data/airports.json": "210b5c636e81ec6887253347fdaaa36f"
   }
 }

@@ -5,16 +5,9 @@
 (function() {
   'use strict';
 
-  const DISMISS_KEY = 'skyboard-update-banner-dismissed';
   const BANNER_ID = 'update-banner';
 
-  // Check if banner was dismissed this session
-  function isDismissed() {
-    return sessionStorage.getItem(DISMISS_KEY) === 'true';
-  }
-
   function dismissBanner() {
-    sessionStorage.setItem(DISMISS_KEY, 'true');
     const banner = document.getElementById(BANNER_ID);
     if (banner) {
       banner.remove();
@@ -22,9 +15,6 @@
   }
 
   function createBanner(message) {
-    // Don't show if dismissed
-    if (isDismissed()) return;
-
     // Don't show if already exists
     if (document.getElementById(BANNER_ID)) return;
 
