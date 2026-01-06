@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================================================
-# generate-manifest.sh - Generate manifest.json with file hashes
+# generate-manifest.sh - Generate manifest.json with file hashes and firmware info
 # =============================================================================
 # This script MUST be run after ANY changes to web files in this repository.
 # The ESP32 uses file hashes to determine which files need to be downloaded,
@@ -13,11 +13,22 @@
 # IMPORTANT: Always run this script and commit the updated manifest.json
 # before pushing changes. The ESP32 will not download new files if the
 # manifest hasn't been updated!
+#
+# FIRMWARE RELEASES: Update FIRMWARE_VERSION and FIRMWARE_NOTES below when
+# publishing new firmware. Copy the .bin to firmware/ directory first.
 # =============================================================================
 
 set -e
 
 cd "$(dirname "$0")"
+
+# =============================================================================
+# FIRMWARE CONFIGURATION - Update these when releasing new firmware
+# =============================================================================
+FIRMWARE_VERSION="2.33.3"
+FIRMWARE_URL="https://raw.githubusercontent.com/mgerety/skyboard-supplemental/main/firmware/skyboard-esp32s3.bin"
+FIRMWARE_MIN_VERSION="2.30.0"
+FIRMWARE_NOTES="OTA firmware updates (ESP32-S3 only)"
 
 # Check if specific version was provided
 if [ -n "$1" ]; then
@@ -52,12 +63,23 @@ FILES=(
     "js/icons.js"
     "js/api.js"
     "js/file-browser.js"
+    "js/update-banner.js"
     "data/airports.json"
 )
 
 # Start JSON output
 echo "{" > manifest.json
 echo "  \"version\": $NEW_VERSION," >> manifest.json
+
+# Add firmware section
+echo "  \"firmware\": {" >> manifest.json
+echo "    \"version\": \"$FIRMWARE_VERSION\"," >> manifest.json
+echo "    \"url\": \"$FIRMWARE_URL\"," >> manifest.json
+echo "    \"min_version\": \"$FIRMWARE_MIN_VERSION\"," >> manifest.json
+echo "    \"notes\": \"$FIRMWARE_NOTES\"" >> manifest.json
+echo "  }," >> manifest.json
+
+# Add files section
 echo "  \"files\": {" >> manifest.json
 
 # Generate hashes for each file
@@ -96,12 +118,18 @@ echo "}" >> manifest.json
 echo ""
 echo "============================================"
 echo "Generated manifest.json"
-echo "  Version: $NEW_VERSION"
-echo "  Files:   $FILE_COUNT"
+echo "  Version:  $NEW_VERSION"
+echo "  Files:    $FILE_COUNT"
+echo "  Firmware: $FIRMWARE_VERSION"
 echo "============================================"
 echo ""
 echo "NEXT STEPS:"
 echo "  1. git add manifest.json"
 echo "  2. git commit -m 'chore: update manifest to v$NEW_VERSION'"
 echo "  3. git push"
+echo ""
+echo "FIRMWARE RELEASE? Don't forget to:"
+echo "  1. Update FIRMWARE_VERSION in this script"
+echo "  2. Copy new .bin to firmware/ directory"
+echo "  3. Update FIRMWARE_NOTES"
 echo ""

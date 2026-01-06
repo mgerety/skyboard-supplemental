@@ -503,8 +503,14 @@
             </button>
             <button class="action-btn" onclick="forceWebFilesUpdate()">
               <i data-lucide="download-cloud"></i>
-              <span>Update Web Interface</span>
+              <span id="webUpdateBtnText">Update Web Interface</span>
+              <span class="update-badge" id="webUpdateBadge" style="display: none;"></span>
             </button>
+            <button class="action-btn" onclick="uploadFirmware()">
+              <i data-lucide="upload"></i>
+              <span>Upload Firmware</span>
+            </button>
+            <input type="file" id="firmwareFileInput" accept=".bin" style="display:none" onchange="handleFirmwareFileSelect(event)">
           </div>
         </div>
 
@@ -1538,6 +1544,18 @@
         badge.style.display = 'none';
         btn.title = 'No update available';
       }
+
+      // Update web interface badge
+      const webBtnText = document.getElementById('webUpdateBtnText');
+      const webBadge = document.getElementById('webUpdateBadge');
+      if (data.web && data.web.update_available) {
+        webBadge.textContent = `v${data.web.available_version}`;
+        webBadge.style.display = 'inline';
+        webBtnText.textContent = 'Update Web Interface';
+      } else {
+        webBadge.style.display = 'none';
+        webBtnText.textContent = 'Force Web Interface Update';
+      }
     }
 
     async function updateFirmware() {
@@ -1761,6 +1779,110 @@
       });
     }
 
+    // ==================== FIRMWARE UPLOAD ====================
+
+    function uploadFirmware() {
+      document.getElementById('firmwareFileInput').click();
+    }
+
+    async function handleFirmwareFileSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      // Reset file input for re-selection
+      event.target.value = '';
+
+      // Validate extension
+      if (!file.name.toLowerCase().endsWith('.bin')) {
+        showToast('Please select a .bin file', 'error');
+        return;
+      }
+
+      // Validate size (500KB - 3MB)
+      const minSize = 500 * 1024;  // 500KB
+      const maxSize = 3 * 1024 * 1024;  // 3MB
+      if (file.size < minSize || file.size > maxSize) {
+        showToast(`Invalid file size (${(file.size / 1024 / 1024).toFixed(1)}MB). Must be 500KB-3MB.`, 'error');
+        return;
+      }
+
+      // Validate magic byte
+      try {
+        const header = await file.slice(0, 1).arrayBuffer();
+        const firstByte = new Uint8Array(header)[0];
+        if (firstByte !== 0xE9) {
+          showToast('Invalid firmware file (wrong magic byte)', 'error');
+          return;
+        }
+      } catch (e) {
+        showToast('Could not read file', 'error');
+        return;
+      }
+
+      // Show confirmation dialog
+      if (!confirm(`Upload custom firmware?\n\nFile: ${file.name}\nSize: ${(file.size / 1024).toFixed(0)} KB\n\nThis will replace your current firmware.\nMake sure this is a valid Skyboard firmware file for your board.`)) {
+        return;
+      }
+
+      // Proceed with upload
+      performFirmwareUpload(file);
+    }
+
+    async function performFirmwareUpload(file) {
+      // Show firmware modal with upload status
+      showFirmwareModal();
+      document.getElementById('firmwareStatus').textContent = 'Uploading Firmware...';
+      document.getElementById('firmwareDetail').textContent = file.name;
+      document.getElementById('firmwareProgressBar').style.width = '0%';
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const xhr = new XMLHttpRequest();
+
+        // Track upload progress
+        xhr.upload.addEventListener('progress', (e) => {
+          if (e.lengthComputable) {
+            const percent = Math.round((e.loaded / e.total) * 100);
+            document.getElementById('firmwareProgressBar').style.width = percent + '%';
+            document.getElementById('firmwareDetail').textContent = `Uploading: ${percent}%`;
+          }
+        });
+
+        // Handle completion
+        xhr.onload = function() {
+          if (xhr.status === 200) {
+            document.getElementById('firmwareStatus').textContent = 'Installing firmware...';
+            document.getElementById('firmwareDetail').textContent = 'Device will reboot shortly';
+            document.getElementById('firmwareProgressBar').style.width = '100%';
+
+            // Start polling for device to come back online
+            originalVersion = document.querySelector('[data-firmware-version]')?.textContent || '';
+            deviceWentOffline = false;
+            startFirmwarePoll();
+          } else {
+            let errorMsg = 'Upload failed';
+            try {
+              const resp = JSON.parse(xhr.responseText);
+              errorMsg = resp.error || resp.message || errorMsg;
+            } catch (e) {}
+            showFirmwareError(errorMsg);
+          }
+        };
+
+        xhr.onerror = function() {
+          showFirmwareError('Network error during upload');
+        };
+
+        xhr.open('POST', '/api/v1/firmware/upload');
+        xhr.send(formData);
+
+      } catch (error) {
+        showFirmwareError(error.message || 'Upload failed');
+      }
+    }
+
     // Close modal on background click
     document.getElementById('firmwareModal')?.addEventListener('click', (e) => {
       if (e.target.id === 'firmwareModal') {
@@ -1828,5 +1950,6 @@
       }
     };
   </script>
+  <script src="/js/update-banner.js"></script>
 </body>
 </html>
