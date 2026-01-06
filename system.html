@@ -791,7 +791,15 @@
 
     async function loadSystemStatus() {
       try {
-        const response = await fetch('/api/v1/system/status');
+        // Add timeout - device may be rebooting after OTA update
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+        const response = await fetch('/api/v1/system/status', {
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
         if (!response.ok) throw new Error('Failed to fetch system status');
 
         const data = await response.json();
@@ -1723,6 +1731,7 @@
       const status = document.getElementById('firmwareStatus');
       const detail = document.getElementById('firmwareDetail');
       const progressBar = document.getElementById('firmwareProgressBar');
+      const buttons = document.getElementById('firmwareButtons');
 
       spinner.style.display = 'none';
       icon.style.display = 'flex';
@@ -1732,13 +1741,14 @@
 
       title.textContent = 'Update Complete!';
       status.textContent = newVersion ? `Now running v${newVersion}` : 'Firmware updated successfully';
-      detail.textContent = 'Reloading page...';
+      detail.textContent = '';
 
       progressBar.style.width = '100%';
       progressBar.classList.add('success');
 
-      // Reload page after 2 seconds
-      setTimeout(() => location.reload(), 2000);
+      // Show close button so user can dismiss and see the updated system page
+      buttons.style.display = 'flex';
+      buttons.innerHTML = '<button class="btn btn-primary" onclick="closeFirmwareModal(); loadSystemStatus();">Close</button>';
     }
 
     function showFirmwareError(errorMessage) {
