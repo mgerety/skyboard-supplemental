@@ -1,5 +1,5 @@
 {
-  "version": 195,
+  "version": 196,
   "firmware": {
     "version": "2.34.2",
     "url": "https://raw.githubusercontent.com/mgerety/skyboard-supplemental/main/firmware/skyboard-esp32s3.bin",
