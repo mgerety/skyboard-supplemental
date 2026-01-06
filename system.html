@@ -1503,8 +1503,9 @@
         // Trigger the check
         await fetch('/api/v1/firmware/check', { method: 'POST' });
 
-        // Poll for result (check is async on device)
-        for (let i = 0; i < 10; i++) {
+        // Poll for result - manifest fetch can take 5-10 seconds (GitHub + TLS)
+        // Poll for up to 15 seconds (30 attempts at 500ms)
+        for (let i = 0; i < 30; i++) {
           await new Promise(r => setTimeout(r, 500)); // Wait 500ms
           const response = await fetch('/api/v1/firmware/status');
           if (!response.ok) continue;

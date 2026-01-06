@@ -1,7 +1,7 @@
 {
-  "version": 188,
+  "version": 189,
   "firmware": {
-    "version": "2.33.3",
+    "version": "2.34.1",
     "url": "https://raw.githubusercontent.com/mgerety/skyboard-supplemental/main/firmware/skyboard-esp32s3.bin",
     "min_version": "2.30.0",
     "notes": "OTA firmware updates (ESP32-S3 only)"
@@ -11,7 +11,7 @@
     "device.html": "8e43d9001ffca3613ab0d0193d6b6458",
     "airports.html": "a749662cd07bf0599de9426611cdfffa",
     "weather.html": "f2ec165efbe63db14763b06b551906a9",
-    "system.html": "f98e01acd1d939be4b24f9c23132fc0c",
+    "system.html": "8896b7ce4dfb2068bfdba7e99b9243e3",
     "diagnostics.html": "e4bca7f7067808522870428de15b989e",
     "css/base.css": "453f0dc299bf0cc854344980cc8fd966",
     "css/components.css": "25f6f4f10fe26aec6eae1cea0ae78a7b",
