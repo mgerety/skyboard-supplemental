@@ -1,6 +1,6 @@
 {
-  "version": "2.33.2",
+  "version": "2.33.3",
   "url": "https://raw.githubusercontent.com/mgerety/skyboard-supplemental/main/firmware/skyboard-esp32s3.bin",
   "min_version": "2.30.0",
-  "notes": "OTA completion detection fix"
+  "notes": "Test OTA UI timeout fix"
 }
