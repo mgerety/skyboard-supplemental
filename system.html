@@ -1554,6 +1554,7 @@
       // Save original version and reset flags for reboot detection
       originalVersion = otaState.current_version;
       deviceWentOffline = false;
+      failedPollCount = 0;
 
       showFirmwareModal();
 
@@ -1611,16 +1612,32 @@
 
     let deviceWentOffline = false;
     let originalVersion = null;
+    let failedPollCount = 0;
 
     async function pollFirmwareStatus() {
       try {
-        const response = await fetch('/api/v1/firmware/status');
+        // Add timeout to detect device offline
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+        const response = await fetch('/api/v1/firmware/status', {
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
 
         // If device is rebooting, we'll get a network error
         if (!response.ok) {
-          deviceWentOffline = true;
+          failedPollCount++;
+          if (failedPollCount >= 3) {
+            deviceWentOffline = true;
+            document.getElementById('firmwareStatus').textContent = 'Device rebooting...';
+            document.getElementById('firmwareDetail').textContent = 'Waiting for device...';
+          }
           return;
         }
+
+        // Successful response - reset fail counter
+        failedPollCount = 0;
 
         const data = await response.json();
         updateFirmwareProgress(data);
@@ -1643,10 +1660,13 @@
         }
 
       } catch (error) {
-        // Network error means device is rebooting
-        deviceWentOffline = true;
-        document.getElementById('firmwareStatus').textContent = 'Device rebooting...';
-        document.getElementById('firmwareDetail').textContent = 'Waiting for device...';
+        // Network error or timeout means device is likely rebooting
+        failedPollCount++;
+        if (failedPollCount >= 3) {
+          deviceWentOffline = true;
+          document.getElementById('firmwareStatus').textContent = 'Device rebooting...';
+          document.getElementById('firmwareDetail').textContent = 'Waiting for device...';
+        }
       }
     }
 
