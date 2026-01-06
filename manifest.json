@@ -1,7 +1,7 @@
 {
-  "version": 192,
+  "version": 193,
   "firmware": {
-    "version": "2.34.1",
+    "version": "2.34.2",
     "url": "https://raw.githubusercontent.com/mgerety/skyboard-supplemental/main/firmware/skyboard-esp32s3.bin",
     "min_version": "2.30.0",
     "notes": "OTA firmware updates (ESP32-S3 only)"

@@ -25,7 +25,7 @@ cd "$(dirname "$0")"
 # =============================================================================
 # FIRMWARE CONFIGURATION - Update these when releasing new firmware
 # =============================================================================
-FIRMWARE_VERSION="2.34.1"
+FIRMWARE_VERSION="2.34.2"
 FIRMWARE_URL="https://raw.githubusercontent.com/mgerety/skyboard-supplemental/main/firmware/skyboard-esp32s3.bin"
 FIRMWARE_MIN_VERSION="2.30.0"
 FIRMWARE_NOTES="OTA firmware updates (ESP32-S3 only)"
