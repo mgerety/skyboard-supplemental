@@ -1673,9 +1673,13 @@
         if (data.state_name === 'error') {
           stopFirmwarePoll();
           showFirmwareError(data.error || 'Update failed');
-        } else if (deviceWentOffline && data.state_name === 'idle') {
-          // Device came back online after going offline - update complete!
-          // Verify version changed
+        } else if (deviceWentOffline) {
+          // Device came back online after going offline (rebooted).
+          // Success = it reports a different firmware version than before.
+          // Same version = the update failed and it rebooted on the old
+          // firmware (do NOT wait for state 'idle' — a failed update comes
+          // back as 'available' after its boot-time check, which previously
+          // left this modal spinning forever).
           if (originalVersion && data.current_version !== originalVersion) {
             stopFirmwarePoll();
             showFirmwareSuccess(data.current_version);
@@ -1683,6 +1687,12 @@
             // No original version saved, assume success if device is back
             stopFirmwarePoll();
             showFirmwareSuccess(data.current_version);
+          } else if (data.state_name === 'idle' || data.state_name === 'available') {
+            // Rebooted but still on the old firmware - update failed
+            stopFirmwarePoll();
+            showFirmwareError('Update failed - device restarted on firmware v' +
+              data.current_version + '. This can be caused by power dips during ' +
+              'the update (check the power supply). You can retry the update.');
           }
         }
 
