@@ -1,10 +1,10 @@
 {
-  "version": 197,
+  "version": 196,
   "firmware": {
-    "version": "2.35.0",
+    "version": "2.34.2",
     "url": "https://raw.githubusercontent.com/mgerety/skyboard-supplemental/main/firmware/skyboard-esp32s3.bin",
     "min_version": "2.30.0",
-    "notes": "Fix LED corruption during WiFi downloads (RMT4 driver + suspend updates)"
+    "notes": "OTA firmware updates (ESP32-S3 only)"
   },
   "files": {
     "index.html": "ccb5f2b640193e9cd443dd7b736de662",
